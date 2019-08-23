@@ -1,0 +1,36 @@
+{
+  "name": "AvanzoBackEnd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CristianOrjuela/AvanzoBackEnd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CristianOrjuela/AvanzoBackEnd/issues"
+  },
+  "homepage": "https://github.com/CristianOrjuela/AvanzoBackEnd#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-mysql-session": "^2.1.0",
+    "express-session": "^1.16.2",
+    "express-validator": "^6.1.1",
+    "morgan": "^1.9.1",
+    "mysql": "^2.17.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "timeago.js": "^4.0.0-beta.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
