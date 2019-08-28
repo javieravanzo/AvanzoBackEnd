@@ -1,6 +1,6 @@
 //Requires
 const express = require('express');
-const passport = require('passport');
+const { body } = require('express-validator');
 
 //Initialize
 const router = express.Router();
@@ -8,6 +8,10 @@ const router = express.Router();
 //Controllers
 const { makeLogin } = require('../../controllers/general');
 
-router.post('/Account/Token', makeLogin);
+//Route
+router.post('/Account/Token', [
+  body('email', 'Email inválido').exists().isEmail(),
+  body('password', "La contraseña es incorrecta123").exists(),
+], makeLogin);
 
 module.exports = router;

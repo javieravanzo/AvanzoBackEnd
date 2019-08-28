@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const helpers = {};
 
+//Functions
 helpers.encryptPassword = async (password) => {
     const text = await bcrypt.hash(password, 10);
     return text;
