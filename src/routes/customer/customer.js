@@ -6,11 +6,11 @@ const passport = require('passport');
 const router = express.Router();
 
 //Controllers
-const { getInitialData } = require('../../controllers/customer');
+const { getInitialData, getRequestData } = require('../../controllers/customer');
 
 //Routes 
 router.get('/Customer/GetInitialData', getInitialData);
-//router.get('/Customer/GetInitialData', getInitialData);
+router.get('/Customer/GetRequestData', getRequestData);
 
 
 //Export

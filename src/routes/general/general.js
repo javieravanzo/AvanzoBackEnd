@@ -29,7 +29,7 @@ function verifyToken (req, res, next) {
 };
 
 //Routes --- Documents
-router.get('/DocumentTypes/GetAll', verifyToken, getDocumentTypes);
+router.get('/DocumentTypes/GetAll', getDocumentTypes);
 //Routes --- Account
 router.get('/Account/ResetPassword', verifyToken, modifyPassword);
 router.put('/Account/ConfirmPassword', verifyToken, confirmPassword);

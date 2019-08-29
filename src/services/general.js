@@ -3,11 +3,14 @@ const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const jwt = require('jsonwebtoken');
 
+//Constants
+const expirationTime = 5;
+
 //Services
 const login = async (email, password) => {
-    const result = {status: null, data: {}, message: ""};
+
     try {
-        const userRow = await pool.query('SELECT * FROM auth INNER JOIN user where user.email = ?', [email]);
+        const userRow = await pool.query('SELECT * FROM auth AUTH JOIN user USER ON AUTH.User_idUser = USER.idUser where user.email = ?', [email]);
         const userQuery = userRow[0];  
         if(userRow.length > 0){
             const userAuth = { idAuth: userQuery.idAuth, expiresOn: userQuery.expiresOn, registeredDate: new Date() };
@@ -16,7 +19,7 @@ const login = async (email, password) => {
             if (validPassword){
                 const jwtoken = jwt.sign({userRow}, 'my_secret_key', { expiresIn: '8h' });
                 const new_date = new Date();
-                new_date.setHours(new_date.getHours()+5);
+                new_date.setHours(new_date.getHours()+expirationTime);
                 userAuth.expiresOn = new_date;     
                 const result2 = await pool.query('UPDATE auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
                 return { status: 200, message: "Ha ingresado satisfactoriamente.",
