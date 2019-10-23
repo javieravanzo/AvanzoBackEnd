@@ -6,12 +6,15 @@ const { body } = require('express-validator');
 const router = express.Router();
 
 //Controllers
-const { makeLogin } = require('../../controllers/general');
+const { makeLogin, confirmAccount } = require('../../controllers/general');
 
 //Route
 router.post('/Account/Token', [
   body('email', 'Email inválido').exists().isEmail(),
   body('password', "La contraseña es incorrecta123").exists(),
 ], makeLogin);
+
+router.get('/Account/Confirm/:token', 
+confirmAccount);
 
 module.exports = router;

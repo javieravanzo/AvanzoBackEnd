@@ -2,6 +2,7 @@
 const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const jwt = require('jsonwebtoken');
+const {my_secret_key} = require('../config/global');
 
 //Constants
 const expirationTime = 5;
@@ -10,23 +11,30 @@ const expirationTime = 5;
 const login = async (email, password) => {
 
     try {
-        const userRow = await pool.query('SELECT * FROM auth AUTH JOIN user USER ON AUTH.User_idUser = USER.idUser where user.email = ?', [email]);
+        const userRow = await pool.query('SELECT * FROM user U JOIN auth A ON (A.User_idUser = U.idUser) where U.email = ?', [email]);
+        console.log("userRow", userRow[0]);
         const userQuery = userRow[0];  
         if(userRow.length > 0){
-            const userAuth = { idAuth: userQuery.idAuth, expiresOn: userQuery.expiresOn, registeredDate: new Date() };
-            const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };      
-            const validPassword = await helpers.matchPassword(password, userQuery.password);
-            if (validPassword){
-                const jwtoken = jwt.sign({userRow}, 'my_secret_key', { expiresIn: '8h' });
-                const new_date = new Date();
-                new_date.setHours(new_date.getHours()+expirationTime);
-                userAuth.expiresOn = new_date;     
-                const result2 = await pool.query('UPDATE auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
-                return { status: 200, message: "Ha ingresado satisfactoriamente.",
-                         data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData}
-                       };
+            console.log("UC", parseInt(userRow[0].isConfirmed, 10) === 1);
+            if(parseInt(userRow[0].isConfirmed, 10) === 1){
+                const userAuth = { idAuth: userQuery.idAuth, expiresOn: userQuery.expiresOn, registeredDate: new Date() };
+                const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };      
+                const validPassword = await helpers.matchPassword(password, userQuery.password);
+                console.log("VP",validPassword);
+                if (validPassword){
+                    const jwtoken = jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
+                    const new_date = new Date();
+                    new_date.setHours(new_date.getHours()+expirationTime);
+                    userAuth.expiresOn = new_date;     
+                    const result2 = await pool.query('UPDATE auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
+                    return { status: 200, message: "Ha ingresado satisfactoriamente.",
+                            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData}
+                        };
+                }else{
+                    return {status: 400, message: "La contraseña es incorrecta."};
+                }
             }else{
-                return {status: 400, message: "La contraseña es incorrecta."};
+                return {status: 401, message: "Por favor confirme su cuenta antes de iniciar sesión."}
             }
         }else{
             return {status: 400, message: "El email no existe en nuestros registros."};
@@ -34,6 +42,26 @@ const login = async (email, password) => {
   } catch(e) {
     throw e;
   }
+};
+
+const confirmAccounts  = async (body, userId) => {
+    
+    const result = {status: null, data: {}, message: ""};
+    try {
+        //const confirmationAccount = await pool.query('SELECT * FROM documenttypes');
+        const user = jwt.verify(body.params.token, my_secret_key);
+
+        console.log("US", user.userRow[0]);
+
+        //Update confirmation
+        const update = await pool.query('UPDATE user SET isConfirmed = ? WHERE idUser = ?', [true, user.userRow[0].idUser]);
+        console.log("UP", update);
+
+        return {status: 200};
+    } catch(e) {
+        return {status: 500, message: "Error interno del servidor."};
+        throw e;
+    }
 };
 
 const getDocumentsTypes = async () => {
@@ -84,5 +112,5 @@ const confirmedPassword = async (email, password) => {
 };
  
 module.exports = {
-    login, getDocumentsTypes, resetPassword, confirmedPassword
+    login, confirmAccounts, getDocumentsTypes, resetPassword, confirmedPassword
 }
