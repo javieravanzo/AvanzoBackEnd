@@ -9,6 +9,7 @@ const { getDocumentTypes, modifyPassword, confirmPassword } = require('../../con
 
 //Routes --- Documents
 router.get('/DocumentTypes/GetAll', getDocumentTypes);
+
 //Routes --- Account
 router.get('/Account/ResetPassword', modifyPassword);
 router.put('/Account/ConfirmPassword', confirmPassword);
