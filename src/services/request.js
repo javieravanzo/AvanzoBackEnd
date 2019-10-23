@@ -50,9 +50,9 @@ hbs.registerHelper('dateFormat', function(value, format){
 const getOutLaysData = async () => {
 
   try {
-    const bankRow = await pool.query('SELECT * FROM bank');
-    const accountTypeRow = await pool.query('SELECT * FROM accounttypes');
-    const walletRow = await pool.query('SELECT * FROM wallet');
+    const bankRow = await pool.query('SELECT * FROM Bank');
+    const accountTypeRow = await pool.query('SELECT * FROM AccountTypes');
+    const walletRow = await pool.query('SELECT * FROM Wallet');
     if(walletRow){
       return {status: 200, message: "", 
               data: {
@@ -73,15 +73,15 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
   try {
     //Dates
-    const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM user USR JOIN client CLI JOIN company COM JOIN companysalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND COM.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
+    const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM User USR JOIN Client CLI JOIN Company COM JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND COM.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
     const dateRate = userRow[0].companyRate;
 
     //Interest
-    const interestRow = await pool.query('SELECT interestValue FROM interestrequest');
+    const interestRow = await pool.query('SELECT interestValue FROM InterestRequest');
     const interest = parseInt(interestRow[0].interestValue, 10);
 
     //ManagementValue
-    const adminRow = await pool.query('SELECT managementPaymentValue FROM managementpayment');
+    const adminRow = await pool.query('SELECT managementPaymentValue FROM ManagementPayment');
     const adminValue = adminRow[0].managementPaymentValue;
     
 
@@ -119,7 +119,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 const createRequest = async (body, file, clientId) => {  
 
   try{
-    const requestState = await pool.query('SELECT * FROM requeststate');
+    const requestState = await pool.query('SELECT * FROM RequestState');
     const {quantity, split, account, accountType, accountNumber, accountKind, haveDocumentsLoaded } = body;
     //New Request
     const newRequest = {quantity, split, account, accountNumber, accountType};
@@ -130,17 +130,17 @@ const createRequest = async (body, file, clientId) => {
     newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
     //Obsevations - Request
     const observation = {observationContent: ""};
-    const observationInsert = await pool.query('INSERT INTO observations SET ?', [observation]);
+    const observationInsert = await pool.query('INSERT INTO Observations SET ?', [observation]);
     newRequest.Observations_idObservations = observationInsert.insertId;
     //PreRequestDates - Request
     const preRequestDates = {firstDate: new Date(), firstQuantity: 282341};
-    const preRequestDatesRow = await pool.query('INSERT INTO prerequestdates SET ?', [preRequestDates]);
+    const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
     newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;
     //Account - Request
-    const userRow =  await pool.query('SELECT ACCOUNT.idAccount FROM client CLIENT JOIN account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientId]);
+    const userRow =  await pool.query('SELECT ACCOUNT.idAccount FROM client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientId]);
     newRequest.Account_idAccount = userRow[0].idAccount;
     //Request
-    const request = await pool.query('INSERT INTO request SET ?', [newRequest]);
+    const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
     return {status: 200, message: {message: "La solicitud ha sido creada exitosamente."}};
   }catch(e){
     return {status: 500, message: "Error interno del servidor."};
@@ -150,8 +150,8 @@ const createRequest = async (body, file, clientId) => {
 const getAllRequests = async (clientId) => {
   
   try{ 
-    const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.name, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN user U JOIN account A JOIN request R JOIN requeststate RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.idClient = ?', [clientId]);
-    const company = await pool.query('SELECT CO.idCompany, US.name FROM client C JOIN company CO JOIN user US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
+    const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.name, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.idClient = ?', [clientId]);
+    const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
     return {status: 500, message: "Error interno del servidor."};
@@ -161,7 +161,7 @@ const getAllRequests = async (clientId) => {
 const getAllRequestsByCompany = async (companyId) => {
 
   try{
-    const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON  (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.Company_idCompany = ?', [companyId]);
+    const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON  (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.Company_idCompany = ?', [companyId]);
     return {status: 200, data: {request: requestRow}};
   }catch(e){
     return {status: 500, message: "Error interno del servidor."};
@@ -173,8 +173,8 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
 
   try{
     //Change the approval/reject state
-    const stateRow = await pool.query('SELECT * FROM requeststate');
-    const requestQuery = await pool.query('SELECT quantity, RequestState_idRequestState, Account_idAccount FROM request where idRequest = ?', [requestid])
+    const stateRow = await pool.query('SELECT * FROM RequestState');
+    const requestQuery = await pool.query('SELECT quantity, RequestState_idRequestState, Account_idAccount FROM Request where idRequest = ?', [requestid])
     let requeststate = -1;
     let response = "";
     if(requestQuery){
@@ -183,8 +183,8 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
         if(userId.role === 1 ){
           requeststate = getStateIdFromName(stateRow, "Desembolsada");
           const transaction = {quantity: requestQuery[0].quantity, transactionType: "Préstamo", createdDate: new Date(), registeredBy: userId.idUser, registeredDate: new Date, Account_idAccount: requestQuery[0].Account_idAccount};
-          const transactionQuery = await pool.query('INSERT INTO transaction SET ?', [transaction]);
-          const requestUpdateQuery = await pool.query('UPDATE request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
+          const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [transaction]);
+          const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
         }else if(userId.role === 2 ){
           let stateAnalysis = getStateIdFromName(stateRow, "En evaluación");
           let stateApprove = getStateIdFromName(stateRow, "Aprobando Admon.");
@@ -203,7 +203,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
     }  
 
     const request = {registeredDate: new Date(), registeredBy: userId, RequestState_idRequestState: requeststate};
-    const updateRequest = await pool.query('UPDATE request set ? WHERE idRequest = ?', [request, requestid]);
+    const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
       return {status: 200, message: {message: "La solicitud ha sido " + response + "satisfactoriamente."}};
     }else{
@@ -219,7 +219,7 @@ const getRequestStatesList = async () => {
 
   try{
     //Change the approval/reject state
-    const stateRow = await pool.query('SELECT idRequestState, name FROM requeststate');
+    const stateRow = await pool.query('SELECT idRequestState, name FROM RequestState');
     return {status: 200, data: stateRow};
   }catch(e){
     return {status: 500, message: "Error interno del servidor."};
@@ -233,22 +233,22 @@ const getAllRequestsToApprove = async (userId) => {
     let requeststate = [];
     if(userId.role === 1){
       //Change the outlay state
-      const stateRow = await pool.query('SELECT * FROM requeststate');
+      const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate.push(getStateIdFromName(stateRow, "Aprobando Admon."));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate[0]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate[0]]);
       return {status: 200, data: requestRow};
     }else if(userId.role === 2){
       //Change the approval/reject state
-      const stateRow = await pool.query('SELECT * FROM requeststate');
+      const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate.push(getStateIdFromName(stateRow, "Solicitada"));
       requeststate.push(getStateIdFromName(stateRow, "En evaluación"));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? );', [requeststate[0], requeststate[1]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? );', [requeststate[0], requeststate[1]]);
       return {status: 200, data: requestRow};    
     }else if(userId.role === 4 ){
       //Change the approval/reject state
-      const stateRow = await pool.query('SELECT * FROM requeststate');
+      const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En evaluación");
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
     }else{
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};
@@ -265,15 +265,15 @@ const getRequestsToOutLay = async (userId) => {
     let requeststate = -1;
     if(userId.role === 1){
       //Change the approval/reject state
-      const stateRow = await pool.query('SELECT * FROM requeststate');
+      const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "Aprobando Admon.");
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
     }else if(userId.role === 4 ){
       //Change the approval/reject state
-      const stateRow = await pool.query('SELECT * FROM requeststate');
+      const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En evaluación");
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM client C JOIN account A JOIN request R JOIN requeststate RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
     }else{
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};

@@ -13,7 +13,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       //New Client
       const newClient = client;
       newClient.registeredDate = new Date();
-      const clientQuery = await pool.query('INSERT INTO client set ?', [newClient]);
+      const clientQuery = await pool.query('INSERT INTO Client set ?', [newClient]);
       
       //Insert in user
       const newUser = user;
@@ -22,12 +22,12 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       newUser.status = false;
       newUser.Client_idClient = clientQuery[0].insertId;  
       
-      const userUpdateQuery = await pool.query('INSERT INTO user SET ?', [newUser]);
+      const userUpdateQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
       //Insert into auth
       const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
                           createdDate: new Date()};
       newAuth.password = await helpers.encryptPassword("0123456789");
-      const authQuery = await pool.query('INSERT INTO auth SET ?', [newAuth]);
+      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
       //Confirmation link
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
@@ -90,9 +90,6 @@ const integrationRegister = async (identificationId, client, user, auth) => {
         await sgMail.send(info);
 
         return {status: 200, message: "Ha sido registrado satisfactoriamente. Confirme su cuenta para poder iniciar sesión."};
-      }else{
-        return {status: 404, message: "El usuario ya se encuentra registrado dentro del sistema.s"};
-      }        
   }catch(e){
     return {status: 500, message: "Error interno del servidor."};
   }    

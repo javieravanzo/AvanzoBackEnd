@@ -11,7 +11,7 @@ const expirationTime = 5;
 const login = async (email, password) => {
 
     try {
-        const userRow = await pool.query('SELECT * FROM user U JOIN auth A ON (A.User_idUser = U.idUser) where U.email = ?', [email]);
+        const userRow = await pool.query('SELECT * FROM User U JOIN Auth A ON (A.User_idUser = U.idUser) where U.email = ?', [email]);
         console.log("userRow", userRow[0]);
         const userQuery = userRow[0];  
         if(userRow.length > 0){
@@ -26,7 +26,7 @@ const login = async (email, password) => {
                     const new_date = new Date();
                     new_date.setHours(new_date.getHours()+expirationTime);
                     userAuth.expiresOn = new_date;     
-                    const result2 = await pool.query('UPDATE auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
+                    const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
                     return { status: 200, message: "Ha ingresado satisfactoriamente.",
                             data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData}
                         };
@@ -54,7 +54,7 @@ const confirmAccounts  = async (body, userId) => {
         console.log("US", user.userRow[0]);
 
         //Update confirmation
-        const update = await pool.query('UPDATE user SET isConfirmed = ? WHERE idUser = ?', [true, user.userRow[0].idUser]);
+        const update = await pool.query('UPDATE User SET isConfirmed = ? WHERE idUser = ?', [true, user.userRow[0].idUser]);
         console.log("UP", update);
 
         return {status: 200};
@@ -67,7 +67,7 @@ const confirmAccounts  = async (body, userId) => {
 const getDocumentsTypes = async () => {
     const result = {status: null, data: {}, message: ""};
     try {
-        const documentRow = await pool.query('SELECT * FROM documenttypes');
+        const documentRow = await pool.query('SELECT * FROM DocumentTypes');
         if(documentRow){
             return {status: 200, message: "", data: documentRow};
         }else{
@@ -82,7 +82,7 @@ const getDocumentsTypes = async () => {
 const resetPassword = async (email) => {
     const result = {status: null, data: {}, message: ""};
     try {
-        const userRow = await pool.query('SELECT * FROM user where email = ?', [email]);
+        const userRow = await pool.query('SELECT * FROM User where email = ?', [email]);
         if(userRow.length > 0){
             return {status: 200, message: "Se ha envíado un correo electrónico a tu email para cambiar la contraseña"};
         }else{
@@ -97,10 +97,10 @@ const resetPassword = async (email) => {
 const confirmedPassword = async (email, password) => {
     const result = {status: null, data: {}, message: ""};
     try {
-        const userRow = await pool.query('SELECT * FROM user where email = ?', [email]);
+        const userRow = await pool.query('SELECT * FROM User where email = ?', [email]);
         if(userRow.length > 0){
             const newPassword = await helpers.encryptPassword(password);
-            const modifiedPassword = await pool.query('UPDATE auth set password = ? WHERE User_idUser = ?', [newPassword, userRow[0].idUser]);
+            const modifiedPassword = await pool.query('UPDATE Auth set password = ? WHERE User_idUser = ?', [newPassword, userRow[0].idUser]);
             return {status: 200, message: "Se ha actualizado exitosamente la contraseña"};
         }else{
             return {status: 500, message: "Error interno del servidor."};

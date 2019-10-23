@@ -10,14 +10,14 @@ const registerCustomer = async (identificationId, client, user, auth) => {
     
     try{
 
-        const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM client C JOIN user U JOIN company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [identificationId]);
+        const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [identificationId]);
         
         if(JSON.stringify(userRow)  != '[]'){
             
           //New Client
           const newClient = client;
           newClient.registeredDate = new Date();
-          clientQuery = await pool.query('UPDATE client set ? WHERE identificationId = ?', [newClient, identificationId]);
+          clientQuery = await pool.query('UPDATE Client set ? WHERE identificationId = ?', [newClient, identificationId]);
           
           //Insert in user
           const newUser = user;
@@ -26,12 +26,12 @@ const registerCustomer = async (identificationId, client, user, auth) => {
           newUser.status = true;
           newUser.Client_idClient = userRow[0].idClient;  
           
-          const userUpdateQuery = await pool.query('UPDATE user SET ? WHERE Client_idClient = ?', [newUser, userRow[0].idClient]);
+          const userUpdateQuery = await pool.query('UPDATE User SET ? WHERE Client_idClient = ?', [newUser, userRow[0].idClient]);
           //Insert into auth
           const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
                               createdDate: new Date()};
           newAuth.password = await helpers.encryptPassword(auth.password);
-          const authQuery = await pool.query('INSERT INTO auth SET ?', [newAuth]);
+          const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
           
           //Confirmation link
           const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
@@ -95,7 +95,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
 
           return {status: 200, message: "Ha sido registrado satisfactoriamente. Confirme su cuenta para poder iniciar sesión."};
         }else{
-          return {status: 500, message: "El usuario no se encuentra registrado en nuestro sistema. Por favor, solicita a tu empresa la inscripción en Avanzo S.A.S."};
+          return {status: 500, message: "Tu usuario no se encuentra registrado en nuestro sistema. Por favor, solicita a tu empresa la inscripción en Avanzo."};
         }        
     }catch(e){
       return {status: 500, message: "Error interno del servidor."};
@@ -111,22 +111,22 @@ const registerAdmins = async (admin, user, auth) => {
     try{
 
       //Consult administrator
-      const userRow = await pool.query('SELECT * FROM user U JOIN administrator A ON (U.Administrator_idAdministrator = A.idAdministrator) where (U.email = ? AND A.identificationId = ?)', [user.email,admin.identificationId]);
+      const userRow = await pool.query('SELECT * FROM User U JOIN Administrator A ON (U.Administrator_idAdministrator = A.idAdministrator) where (U.email = ? AND A.identificationId = ?)', [user.email,admin.identificationId]);
      
       if(JSON.stringify(userRow)  != '[]'){     
       
-        const adminQuery = await pool.query('UPDATE administrator SET ? WHERE idAdministrator = ?', [newAdmin, userRow[0].Administrator_idAdministrator]);
+        const adminQuery = await pool.query('UPDATE Administrator SET ? WHERE idAdministrator = ?', [newAdmin, userRow[0].Administrator_idAdministrator]);
 
         //Insert in user
         newUser.registeredDate = new Date(); 
         newUser.status = true;
-        const result2 = await pool.query('UPDATE user SET ? WHERE idUser = ?', [newUser, userRow[0].idUser]);
+        const result2 = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, userRow[0].idUser]);
 
         //Auth
         const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
                           createdDate: new Date()};
         newAuth.password = await helpers.encryptPassword(auth.password);
-        const result3 = await pool.query('INSERT INTO auth SET ?', [newAuth]);
+        const result3 = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
         
         //Confirmation link
         const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
@@ -190,7 +190,7 @@ const registerAdmins = async (admin, user, auth) => {
 
         return {status: 200, message: "Ha sido registrado satisfactoriamente. Hemos envíado un correo electrónico que le permitirá confirmar su cuenta e iniciar sesión."};
       }else{
-        return {status: 400, message: "El correo electrónico no se encuentra registrado en nuestro sistema."};
+        return {status: 400, message: "El correo electrónico y el número de documento no se encuentran registrados en nuestro sistema."};
       }
   }catch(e){
     throw(e);

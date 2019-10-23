@@ -146,6 +146,7 @@ const createMultipleCustomer = async (req, res, next) => {
 
     // Map the xlsx format to json.
     var data = Excel.utils.sheet_to_json(company);
+    //console.log("Data", data);
 
     try {
         const result = await createMultipleCustomers(data, adminId);
