@@ -18,18 +18,30 @@
   },
   "homepage": "https://github.com/CristianOrjuela/AvanzoBackEnd#readme",
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "exceljs": "^2.0.1",
     "express": "^4.17.1",
     "express-mysql-session": "^2.1.0",
     "express-session": "^1.16.2",
     "express-validator": "^6.1.1",
+    "fs-extra": "^8.1.0",
+    "handlebars": "^4.3.1",
     "jsonwebtoken": "^8.5.1",
+    "math": "0.0.3",
+    "moment": "^2.24.0",
     "morgan": "^1.9.1",
+    "multer": "^1.4.2",
     "mysql": "^2.17.1",
+    "nodemailer": "^6.3.0",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "timeago.js": "^4.0.0-beta.2"
+    "path": "^0.12.7",
+    "puppeteer": "^1.20.0",
+    "timeago.js": "^4.0.0-beta.2",
+    "xlsx": "^0.15.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

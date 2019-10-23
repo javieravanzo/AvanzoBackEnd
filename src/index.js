@@ -11,12 +11,19 @@ app.set('port', process.env.PORT || 4000)
 //Middlewares
 app.use(express.json());
 app.use(morgan('dev'));
+app.all('*', function(req, res, next) {
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header("Access-Control-Allow-Headers", "*");
+   next();
+});
 
 //Routes
 app.use(require('./routes/authentication/login'));
 app.use(require('./routes/authentication/register'));
 app.use(require('./routes/general/general'));
 app.use(require('./routes/customer/customer'));
+app.use(require('./routes/request/request'));
+app.use(require('./routes/company/company'));
 
 //Server
 app.listen( app.get('port'), () => {
