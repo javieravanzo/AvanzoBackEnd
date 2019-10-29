@@ -7,94 +7,89 @@ const {my_secret_key, base_URL} = require('../config/global');
 
 //Services
 const integrationRegister = async (identificationId, client, user, auth) => {
+
+  const newClient = client;
+
+  newClient.birthDate = new Date(client.birthDate.split('/')[2], client.birthDate.split('/')[1], client.birthDate.split('/')[0]);
+  newClient.expeditionDate = new Date(client.expeditionDate.split('/')[2], client.expeditionDate.split('/')[1], client.expeditionDate.split('/')[0]);
+  newClient.documentType = "Cédula";
+  newClient.registeredBy = 1;
+  newClient.registeredDate = new Date();
+  newClient.Company_idCompany = 1;
+  
+  try{
+
+    //New client
+    const clientQuery = await pool.query('INSERT INTO Client SET ?', [newClient]);
+    //console.log("clientQuery", clientQuery);  
+      
+    //Insert in user
+    const newUser = user;
+    newUser.registeredDate = new Date();
+    newUser.Role_idRole = 4;
+    newUser.status = true;
+    newUser.Client_idClient = clientQuery.insertId;
+    newUser.registeredBy = 1;
+    newUser.registeredDate = new Date();
+    newUser.createdDate = new Date();
+    newUser.isConfirmed = true;
+    const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
+    //console.log("userQuery", userQuery);
     
-    try{
-       
-      //New Client
-      const newClient = client;
-      newClient.registeredDate = new Date();
-      const clientQuery = await pool.query('INSERT INTO Client set ?', [newClient]);
-      
-      //Insert in user
-      const newUser = user;
-      newUser.registeredDate = new Date();
-      newUser.Role_idRole = 4;
-      newUser.status = false;
-      newUser.Client_idClient = clientQuery[0].insertId;  
-      
-      const userUpdateQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
-      //Insert into auth
-      const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
-                          createdDate: new Date()};
-      newAuth.password = await helpers.encryptPassword("0123456789");
-      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
-      
-      //Confirmation link
-      const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
-      const url = base_URL + `Account/Confirm/${jwtoken}`;
-      
-      //Mailer
-      sgMail.setApiKey('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');
+    //Account
+    const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [1]);
+    //console.log("companyQuery", companyQuery);
+    const newAccount = {maximumAmount: companyQuery[0].defaultAmount, partialCapacity: companyQuery[0].defaultAmount,
+      documentsUploaded: false, montlyFee: 0, totalInterest: 0, totalFeeAdministration: 0,
+      totalOtherCollection: 0, totalRemainder: 0, approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+      registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+    const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
+    //console.log("accountQuery", accountQuery);
+   
+    //Insert into auth
+    const newAuth = { User_idUser: userQuery.insertId, registeredBy: 1, registeredDate: new Date(),
+                        createdDate: new Date()};
+    newAuth.password = await helpers.encryptPassword("12345678");
+    const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+    //console.log("authQuery", authQuery);
 
-        let output = `<div>
-                <div class="header-confirmation">
-                  <h2 class="confirmation-title">
-                    Avanzo
-                  </h2>
-                  <h4 class="confirmation-subtitle">
-                    Créditos al instante
-                  </h4>
-                </div>
-            
-                <hr/>
-                
-                <div class="greet-confirmation">
-                  <h3 class="greet-title">
-                    Hola, apreciado ${user.name}.
-                  </h3>
-                  <br/>
-                  <img alt="userLogo" class="user-logo" src="imageURL"/>
-                  <h3>
-                    Gracias por registrarse en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
-                  </h3>
-                </div>
-            
-                <div class="body-confirmation">
-                  <h3 class="body-title">
-                    Para continuar en el proceso, por favor realice la confirmación de su cuenta.
-                  </h3>
-                  <h3>
-                    Confirme su cuenta, haciendo clic <a href="${url}">aquí</a>.
-                  </h3>
-                </div>
-            
-                <div class="footer-confirmation">
-                  <h3 class="footer-title">
-                    Gracias por confiar en nosotros.
-                  </h3>
-                  <div>
-                    <img alt="avanzoLogo" class="avanzo-logo" src="logoURL"/>
-                  </div>
-                </div>
-            
-              </div>`;
+    //Check token_info
+    const userRow = await pool.query('SELECT * FROM User U JOIN Auth A ON (A.User_idUser = U.idUser) where U.email = ?', [user.email]);
+    //console.log("userRow", userRow);
 
-        let info = {
-            from: 'operaciones@avanzo.co', // sender address
-            to: user.email, // list of receivers
-            subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
-            text: 'Hello world?', // plain text body
-            html: output // html body
-        };
-
-        await sgMail.send(info);
-
-        return {status: 200, message: "Ha sido registrado satisfactoriamente. Confirme su cuenta para poder iniciar sesión."};
+    //Confirmation link
+    const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
+    const userData = { idUser: userQuery.insertId, name: user.name, email: user.email, roleId: 4 };      
+    const userAuth = { idAuth: authQuery.insertId, expiresOn: new Date(), registeredDate: new Date() };
+    const new_date = new Date();
+    new_date.setHours(new_date.getHours()+8);
+    userAuth.expiresOn = new_date;     
+    const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userQuery.insertId]);
+    return { status: 200, message: "El usuario ha sido registrado satisfactoriamente.",
+            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData}
+           };         
   }catch(e){
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
-  }    
+  }
+     
+};
+
+const integrationCheckPhone = async (phoneNumber) => {
+
+  try{
+    const clientQuery = await pool.query('SELECT idClient FROM Client where phoneNumber = ?', [phoneNumber]);
+    if(clientQuery.length>0){
+      return {status: 500, message: "El número se encuentra registrado en nuestro sistema."};
+    }else{
+      return {status: 200, message: "El número no se encuentra registrado en nuestro sistema."}
+    }
+  }catch(e) {
+    return {status: 500, message: "No es posible realizar la validación del número en este momento."};
+  };
+
 };
 
 module.exports = {
-  integrationRegister
+  integrationRegister, integrationCheckPhone
 }

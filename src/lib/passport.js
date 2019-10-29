@@ -11,7 +11,7 @@ passport.use('local.signin', new LocalStrategy({
     passwordField: 'password',
     passReqToCallback: true,
 }, async (req, email, password, done) => {
-    console.log(req.body);
+   // console.log(req.body);
     const userRow = await pool.query('SELECT * FROM user where email = ?', [email]);
     const authRow = await pool.query('SELECT * FROM auth where User_idUser = ?', [userRow.insertId]);
     if(authRow > 0){
@@ -39,9 +39,9 @@ passport.use('local.signup', new LocalStrategy({
     let result1 = {};
     try{
         result1 = await pool.query('INSERT INTO client SET ?', [newClient]);
-        console.log("Resultado1", result1);
+        //console.log("Resultado1", result1);
     }catch(e){
-        console.log("Error", e);
+        //console.log("Error", e);
     }
     const newUser = { email, name, status: true, Role_idRole: 3, Client_idClient: result1.insertId};
     if(result1){
@@ -50,11 +50,11 @@ passport.use('local.signup', new LocalStrategy({
         const result2 = await pool.query('INSERT INTO user SET ?', [newUser]);
         newUser.id = result2.insertId;
         const newAuth = { password, token: "asd987a9sd698as7d", User_idUser: result2.insertId};
-        console.log("NewPas", newAuth.password);
+        //console.log("NewPas", newAuth.password);
         //Change saved password
         newAuth.password = await helpers.encryptPassword(password, password);
         const result3 = await pool.query('INSERT INTO auth SET ?', [newAuth]);
-        console.log("Resultado2", result3);
+        //console.log("Resultado2", result3);
     }
     return done(null, newUser);
 }));

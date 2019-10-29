@@ -11,7 +11,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
     try{
 
         const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [identificationId]);
-        
+        //console.log("UserREGISTERRow", userRow);
         if(JSON.stringify(userRow)  != '[]'){
             
           //New Client

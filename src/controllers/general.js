@@ -15,7 +15,7 @@ function getUserIdFromToken(req){
 
   //Set the token
   const decoded = jwt.decode(bearer);
-  console.log("Decoded", decoded);
+
   return (parseInt(decoded.userRow[0].idUser, 10));  
 
 }; 

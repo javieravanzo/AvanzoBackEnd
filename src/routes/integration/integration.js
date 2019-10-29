@@ -1,15 +1,15 @@
 //Requires
 const express = require('express');
-const { body, header } = require('express-validator');
+const { header, body } = require('express-validator');
 
 //Controllers
-const { makeRegistration } = require('../../controllers/integration');
+const { makeRegistration, checkPhone } = require('../../controllers/integration');
  
 //Initialize
 const router = express.Router();
 
 //Routes 
-router.get('/Register/IntegrationRegister', 
+router.post('/Integration/Register', 
 [
   body('name', 'Nombres inválidos').exists().not().isEmpty(),
   body('lastName', 'Apellidos inválidos').exists().not().isEmpty(),
@@ -19,6 +19,12 @@ router.get('/Register/IntegrationRegister',
   body('email', 'Nombre inválido').exists().isEmail().not().isEmpty(),
   body('phoneNumber', 'Teléfono inválido').exists().not().isEmpty(),
 ], makeRegistration);
+
+//Routes 
+router.get('/Integration/CheckPhone', 
+[
+  header('phoneNumber', 'Teléfono inválido').exists().not().isEmpty().isLength({ min: 10, max: 10 })
+], checkPhone);
 
 //Export
 module.exports = router;

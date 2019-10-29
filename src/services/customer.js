@@ -1,20 +1,28 @@
+
 //Requires
 const pool = require('../config/database.js');
 
 //Services
 const getInitialsData = async (userId) => {
 
+  //console.log("UI", userId);
+
   try {
-      const userRow = await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where user.idUser = ?', [userId]);
+      const userRow = await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
+      //console.log("UR", userRow);
       const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ?', [userRow[0].idAccount]);
-      const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.name <> "Desembolsada") where REQUEST.Account_idAccount = ?', [userRow[0].idAccount]);
+      //console.log("UT", transactions);
+      const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.name <> ?) where REQUEST.Account_idAccount = ?', ["Desembolsada", userRow[0].idAccount]);
+     // console.log("URE", request);
+      //console.log("userRow[0].maximumAmount", userRow[0].maximumAmount);
+      //console.log(JSON.stringify(transactions) !== '[]' ? transactions : '[]');
       if(userRow){
         return {status: 200, message: "", 
                 data: {
                   maximumAmount: userRow[0].maximumAmount,
                   partialCapacity: userRow[0].partialCapacity,
-                  transactions: transactions,
-                  request: request,
+                  transactions: JSON.stringify(transactions) !== '[]' ? transactions : [],
+                  request: request.length 
                 }
                 };
       }else{
@@ -91,7 +99,7 @@ const createCustomer = async (body, user, company, adminId) => {
     newUser.registeredBy = adminId;
     newUser.registeredDate = new Date();
     newUser.createdDate = new Date();
-    newUser.Role_idRole = 3;
+    newUser.Role_idRole = 4;
     newUser.status = true;
     newUser.Client_idClient = clientQuery.insertId;
     const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
@@ -139,7 +147,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 
         //Insert the client
         const clientQuery = await pool.query('INSERT INTO Client SET ?', [new_client]);
-        console.log("ClientQuery", clientQuery);
+        //console.log("ClientQuery", clientQuery);
 
         //Insert in user
         const newUser = {
@@ -148,7 +156,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           registeredBy: adminId,
           registeredDate: new Date(),
           createdDate: new Date(),
-          Role_idRole: 3,
+          Role_idRole: 4,
           status: true,
           Client_idClient: clientQuery.insertId
         };

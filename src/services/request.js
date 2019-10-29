@@ -94,7 +94,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
       for (let i=0; i<split; i++){
         
-        console.log("FD", firstDate);
+        //console.log("FD", firstDate);
 
         let new_date = {
           id: i,
@@ -118,32 +118,40 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
 const createRequest = async (body, file, clientId) => {  
 
+  //console.log(body.quantity);
+
   try{
     const requestState = await pool.query('SELECT * FROM RequestState');
-    const {quantity, split, account, accountType, accountNumber, accountKind, haveDocumentsLoaded } = body;
+    //console.log("OI", requestState);
+    const {quantity, split, moyen, accountType, accountNumber, isBank } = body;
     //New Request
-    const newRequest = {quantity, split, account, accountNumber, accountType};
+    const newRequest = {quantity, split, account: moyen, accountNumber, accountType};
     newRequest.creditNumber = math.ceil(math.random()*10000);
     newRequest.approveHumanResources = true;
     newRequest.createdDate = new Date();
-    newRequest.filePath = file.path;
+    newRequest.filePath = "./files/images/nueva_imagen.png";
     newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
     //Obsevations - Request
     const observation = {observationContent: ""};
     const observationInsert = await pool.query('INSERT INTO Observations SET ?', [observation]);
+    //console.log("OI", observationInsert);
     newRequest.Observations_idObservations = observationInsert.insertId;
     //PreRequestDates - Request
     const preRequestDates = {firstDate: new Date(), firstQuantity: 282341};
     const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
+    //console.log("PRD", preRequestDatesRow);
     newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;
     //Account - Request
-    const userRow =  await pool.query('SELECT ACCOUNT.idAccount FROM client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientId]);
+    const userRow =  await pool.query('SELECT ACCOUNT.idAccount FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientId]);
+    //console.log("URW", userRow);
     newRequest.Account_idAccount = userRow[0].idAccount;
     //Request
     const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
+    //console.log("REQ", request);
     return {status: 200, message: {message: "La solicitud ha sido creada exitosamente."}};
   }catch(e){
-    return {status: 500, message: "Error interno del servidor."};
+    //console.log(e);
+    return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 };
 
@@ -154,6 +162,7 @@ const getAllRequests = async (clientId) => {
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -305,7 +314,7 @@ const generateContracts = async (customerid, split, quantity) => {
 
     return {status: 200, message: {message: "El pdf ha sido generado exitosamente"}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
   }
 
 };

@@ -2,6 +2,9 @@
 //Requires
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+var buffer = require('buffer');
+var path = require('path');
+var fs = require('fs');
 
 //Imports
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
@@ -89,9 +92,29 @@ const getOultayDatesList = async (req, res, next) => {
 
 };
 
+const decode_base64 = async (base64str , filename) => {
+
+  var base64DataReplaced = await base64str.replace('/^data:image\/png;base64,/', "");
+  var buf = Buffer.from(base64DataReplaced,'base64');
+
+  fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
+    if(error){
+      throw error;
+    }else{
+      /*console.log('File created from base64 string!');
+      console.log('File created from base64 string!');*/
+      return true;
+    }
+  });
+
+}
+
 const createNewRequest = async (req, res, next) => {
 
   const clientId = getClientId(req);
+  //console.log("CI", req.body.file);
+  //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
+  decode_base64(req.body.file, "nueva_imagen.PNG");
 
   try {
     const result = await createRequest(req.body, req.file, clientId);
@@ -102,7 +125,7 @@ const createNewRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -110,6 +133,7 @@ const createNewRequest = async (req, res, next) => {
 const getAllRequest = async (req, res, next) => {
 
   const clientId = getClientId(req);
+  //console.log("CI", clientId);
 
   try {
     const result = await getAllRequests(clientId);

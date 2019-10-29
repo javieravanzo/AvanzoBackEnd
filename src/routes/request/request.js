@@ -3,6 +3,7 @@ const express = require('express');
 const { body, header,  } = require('express-validator');
 const multer = require('multer');
 
+
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
@@ -30,16 +31,17 @@ const uploads = multer({
   //fileFilter: fileFilter
 });
 
-
 //Initialize
 const router = express.Router();
 
 //Controllers
-const { verifyToken } = require('../../controllers/validator');
+const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract } = require('../../controllers/request');
  
+
+  
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
 
