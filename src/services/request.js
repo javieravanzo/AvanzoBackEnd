@@ -150,7 +150,7 @@ const createRequest = async (body, file, clientId) => {
     //console.log("REQ", request);
     return {status: 200, message: {message: "La solicitud ha sido creada exitosamente."}};
   }catch(e){
-    //console.log(e);
+    console.log(e);
     return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 };

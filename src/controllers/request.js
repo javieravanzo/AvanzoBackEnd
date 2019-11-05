@@ -114,9 +114,12 @@ const createNewRequest = async (req, res, next) => {
   const clientId = getClientId(req);
   //console.log("CI", req.body.file);
   //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
-  decode_base64(req.body.file, "nueva_imagen.PNG");
+  
 
   try {
+    //Decode
+    decode_base64(req.body.file, "nueva_imagen.PNG");
+    //Request
     const result = await createRequest(req.body, req.file, clientId);
     if(result.status === 200){
         res.status(result.status).json(result.message);
@@ -125,6 +128,7 @@ const createNewRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
+    console.log(e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
