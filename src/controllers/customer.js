@@ -5,7 +5,7 @@ const Excel = require('xlsx');
 
 //Imports
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
-        getAllCustomerWithCompanies, getTransactionsByUsersId } = require('../services/customer');
+        getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -106,6 +106,30 @@ const getAllCustomer = async (req, res, next) => {
     };
 };
 
+const getCustomers = async (req, res, next) => {
+
+    //Validate input
+    const errors = validationResult(req); 
+
+    if (!errors.isEmpty()) {
+        res.status(422).json({ message: errors.errors[0].msg });
+        return;
+    }
+
+    try {
+        const result = await getCustomersByAdmin( );
+        if(result.status === 200){
+            res.status(result.status).json(result.data);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+    } catch(e) {
+        res.status(500).json("No es posible obtener la información en este momento.");
+    };
+};
+
+
 const createNewCustomer = async (req, res, next) => {
   
   //Variables
@@ -197,5 +221,5 @@ const getTransactionsByUserId = async (req, res, next) => {
 
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
-  getAllCustomerWithCompany, getTransactionsByUserId
+  getAllCustomerWithCompany, getTransactionsByUserId, getCustomers
 };

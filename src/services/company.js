@@ -40,11 +40,26 @@ const createCompanies = async (req, userId) => {
 
     return {status: 200, message: {message: "La empresa ha sido creada de manera exitosa."}};
   }catch(e){
+    console.log(e);
     throw e;
     //return {status: 500, message: "Error interno de l servidor."};
   }    
 };
 
+const getCompanies = async (req, userId) => {
+
+  
+  try{
+    const companyRow = await pool.query('SELECT * FROM Company');
+    return {status: 200, data: companyRow};
+  }catch(e){
+    console.log(e);
+    //throw e;
+    return {status: 500, message: "Error interno de l servidor."};
+  }  
+
+};
+
 module.exports = {
-  createCompanies
+  createCompanies, getCompanies
 };

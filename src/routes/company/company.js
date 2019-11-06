@@ -7,7 +7,7 @@ const router = express.Router();
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
-const { createCompany } = require('../../controllers/company');
+const { createCompany, getAllCompanies } = require('../../controllers/company');
  
 //Routes 
 router.post('/Company/Create', 
@@ -28,7 +28,8 @@ router.post('/Company/Create',
   ],
 [verifyToken], createCompany);
 
-
+//Routes 
+router.get('/Company/GetAll', [verifyToken], getAllCompanies);
 
 //Export
 module.exports = router;

@@ -5,7 +5,7 @@ const multer = require('multer');
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
-const { getInitialData, getRequestData, getAllCustomer, createNewCustomer,
+const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId} = require('../../controllers/customer');
  
 //Initialize
@@ -63,8 +63,11 @@ router.post('/Customer/Create', [
 ],
 [verifyToken], createNewCustomer);
 
-router.get('/Customer/GetAll', 
+router.get('/Customer/GetAllByCompany', 
 [verifyToken], getAllCustomer);
+
+router.get('/Customer/GetAll', 
+[verifyToken], getCustomers);
 
 router.post('/Customer/MultipleCreate', 
 uploads.single('file'),

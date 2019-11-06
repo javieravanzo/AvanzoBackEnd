@@ -74,6 +74,21 @@ const getAllCustomers = async (companyId) => {
   }
 };
 
+const getCustomersByAdmin = async ( ) => {
+
+  try {
+    const clientRow =  await pool.query('SELECT * FROM Client');
+    
+    if(clientRow){
+      return {status: 200, message: "", data: clientRow};
+    }else{
+      return {status: 500, message: "Error interno del servidor."};
+    }
+  }catch(e) {
+    return {status: 500, message: "Error interno del servidor."};
+  }
+};
+
 const createCustomer = async (body, user, company, adminId) => {
  
   //NewClient
@@ -230,5 +245,5 @@ const getTransactionsByUsersId = async (userId) => {
 
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
-  getAllCustomerWithCompanies, getTransactionsByUsersId
+  getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin
 }

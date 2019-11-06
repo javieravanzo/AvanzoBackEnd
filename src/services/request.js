@@ -251,13 +251,13 @@ const getAllRequestsToApprove = async (userId) => {
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate.push(getStateIdFromName(stateRow, "Solicitada"));
       requeststate.push(getStateIdFromName(stateRow, "En evaluación"));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? );', [requeststate[0], requeststate[1]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? );', [requeststate[0], requeststate[1]]);
       return {status: 200, data: requestRow};    
     }else if(userId.role === 4 ){
       //Change the approval/reject state
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En evaluación");
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
     }else{
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};
