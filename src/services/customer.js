@@ -63,7 +63,7 @@ const getAllCustomers = async (companyId) => {
 
   try {
     const clientRow =  await pool.query('SELECT U.email, U.name, C.identificationId, C.lastName, C.profession, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.Company_idCompany = ?', [companyId]);
-    
+
     if(clientRow){
       return {status: 200, message: "", data: clientRow};
     }else{
@@ -214,7 +214,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
     
     if(clientRow){
       return {status: 200, data: clientRow};
@@ -222,6 +222,7 @@ const getAllCustomerWithCompanies = async () =>{
       return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e) {
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 

@@ -9,7 +9,6 @@ const verifyToken = async (req, res, next) => {
   try{
     //Get header value
     const bearerHeader = req.headers['authorization'];
-
     if(typeof bearerHeader !== 'undefined'){ 
       //Get the real token
       const bearer = bearerHeader.split(" ")[1];
@@ -26,6 +25,7 @@ const verifyToken = async (req, res, next) => {
       res.sendStatus(401).json({message: "El usuario no tiene permisos para acceder a este recurso."});
     }
   }catch(e){
+
     return false;
   }
 };

@@ -50,7 +50,7 @@ const getCompanies = async (req, userId) => {
 
   
   try{
-    const companyRow = await pool.query('SELECT * FROM Company');
+    const companyRow = await pool.query('SELECT * FROM Company C JOIN CompanySalaries CS where (C.CompanySalaries_idCompanySalaries = CS.idCompanySalaries)');
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);
