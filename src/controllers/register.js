@@ -60,7 +60,7 @@ const preRegister = async (req, res, next) => {
   const auth = {password};
 
   try {
-    const result = await newPreregister(client, user, files);
+    const result = await newPreregister(client, user, files, auth);
     res.status(result.status).json({message: result.message});      
   }catch(e) {
     res.status(500).json({message:"No es posible realizar el registro en este momento."});

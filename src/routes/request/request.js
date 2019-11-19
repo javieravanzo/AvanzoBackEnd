@@ -39,8 +39,6 @@ const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract } = require('../../controllers/request');
- 
-
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);

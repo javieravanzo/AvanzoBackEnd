@@ -105,10 +105,13 @@ const registerCustomer = async (identificationId, client, user, auth) => {
 
 const newPreregister = async (client, user, files, auth) => {
   
+  let consultUser = [];
+
   try{
 
     const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [client.identificationId]);
-    //console.log("UserREGISTERRow", userRow);
+    consultUser = userRow;
+
     if(JSON.stringify(userRow) === '[]'){
         
       //DocumentClients
@@ -146,7 +149,7 @@ const newPreregister = async (client, user, files, auth) => {
       const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       //Insert into auth
-      const newAuth = { User_idUser: userQuery[0].idUser, registeredBy: 1, registeredDate: new Date(),
+      const newAuth = { User_idUser: userQuery.insertId, registeredBy: 1, registeredDate: new Date(),
                           createdDate: new Date()};
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
@@ -230,7 +233,6 @@ const newPreregister = async (client, user, files, auth) => {
       newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
       //console.log("NC", newClient);
       const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
-      console.log("CQ", clientQuery);
 
       //Insert in user
       const newUser = user;
@@ -241,8 +243,9 @@ const newPreregister = async (client, user, files, auth) => {
       newUser.status = true;
       const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
 
+      console.log(consultUser);
       //Insert into auth
-      const newAuth = { User_idUser: clientQuery.insertId, registeredBy: 1, registeredDate: new Date(),
+      const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date(),
         createdDate: new Date()};
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);

@@ -97,7 +97,9 @@ const decode_base64 = async (base64str , filename) => {
   var base64DataReplaced = await base64str.replace('/^data:image\/png;base64,/', "");
   var buf = Buffer.from(base64DataReplaced,'base64');
 
+  //Dev
   fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
+  //Pro
   //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
       throw error;

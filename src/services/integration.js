@@ -11,7 +11,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
   try{
     
     const userRow = await pool.query('SELECT C.idClient, C.identificationId, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.identificationId = ?', [identificationId]);
-    console.log("Row", userRow);
+    //console.log("Row", userRow);
     if(userRow.length !== 0){
 
       const newClient = client;
