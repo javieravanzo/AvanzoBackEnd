@@ -12,7 +12,7 @@ const createCompanies = async (req, userId) => {
   try{
     
     //CompanySalaries
-    const companyRates = {companyRateName: companyRate, companyRate: companyRate === "Mensual" ? 30 : 15, companyFirstDate, companySecondDate}
+    const companyRates = {companyRateName: companyRate, companyRate: companyRate === "Mensual" ? 30 : 15, companyFirstDate, companySecondDate: companySecondDate !== undefined ? companySecondDate : null}
     const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [companyRates]);
     
     //Company
@@ -47,7 +47,6 @@ const createCompanies = async (req, userId) => {
 };
 
 const getCompanies = async (req, userId) => {
-
   
   try{
     const companyRow = await pool.query('SELECT * FROM Company C JOIN CompanySalaries CS where (C.CompanySalaries_idCompanySalaries = CS.idCompanySalaries)');
@@ -60,6 +59,19 @@ const getCompanies = async (req, userId) => {
 
 };
 
+const getAllCompaniesForUser = async ( ) => {
+  
+  try{
+    const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C');
+    return {status: 200, data: companyRow};
+  }catch(e){
+    console.log(e);
+    //throw e;
+    return {status: 500, message: "Error interno de l servidor."};
+  }  
+
+};
+
 module.exports = {
-  createCompanies, getCompanies
+  createCompanies, getCompanies, getAllCompaniesForUser
 };

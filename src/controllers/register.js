@@ -2,7 +2,7 @@
 const { validationResult } = require('express-validator');
 
 //Imports
-const { registerCustomer, registerAdmins } = require('../services/register');
+const { registerCustomer, registerAdmins, newPreregister } = require('../services/register');
  
 const registerClient = async (req, res, next) => {
 
@@ -39,6 +39,35 @@ const registerClient = async (req, res, next) => {
   }
 };
 
+const preRegister = async (req, res, next) => {
+  
+  //Variables
+  const {name, lastName, identificationId, email, company, phoneNumber, password} = req.body;
+
+  //Validate input
+  const errors = validationResult(req); 
+
+  if (!errors.isEmpty()) {
+    //res.status(422).json({ message: errors.errors[0].msg });
+    res.status(422).json({ message: errors.array() });
+    return;
+  }
+
+  //Logic
+  const client = {lastName, identificationId, phoneNumber, Company_idCompany: company};
+  const user = {name, email};
+  const files = {documentId: req.files.documentId[0].path, photo: req.files.photo[0].path, paymentReport: req.files.paymentReport[0].path};
+  const auth = {password};
+
+  try {
+    const result = await newPreregister(client, user, files);
+    res.status(result.status).json({message: result.message});      
+  }catch(e) {
+    res.status(500).json({message:"No es posible realizar el registro en este momento."});
+  };
+
+};
+
 const registerAdmin = async (req, res, next) => {
 
   //Variables
@@ -67,5 +96,5 @@ const registerAdmin = async (req, res, next) => {
 };
  
 module.exports = {
-    registerClient, registerAdmin
+    registerClient, registerAdmin, preRegister
 };

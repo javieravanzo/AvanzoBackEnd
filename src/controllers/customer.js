@@ -5,7 +5,8 @@ const Excel = require('xlsx');
 
 //Imports
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
-        getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin } = require('../services/customer');
+        getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
+        getCustomerToApprove, approveCustomers } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -129,7 +130,6 @@ const getCustomers = async (req, res, next) => {
     };
 };
 
-
 const createNewCustomer = async (req, res, next) => {
   
   //Variables
@@ -170,7 +170,6 @@ const createMultipleCustomer = async (req, res, next) => {
 
     // Map the xlsx format to json.
     var data = Excel.utils.sheet_to_json(company);
-    //console.log("Data", data);
 
     try {
         const result = await createMultipleCustomers(data, adminId);
@@ -188,6 +187,25 @@ const getAllCustomerWithCompany = async (req, res, next) => {
 
     try {
         const result = await getAllCustomerWithCompanies(adminId);
+        if(result){
+            res.status(result.status).json(result.data);
+        }else{
+            res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+        }
+              
+    }catch(e) {
+        res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+    };
+
+};
+
+const getAllCustomerToApprove = async (req, res, next) => {
+    
+    //Get the user id
+    const adminId = getAdminId(req);
+
+    try {
+        const result = await getCustomerToApprove(adminId);
         if(result){
             res.status(result.status).json(result.data);
         }else{
@@ -219,7 +237,30 @@ const getTransactionsByUserId = async (req, res, next) => {
 
 };
 
+const approveCustomer = async (req, res, next) => {
+    
+    try {
+
+        //Get the user id
+        const adminId = getAdminId(req);
+        const {clientid, approve} = req.headers;
+
+        const result = await approveCustomers(clientid, approve, adminId);
+        if(result.status === 200){
+            res.status(result.status).json(result.message);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+    } catch(e) {
+        res.status(500).json("No es posible obtener la información en este momento.");
+    };
+
+};
+
+
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
-  getAllCustomerWithCompany, getTransactionsByUserId, getCustomers
+  getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
+  approveCustomer
 };

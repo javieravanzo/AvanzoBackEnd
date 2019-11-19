@@ -6,7 +6,7 @@ INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate)
 
 /* Main Administrator */
 INSERT INTO Administrator (lastName, identificationId, adminType) values ("Orjuela", "1032488727", "superAdmin");
-INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", false, false, NOW(), 1, NOW(), 4, null, null, 1);
+INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", false, false, NOW(), 1, NOW(), 1, null, null, 1);
 
 /* Request */
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Solicitada", NOW(), 1, NOW());

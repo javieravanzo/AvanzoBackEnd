@@ -58,7 +58,7 @@ const confirmAccount = async (req, res, next) => {
   try{
     const result = await confirmAccounts(req, userId);
     if(result.status === 200){
-      res.redirect(front_URL+'login');
+      res.redirect(front_URL+'/password_confirmed');
     }else{
       res.status(result.status).json({message: result.message});
     }

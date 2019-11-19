@@ -93,7 +93,7 @@ const getOultayDatesList = async (req, res, next) => {
 };
 
 const decode_base64 = async (base64str , filename) => {
-  //console.log("B412", base64str);
+ 
   var base64DataReplaced = await base64str.replace('/^data:image\/png;base64,/', "");
   var buf = Buffer.from(base64DataReplaced,'base64');
 
@@ -102,8 +102,6 @@ const decode_base64 = async (base64str , filename) => {
     if(error){
       throw error;
     }else{
-      /*console.log('File created from base64 string!');
-      console.log('File created from base64 string!');*/
       return true;
     }
   });
@@ -129,7 +127,6 @@ const createNewRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    console.log(e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 

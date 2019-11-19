@@ -138,6 +138,7 @@ const createCustomer = async (body, user, company, adminId) => {
 const createMultipleCustomers = async (customersData, adminId) => {
 
   try{
+  //console.log("CD", customersData);
     
     for (let i in customersData){
       
@@ -205,6 +206,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
       }
     }    
   }catch(e){
+    console.log(e);
     return {status: 500, message: "Error interno del servidor"};
   }
   
@@ -215,6 +217,22 @@ const getAllCustomerWithCompanies = async () =>{
   
   try {
     const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    if(clientRow){
+      return {status: 200, data: clientRow};
+    }else{
+      return {status: 500, message: "Error interno del servidor."};
+    }
+  }catch(e) {
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
+const getCustomerToApprove = async () =>{
+  
+  try {
+    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ?)', [false]);
     
     if(clientRow){
       return {status: 200, data: clientRow};
@@ -244,7 +262,27 @@ const getTransactionsByUsersId = async (userId) => {
 
 };
 
+const approveCustomers = async (clientId, approve, adminId) => {
+
+  console.log("CI", clientId, approve, adminId);
+  
+  try{   
+    if(approve === "true"){
+      const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [true, clientId]);
+      return {status: 200, message: "El usuario ha sido aprobado exitosamente."};
+    }else{
+      const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [false, clientId]);
+      return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
+    }
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
-  getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin
+  getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
+  approveCustomers
 }

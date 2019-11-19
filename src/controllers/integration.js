@@ -30,7 +30,6 @@ const makeRegistration = async (req, res, next) => {
     const result = await integrationRegister(identificationId, client, user, auth);
     res.status(result.status).json({data: result.data, message: result.message});      
   }catch(e) {
-    //console.log(e);
     res.status(500).json({message:"No es posible realizar el registro en este momento."});
   };
 

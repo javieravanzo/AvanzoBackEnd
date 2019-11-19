@@ -118,8 +118,6 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
 const createRequest = async (body, file, clientId) => {  
 
-  //console.log(body.quantity);
-
   try{
     const requestState = await pool.query('SELECT * FROM RequestState');
     //console.log("OI", requestState);
@@ -278,7 +276,7 @@ const getRequestsToOutLay = async (userId) => {
       requeststate = getStateIdFromName(stateRow, "Aprobando Admon.");
       const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN Account A JOIN Request R JOIN RequestState RS ON (C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
-    }else if(userId.role === 4 ){
+    }else if(userId.role === 2 ){
       //Change the approval/reject state
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En evaluación");
