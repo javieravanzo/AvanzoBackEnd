@@ -7,7 +7,7 @@ const multer = require('multer');
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
-    callback(null, './files/');
+    callback(null, '../files/');
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);

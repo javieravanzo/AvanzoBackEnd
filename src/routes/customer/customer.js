@@ -16,7 +16,7 @@ const router = express.Router();
 //- Modify the folder/file storage
 const storageAdmin = multer.diskStorage({
   destination: function(req, file, callback){
-    callback(null, './files/admin/reads');
+    callback(null, '../files/admin/reads');
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
