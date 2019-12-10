@@ -2,12 +2,13 @@
 const express = require('express');
 const { body, header } = require('express-validator');
 const multer = require('multer');
+//const BaseURL = require('../../config/')
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
 const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
-        getAllCustomerToApprove, approveCustomer} = require('../../controllers/customer');
+        getAllCustomerToApprove, approveCustomer, updateCustomer, changeCustomerStatus} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -16,7 +17,12 @@ const router = express.Router();
 //- Modify the folder/file storage
 const storageAdmin = multer.diskStorage({
   destination: function(req, file, callback){
+    //Production
     callback(null, '../files/admin/reads');
+    //Development
+    //callback(null, './files/admin/reads');
+
+    
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
@@ -25,7 +31,9 @@ const storageAdmin = multer.diskStorage({
 
 const storageCustomer = multer.diskStorage({
   destination: function(req, file, callback){
-    callback(null, './files/admin/reads');
+    
+
+    callback(null, '../files/admin/reads');
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
@@ -63,6 +71,14 @@ router.post('/Customer/Create', [
   body('companyid', 'La empresa es inválida').exists().isInt().not().isEmpty(),
 ],
 [verifyToken], createNewCustomer);
+
+//router.post('/Customer/Update', [verifyToken], updateCustomer);
+
+router.get('/Customer/ChangePlatformStatus', [
+ header('clientId', 'El cliente no es válido').exists().not().isEmpty(),
+ header('status', 'El estado del cliente no es válido').exists().not().isEmpty(),
+],
+[verifyToken], changeCustomerStatus);
 
 router.get('/Customer/GetAllByCompany', 
 [verifyToken], getAllCustomer);

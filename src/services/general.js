@@ -12,7 +12,7 @@ const login = async (email, password) => {
 
     try {
         const consultEmail = await pool.query('SELECT * FROM User U where U.email = ?', [email]);
-        console.log("CE", consultEmail);
+        //console.log("CE", consultEmail);
         if (consultEmail[0]){
             const userRow = await pool.query('SELECT * FROM User U JOIN Auth A ON (A.User_idUser = U.idUser) where U.email = ?', [email]);
             //console.log("userRow", userRow[0]);

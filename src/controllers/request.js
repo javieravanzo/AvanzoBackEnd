@@ -20,6 +20,7 @@ function getClientId(req){
     const bearer = bearerHeader.split(" ")[1];
     //Set the token
     const decoded = jwt.decode(bearer);
+    //console.log("DEC", decoded);
     return (decoded.userRow[0].Client_idClient);  
 
 };
@@ -97,9 +98,9 @@ const decode_base64 = async (base64str , filename) => {
   var base64DataReplaced = await base64str.replace('/^data:image\/png;base64,/', "");
   var buf = Buffer.from(base64DataReplaced,'base64');
 
-  //Dev
+  //Production
   fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
-  //Pro
+  //Development
   //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
       throw error;
@@ -116,7 +117,6 @@ const createNewRequest = async (req, res, next) => {
   //console.log("CI", req.body.file);
   //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
   
-
   try {
     //Decode
     decode_base64(req.body.file, "nueva_imagen.PNG");
@@ -209,7 +209,6 @@ const getRequestStateList = async (req, res, next) => {
   };  
 
 };
-
 
 const getRequestsToApprove = async (req, res, next) => {
 

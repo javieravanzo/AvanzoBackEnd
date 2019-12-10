@@ -43,6 +43,7 @@ const getRequestsData = async (userId) => {
       if(userRow){
         return {status: 200, message: "", 
                 data: {
+                  partialCapacity: userRow[0].partialCapacity,
                   maximumAmount: userRow[0].maximumAmount,
                   maximumSplit: companyInfo[0].maximumSplit,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
@@ -183,12 +184,14 @@ const createMultipleCustomers = async (customersData, adminId) => {
         //Consult the company info
         const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
         
+        console.log("MCA", customersData[i].CantidadMaximaPrestamo, customersData[i].CantidadMaximaPrestamo !== " ");
+        console.log("FEE", customersData[i].CantidadMaximaCuotas);
         //Create the account
         const newAccount = {
-          maximumAmount: companyQuery[0].defaultAmount,
-          partialCapacity: companyQuery[0].defaultAmount,
+          maximumAmount: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo,10) : parseInt(companyQuery[0].defaultAmount, 10),
+          partialCapacity: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo, 10) : parseInt(companyQuery[0].defaultAmount, 10),
           documentsUploaded: false,
-          montlyFee: 0,
+          montlyFee: customersData[i].CantidadMaximaCuotas !== " " ? parseInt(customersData[i].CantidadMaximaCuotas, 10) : parseInt(companyQuery[0].maximumSplit, 10),
           totalInterest: 0,
           totalFeeAdministration: 0,
           totalOtherCollection: 0,
@@ -216,7 +219,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
     if(clientRow){
       return {status: 200, data: clientRow};
     }else{
@@ -262,7 +265,7 @@ const getTransactionsByUsersId = async (userId) => {
 
 };
 
-const approveCustomers = async (clientId, approve, adminId) => {
+const approveCustomers = async (clientId, approve, adminId, observation) => {
 
   console.log("CI", clientId, approve, adminId);
   
@@ -272,7 +275,31 @@ const approveCustomers = async (clientId, approve, adminId) => {
       return {status: 200, message: "El usuario ha sido aprobado exitosamente."};
     }else{
       const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [false, clientId]);
+      
+      const reject = {Client_idClient: clientId, observation: observation !== undefined ? observation : null};
+      const rejectQuery = await pool.query('INSERT INTO RejectClient SET ?', [reject]) ;
+
       return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
+    }
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
+
+const changeCustomersStatus = async (clientid, status) => {
+
+  console.log("CI", clientid, status);
+  
+  try{   
+    if(status === "true"){
+      const clientQuery = await pool.query('UPDATE Client SET platformState = ? where idClient = ?', [true, clientid]);
+      return {status: 200, message: {message:"El usuario ha sido activado exitosamente."}};
+    }else{
+      const clientQuery = await pool.query('UPDATE Client SET platformState = ? where idClient = ?', [false, clientid]);
+      return {status: 200, message: {message: "El usuario ha sido inactivado exitosamente."}};
     }
   }catch(e){
     console.log(e);
@@ -284,5 +311,5 @@ const approveCustomers = async (clientId, approve, adminId) => {
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
-  approveCustomers
+  approveCustomers, changeCustomersStatus
 }

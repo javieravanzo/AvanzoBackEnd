@@ -7,7 +7,7 @@ const router = express.Router();
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
-const { createCompany, getAllCompanies, getCompaniesForUser } = require('../../controllers/company');
+const { createCompany, getAllCompanies, getCompaniesForUser, updateCompany } = require('../../controllers/company');
  
 //Routes 
 router.post('/Company/Create', 
@@ -19,14 +19,25 @@ router.post('/Company/Create',
     body('maximumSplit', 'La cantidad de cuotas máxima no es válida.').exists().isInt(),
     body('defaultAmount', 'La máxima cantidad a prestar no es válida.').exists().isInt(),
     body('approveHumanResources', 'La aprobación por recursos humano es inválida.').exists().not().isEmpty(),
-    body('companyRate', 'El pago del salario no es válido.').exists().not().isEmpty(),
-    body('companyFirstDate', 'La primer fecha de pago es válida.').exists().not().isEmpty(),
-    //body('companySecondDate', 'La segunda fecha de pago es válida.').exists(),
+    body('companySalaries', 'Los ciclos de pago son inválidos').exists().not().isEmpty(),
     body('companyMembers', 'Los miembros de la compañia son inválidos.').exists().not().isEmpty(),
     body('password', 'La contraseña es inválida.').exists().not().isEmpty(),
     body('email', 'El correo electrónico es inválido.').exists().isEmail(),
   ],
 [verifyToken], createCompany);
+
+router.put('/Company/Update', 
+  [
+    body('nit', 'El número nit no es válido.').exists().isInt(),
+    body('address', 'La dirección no es válida.').exists().not().isEmpty(),
+    body('socialReason', 'La razón social no es válida.').exists().not().isEmpty(),
+    body('economyActivity', 'La actividad económica no es válida.').exists().not().isEmpty(),
+    body('maximumSplit', 'La cantidad de cuotas máxima no es válida.').exists().isInt(),
+    body('defaultAmount', 'La máxima cantidad a prestar no es válida.').exists().isInt(),
+    body('approveHumanResources', 'La aprobación por recursos humano es inválida.').exists().not().isEmpty(),
+    //body('email', 'El correo electrónico es inválido.').exists().isEmail(),
+  ],
+[verifyToken], updateCompany);
 
 //Routes 
 router.get('/Company/GetAll', [verifyToken], getAllCompanies);
