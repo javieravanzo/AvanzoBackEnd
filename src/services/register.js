@@ -55,7 +55,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
               
               <div class="greet-confirmation">
                 <h3 class="greet-title">
-                  Hola, apreciado ${user.name}.
+                  Hola, apreciado/a ${user.name}.
                 </h3>
                 <br/>
                 <img alt="userLogo" class="user-logo" src="imageURL"/>
@@ -142,10 +142,14 @@ const newPreregister = async (client, user, files, auth) => {
       
       //Create an account
       const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
-      const newAccount = {maximumAmount: companyQuery[0].defaultAmount, partialCapacity: companyQuery[0].defaultAmount,
-                          documentsUploaded: true, montlyFee: 0, totalInterest: 0, totalFeeAdministration: 0,
-                          totalOtherCollection: 0, totalRemainder: 0, approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-                          registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+      const newAccount = {maximumAmount: companyQuery[0].defaultAmount,
+                         partialCapacity: companyQuery[0].defaultAmount,
+                         documentsUploaded: true,
+                         montlyFee: companyQuery[0].maximumSplit,
+                         totalInterest: 0, totalFeeAdministration: 0,
+                         totalOtherCollection: 0, totalRemainder: 0,
+                         approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+                         registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
       const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       //Insert into auth
@@ -177,7 +181,7 @@ const newPreregister = async (client, user, files, auth) => {
               
               <div class="greet-confirmation">
                 <h3 class="greet-title">
-                  Hola, apreciado ${user.name}.
+                  Hola, apreciado/a ${user.name}.
                 </h3>
                 <br/>
                 
@@ -273,7 +277,7 @@ const newPreregister = async (client, user, files, auth) => {
               
               <div class="greet-confirmation">
                 <h3 class="greet-title">
-                  Hola, apreciado ${user.name}.
+                  Hola, apreciado/a ${user.name}.
                 </h3>
                 <br/>
                 
@@ -315,7 +319,7 @@ const newPreregister = async (client, user, files, auth) => {
       return {status: 200, message: "Tu usuario ha sido actualizado exitosamente. Se ha envíado un correo electrónico que te permitirá confirmar la cuenta y posteriormente, iniciar sesión."};
     }        
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }    
 
@@ -368,7 +372,7 @@ const registerAdmins = async (admin, user, auth) => {
                 
                 <div class="greet-confirmation">
                   <h3 class="greet-title">
-                    Hola, apreciado ${user.name}.
+                    Hola, apreciado/a ${user.name}.
                   </h3>
                   <br/>
                   <img alt="userLogo" class="user-logo" src="imageURL"/>

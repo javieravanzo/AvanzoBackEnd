@@ -12,7 +12,10 @@ const { registerClient, registerAdmin, preRegister } = require('../../controller
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
+    //Production
     callback(null, '../files/documents/');
+    //Development
+    //callback(null, './files/documents/');
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);

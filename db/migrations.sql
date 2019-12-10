@@ -7,14 +7,19 @@ INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate)
 /* Main Administrator */
 INSERT INTO Administrator (lastName, identificationId, adminType) values ("Orjuela", "1032488727", "superAdmin");
 INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", false, false, NOW(), 1, NOW(), 1, null, null, 1);
+/* Main Administrator */
+INSERT INTO Administrator (lastName, identificationId, adminType) values ("Sarmiento", "1011222333", "admin");
+INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Laura", false, false, NOW(), 1, NOW(), 2, null, null, 2);
 
 /* Request */
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Solicitada", NOW(), 1, NOW());
-INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("En evaluación", NOW(), 1, NOW());
-INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Aprobando RR.HH.", NOW(), 1, NOW());
-INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Aprobando Admon.", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Evaluada", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Aprobada RR.HH.", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Aprobada Admon.", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Desembolsada", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Rechazada", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Finalizada", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Devolución bancaria", NOW(), 1, NOW());
 
 /* Interest */
 INSERT INTO InterestRequest (interestValue, registeredBy, registeredDate) values ('0.04', 1, NOW());

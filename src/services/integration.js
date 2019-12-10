@@ -14,6 +14,12 @@ const integrationRegister = async (identificationId, client, user, auth) => {
     //console.log("Row", userRow);
     if(userRow.length !== 0){
 
+      const newUser = user;
+      newUser.registeredBy = 1;
+      newUser.registeredDate = new Date();
+
+      const updateUser = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, userRow[0].idUser]);
+
       const newClient = client;
 
       newClient.birthDate = new Date(client.birthDate.split('-')[2], client.birthDate.split('-')[1], client.birthDate.split('-')[0]);
