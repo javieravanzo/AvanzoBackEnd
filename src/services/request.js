@@ -139,7 +139,7 @@ const createRequest = async (body, file, clientId) => {
           //Generate contract
           //Generate contract
           console.log("CI", clientId, "S", split, "Q", quantity);
-          const browser = await puppeteer.launch();
+          /*const browser = await puppeteer.launch();
           const page = await browser.newPage();
           const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
 
@@ -154,7 +154,7 @@ const createRequest = async (body, file, clientId) => {
           //console.log("Page", page, "Path", pathname);
 
           await browser.close();
-          //process.exit();
+          //process.exit();*/
 
           //Update account value
           const newAccount = { partialCapacity: userRow[0].partialCapacity - quantity };
