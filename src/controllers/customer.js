@@ -6,7 +6,7 @@ const Excel = require('xlsx');
 //Imports
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
-        getCustomerToApprove, approveCustomers, changeCustomersStatus } = require('../services/customer');
+        getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -133,27 +133,54 @@ const getCustomers = async (req, res, next) => {
 const createNewCustomer = async (req, res, next) => {
   
   //Variables
-  const {name, email, companyid} = req.body;
+  const {name, email, idCompany} = req.body;
 
   //Validate input
   const errors = validationResult(req); 
 
   if (!errors.isEmpty()) {
     //res.status(422).json({ message: errors.errors[0].msg });
-    res.status(422).json({ message: errors.array() });
+    res.status(422).json({ message: errors.errors[0].msg });
     return;
   }
 
   //Logic
   const user = {name, email};
-  const adminId = getUserId(req);
+  const adminId = getAdminId(req);
  
   try {
-    const result = await createCustomer(req.body, user, companyid, adminId);
+    const result = await createCustomer(req.body, user, idCompany, adminId);
     res.status(result.status).json({message: result.message});      
   }catch(e) {
     res.status(500).json({message:"No es posible realizar el registro en este momento."}); 
   };
+
+};
+
+const updateCustomer = async (req, res, next) => {
+
+    //Variables
+    const {name, email} = req.body;
+
+    //Validate input
+    const errors = validationResult(req); 
+
+    if (!errors.isEmpty()) {
+        //res.status(422).json({ message: errors.errors[0].msg });
+        res.status(422).json({ message: errors.errors[0].msg });
+        return;
+    }
+
+    //Logic
+    const user = {name, email};
+    const adminId = getUserId(req);
+
+    try {
+        const result = await updateCustomers(req.body, user, adminId);
+        res.status(result.status).json({message: result.message});      
+    }catch(e) {
+        res.status(500).json({message:"No es posible realizar el registro en este momento."}); 
+    };
 
 };
 
@@ -282,8 +309,10 @@ const changeCustomerStatus = async (req, res, next) => {
 };
 
 
+
+
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
-  approveCustomer, changeCustomerStatus
+  approveCustomer, changeCustomerStatus, updateCustomer
 };

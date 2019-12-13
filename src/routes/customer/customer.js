@@ -63,16 +63,23 @@ router.get('/Customer/GetRequestData',
 
 router.post('/Customer/Create', [
   body('name', 'Nombres inválidos').exists().not().isEmpty(),
-  body('email', 'Nombre inválido').exists().isEmail().not().isEmpty(),
-  body('identificationId', 'Número de documento inválido').exists().isInt().not().isEmpty(),
   body('lastName', 'Apellidos inválidos').exists().not().isEmpty(),
+  body('identificationId', 'Número de documento inválido').exists().isInt().not().isEmpty(),
   body('documentType', 'Tipo de documento inválido').exists().not().isEmpty(),
+  body('email', 'Nombre inválido').exists().isEmail().not().isEmpty(),
   body('phoneNumber', 'Teléfono celular inválido').exists().isInt().not().isEmpty(),
-  body('companyid', 'La empresa es inválida').exists().isInt().not().isEmpty(),
+  body('idCompany', 'La empresa es inválida').exists().isInt().not().isEmpty(),
 ],
 [verifyToken], createNewCustomer);
 
-//router.post('/Customer/Update', [verifyToken], updateCustomer);
+router.put('/Customer/Update', [
+  body('name', 'Nombres inválidos').exists().not().isEmpty(),
+  body('lastName', 'Apellidos inválidos').exists().not().isEmpty(),
+  body('identificationId', 'Número de documento inválido').exists().isInt().not().isEmpty(),
+  body('email', 'Nombre inválido').exists().isEmail().not().isEmpty(),  
+  body('phoneNumber', 'Teléfono celular inválido').exists().isInt().not().isEmpty(),
+  body('idClient', 'El cliente es inválido').exists().isInt().not().isEmpty(),
+], [verifyToken], updateCustomer);
 
 router.get('/Customer/ChangePlatformStatus', [
  header('clientId', 'El cliente no es válido').exists().not().isEmpty(),

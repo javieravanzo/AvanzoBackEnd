@@ -94,17 +94,17 @@ const createCustomer = async (body, user, company, adminId) => {
  
   //NewClient
   const {identificationId, lastName, documentType, phoneNumber, fixedNumber, birthDate, expeditionDate, 
-         contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber} = body;
+         contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany} = body;
   
   const newClient = {identificationId, lastName, documentType, phoneNumber, fixedNumber, contractType, salary,
-     entryDate, profession, genus, accountBank, accountType, accountNumber};
+     entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate};
 
-  newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
-  newClient.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
+  //newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
+  //newClient.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
 
   newClient.registeredBy = adminId;
   newClient.registeredDate = new Date();
-  newClient.Company_idCompany = company;
+  newClient.Company_idCompany = idCompany;
 
   try{
 
@@ -122,14 +122,57 @@ const createCustomer = async (body, user, company, adminId) => {
 
     //Create an account
     const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
-    const newAccount = {maximumAmount: companyQuery[0].defaultAmount, partialCapacity: companyQuery[0].defaultAmount,
-                        documentsUploaded: false, montlyFee: 0, totalInterest: 0, totalFeeAdministration: 0,
-                        totalOtherCollection: 0, totalRemainder: 0, approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-                        registeredBy: adminId, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+    const newAccount = {maximumAmount: companyQuery[0].defaultAmount,
+                        partialCapacity: companyQuery[0].defaultAmount,
+                        documentsUploaded: false,
+                        montlyFee: 0,
+                        totalInterest: 0,
+                        totalFeeAdministration: 0,
+                        totalOtherCollection: 0,
+                        totalRemainder: 0,
+                        approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+                        registeredBy: adminId,
+                        registeredDate: new Date(),
+                        Client_idClient: clientQuery.insertId};
     const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
     return {status: 200, message: "El cliente ha sido registrado exitosamente."};
   }catch(e){
+    return {status: 500, message: "Error interno del servidor. Por favor, intente más tarde."};
+
+  }    
+
+};
+
+const updateCustomers = async (body, user, adminId) => {
+ 
+  //NewClient
+  const {identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee} = body;
+  
+  const newClient = {identificationId, lastName, phoneNumber, profession};
+  newClient.registeredBy = adminId;
+  newClient.registeredDate = new Date();
+
+  try{
+
+    const clientQuery = await pool.query('UPDATE Client SET ? where idClient = ?', [newClient, idClient]);
+
+    //Insert in user
+    const newUser = user;
+    newUser.registeredBy = adminId;
+    newUser.registeredDate = new Date();
+    const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
+
+    //Create an account
+    const newAccount = {maximumAmount: maximumAmount,
+                        montlyFee: montlyFee, 
+                        registeredBy: adminId,
+                        registeredDate: new Date()};
+    const accountQuery = await pool.query('UPDATE Account SET ? where idAccount = ?', [newAccount, idAccount]);
+
+    return {status: 200, message: "El cliente ha sido actualizado exitosamente."};
+  }catch(e){
+    console.log(e);
     return {status: 500, message: "Error interno del servidor. Por favor, intente más tarde."};
 
   }    
@@ -219,7 +262,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    const clientRow =  await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, C.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
     if(clientRow){
       return {status: 200, data: clientRow};
     }else{
@@ -288,7 +331,6 @@ const approveCustomers = async (clientId, approve, adminId, observation) => {
 
 };
 
-
 const changeCustomersStatus = async (clientid, status) => {
 
   console.log("CI", clientid, status);
@@ -311,5 +353,5 @@ const changeCustomersStatus = async (clientid, status) => {
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
-  approveCustomers, changeCustomersStatus
+  approveCustomers, changeCustomersStatus, updateCustomers
 }
