@@ -4,6 +4,8 @@ const base_URL = "http://3.133.128.42:4000";
 
 const front_URL = "http://3.133.128.42:3000";
 
+const front_URL_test = "http://localhost:3000";
+
 module.exports = {
-  my_secret_key, base_URL, front_URL
+  my_secret_key, base_URL, front_URL, front_URL_test
 }

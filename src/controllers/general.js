@@ -10,13 +10,14 @@ const { login, confirmAccounts, getDocumentsTypes, resetPassword, confirmedPassw
 //Get the user with token
 function getUserIdFromToken(req){
 
+  //Get the clientId
+  const bearerHeader = req.headers['authorization'];
   //Get the real token
-  const bearer = req.params.token;
-
+  const bearer = bearerHeader.split(" ")[1];
   //Set the token
   const decoded = jwt.decode(bearer);
 
-  return (parseInt(decoded.userRow[0].idUser, 10));  
+  return (decoded.userRow[0].idUser);  
 
 }; 
 
@@ -59,6 +60,8 @@ const confirmAccount = async (req, res, next) => {
     const result = await confirmAccounts(req, userId);
     if(result.status === 200){
       res.redirect(front_URL+'/password_confirmed');
+    }else if(result.status === 100){
+      res.redirect(front_URL+'/login');
     }else{
       res.status(result.status).json({message: result.message});
     }
@@ -82,7 +85,9 @@ const getDocumentTypes = async (req, res) => {
 };
  
 const modifyPassword = async (req, res, next) => {
-    const {email} = req.headers;
+    
+  const { email} = req.headers; 
+
     try {
       const result = await resetPassword(email);
       if(result.status === 200){
@@ -97,11 +102,15 @@ const modifyPassword = async (req, res, next) => {
 };
 
 const confirmPassword = async (req, res, next) => {
+    
     const {password, confirmPassword} = req.body;
-    const email = "capisi@gmail.com";
+    
+    //Get the userid
+    const userId = getUserIdFromToken(req);
+
     try {
         if (password === confirmPassword){
-            const result = await confirmedPassword(email, password);
+            const result = await confirmedPassword(userId, password, confirmPassword);
             if(result.status === 200){
                 res.status(result.status).json(result.message);
             }else{

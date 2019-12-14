@@ -2,7 +2,8 @@
 const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const jwt = require('jsonwebtoken');
-const {my_secret_key} = require('../config/global');
+const {my_secret_key, front_URL, front_URL_test} = require('../config/global');
+const sgMail = require('@sendgrid/mail');
 
 //Constants
 const expirationTime = 5;
@@ -53,17 +54,23 @@ const login = async (email, password) => {
 const confirmAccounts  = async (body, userId) => {
     
     const result = {status: null, data: {}, message: ""};
+
     try {
-        //const confirmationAccount = await pool.query('SELECT * FROM documenttypes');
-        const user = jwt.verify(body.params.token, my_secret_key);
 
-        //console.log("US", user.userRow[0]);
+        const checkConfirmed = await pool.query('SELECT isConfirmed FROM User where idUser = ?', userId);
 
-        //Update confirmation
-        const update = await pool.query('UPDATE User SET isConfirmed = ? WHERE idUser = ?', [true, user.userRow[0].idUser]);
-        //console.log("UP", update);
+        if (parseInt(checkConfirmed[0].isConfirmed, 10) === 0 ){
 
-        return {status: 200};
+            //const confirmationAccount = await pool.query('SELECT * FROM documenttypes');
+            const user = jwt.verify(body.params.token, my_secret_key);
+            //Update confirmation
+            const update = await pool.query('UPDATE User SET isConfirmed = ? WHERE idUser = ?', [true, user.userRow[0].idUser]);
+            //console.log("UP", update);
+
+            return {status: 200};
+        }else{
+            return {status: 100, message: "Tu cuenta ya ha sido confirmada. Por favor, inicia sesión."}
+        }
     } catch(e) {
         return {status: 500, message: "Error interno del servidor."};
         throw e;
@@ -88,30 +95,89 @@ const getDocumentsTypes = async () => {
 const resetPassword = async (email) => {
     const result = {status: null, data: {}, message: ""};
     try {
-        const userRow = await pool.query('SELECT * FROM User where email = ?', [email]);
+        const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.name FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where U.email = ?', [email]);
         if(userRow.length > 0){
+
+            const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });      
+
+             //Mailer
+            sgMail.setApiKey('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');
+
+            let output = `<div>
+                    <div class="header-confirmation">
+                    <h2 class="confirmation-title">
+                        Avanzo
+                    </h2>
+                    <h4 class="confirmation-subtitle">
+                        Créditos al instante
+                    </h4>
+                    </div>
+                
+                    <hr/>
+                    
+                    <div class="greet-confirmation">
+                        <h3 class="greet-title">
+                        Hola, apreciado/a ${userRow[0].name}.
+                        </h3>
+                        <br/>
+
+                    </div>
+                
+                    <div class="body-confirmation">
+                        <h3 class="body-title">
+                            Para continuar en el proceso, por favor realiza el cambio de tu contraseña.
+                        </h3>
+                        <h3>
+                            Para cambiarla, haz clic <a href="${front_URL+ `/confirm_password/${jwtoken}`}">aquí</a>.
+                        </h3>
+                    </div>
+                
+                    <div class="footer-confirmation">
+                        <h3 class="footer-title">
+                        Gracias por confiar en nosotros.
+                        </h3>
+                    </div>
+                                        
+                </div>`;
+
+            let info = {
+                from: 'operaciones@avanzo.co', // sender address
+                to: email, // list of receivers
+                subject: 'Avanzo (Desembolsos al instante) - Restablecer contraseña', // Subject line
+                text: 'Hola', // plain text body
+                html: output // html body
+            };
+
+            await sgMail.send(info);
+
             return {status: 200, message: "Se ha envíado un correo electrónico a tu email para cambiar la contraseña"};
         }else{
             return {status: 400, message: "El email no existe en nuestros registros."};
         }
     } catch(e) {
+        console.log(e);
         return {status: 500, message: "Error interno del servidor."};
         throw e;
     }
 };
 
-const confirmedPassword = async (email, password) => {
+const confirmedPassword = async (userId, password, confirmPassword) => {
     const result = {status: null, data: {}, message: ""};
     try {
-        const userRow = await pool.query('SELECT * FROM User where email = ?', [email]);
-        if(userRow.length > 0){
-            const newPassword = await helpers.encryptPassword(password);
-            const modifiedPassword = await pool.query('UPDATE Auth set password = ? WHERE User_idUser = ?', [newPassword, userRow[0].idUser]);
-            return {status: 200, message: "Se ha actualizado exitosamente la contraseña"};
+        if(password === confirmPassword){ 
+            const userRow = await pool.query('SELECT * FROM User where idUser = ?', [userId]);
+            if(userRow.length > 0){
+                const newPassword = await helpers.encryptPassword(password);
+                const modifiedPassword = await pool.query('UPDATE Auth set password = ? WHERE User_idUser = ?', [newPassword, userRow[0].idUser]);
+                return {status: 200, message: "Se ha actualizado exitosamente la contraseña"};
+            }else{
+                return {status: 500, message: "Error interno del servidor."};
+            }
         }else{
-            return {status: 500, message: "Error interno del servidor."};
+            return {status: 404, message: "Las contraseñas no coinciden."};
         }
     } catch(e) {
+        console.log(e);
         return {status: 500, message: "Error interno del servidor."};
         throw e;
     }
