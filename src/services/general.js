@@ -57,8 +57,8 @@ const confirmAccounts  = async (body, userId) => {
 
     try {
 
-        const checkConfirmed = await pool.query('SELECT isConfirmed FROM User where idUser = ?', userId);
-
+        const checkConfirmed = await pool.query('SELECT isConfirmed FROM User where idUser = ?', [userId]);
+        
         if (parseInt(checkConfirmed[0].isConfirmed, 10) === 0 ){
 
             //const confirmationAccount = await pool.query('SELECT * FROM documenttypes');
@@ -72,6 +72,7 @@ const confirmAccounts  = async (body, userId) => {
             return {status: 100, message: "Tu cuenta ya ha sido confirmada. Por favor, inicia sesión."}
         }
     } catch(e) {
+        console.log(e);
         return {status: 500, message: "Error interno del servidor."};
         throw e;
     }

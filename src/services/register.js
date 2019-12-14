@@ -3,7 +3,7 @@ const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const sgMail = require('@sendgrid/mail');
 const jwt = require('jsonwebtoken');
-const {my_secret_key, base_URL} = require('../config/global');
+const {my_secret_key, base_URL, base_URL_test} = require('../config/global');
 
 //Services
 const registerCustomer = async (identificationId, client, user, auth) => {

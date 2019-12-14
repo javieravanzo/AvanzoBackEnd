@@ -58,6 +58,7 @@ const preRegister = async (req, res, next) => {
   const user = {name, email};
   const files = {documentId: req.files.documentId[0].path, photo: req.files.photo[0].path, paymentReport: req.files.paymentReport[0].path};
   const auth = {password};
+  const request = {}
 
   try {
     const result = await newPreregister(client, user, files, auth);
