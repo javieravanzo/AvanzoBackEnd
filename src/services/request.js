@@ -232,7 +232,9 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
   try{
     //Change the approval/reject state
     const stateRow = await pool.query('SELECT * FROM RequestState');
+
     const requestQuery = await pool.query('SELECT quantity, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
+    const clientEmail = await pool.query('SELECT U.email FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
     let requeststate = -1;
     let sendApprovedEmail = -1;
     let response = "";
@@ -301,12 +303,18 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
                     Tu solicitud ha sido aprobada exitosamente. Ahora solo falta esperar el desembolso del banco.
                   </h3>
                 </div>
+
+                <div class="footer-confirmation">
+                  <h3 class="footer-title">
+                    Gracias por confiar en nosotros.
+                  </h3>
+                </div>
                                     
               </div>`;
 
         let info = {
             from: 'operaciones@avanzo.co', // sender address
-            to: user.email, // list of receivers
+            to: clientEmail[0].email, // list of receivers
             subject: 'Avanzo (Desembolsos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
             text: 'Hola', // plain text body
             html: output // html body
