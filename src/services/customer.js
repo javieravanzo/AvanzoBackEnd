@@ -1,6 +1,9 @@
 
 //Requires
 const pool = require('../config/database.js');
+const jwt = require('jsonwebtoken');
+const {my_secret_key, base_URL} = require('../config/global');
+const sgMail = require('@sendgrid/mail');
 
 //Services
 const getInitialsData = async (userId) => {
@@ -116,7 +119,7 @@ const createCustomer = async (body, user, company, adminId) => {
     newUser.registeredDate = new Date();
     newUser.createdDate = new Date();
     newUser.Role_idRole = 4;
-    newUser.status = true;
+    newUser.status = false;
     newUser.Client_idClient = clientQuery.insertId;
     const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
 
@@ -217,7 +220,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           registeredDate: new Date(),
           createdDate: new Date(),
           Role_idRole: 4,
-          status: true,
+          status: false,
           Client_idClient: clientQuery.insertId
         };
         
@@ -308,15 +311,82 @@ const getTransactionsByUsersId = async (userId) => {
 
 };
 
-const approveCustomers = async (clientId, approve, adminId, observation) => {
+//Pendiente traer IDENTIFICATION ID
+const approveCustomers = async (clientId, approve, adminId, observation, identificationId) => {
 
   console.log("CI", clientId, approve, adminId);
   
   try{   
+    
     if(approve === "true"){
+
+      //Client
       const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [true, clientId]);
+      
+      //Confirmation link
+      const consultEmail = await pool.query('SELECT U.email, U.name FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.idClient = ?', [clientId]);
+      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientId]);
+      const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
+      const url = base_URL + `/Account/Confirm/${jwtoken}`;
+      console.log(url.toString());
+        
+      //Mailer
+      sgMail.setApiKey('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');
+
+      let output = `<div>
+              <div class="header-confirmation">
+                <h2 class="confirmation-title">
+                  Avanzo
+                </h2>
+                <h4 class="confirmation-subtitle">
+                  Créditos al instante
+                </h4>
+              </div>
+          
+              <hr/>
+              
+              <div class="greet-confirmation">
+                <h3 class="greet-title">
+                  Hola, apreciado/a ${consultEmail[0].name}.
+                </h3>
+                <br/>
+                
+                <h3>
+                  Gracias por registrarse en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
+                </h3>
+              </div>
+          
+              <div class="body-confirmation">
+                <h3 class="body-title">
+                  Tu usuario ha sido aprobado para interactuar en la plataforma. Para continuar en el proceso, por favor realiza la confirmación de tu cuenta.
+                </h3>
+                <h3>
+                  Confirme tu cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
+                </h3>
+              </div>
+          
+              <div class="footer-confirmation">
+                <h3 class="footer-title">
+                  Gracias por confiar en nosotros.
+                </h3>
+              </div>
+          
+            </div>`;
+
+      let info = {
+          from: 'operaciones@avanzo.co', // sender address
+          to: consultEmail[0].email, // list of receivers
+          subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
+          text: 'Hola', // plain text body
+          html: output // html body
+      };
+
+      await sgMail.send(info);
+
       return {status: 200, message: "El usuario ha sido aprobado exitosamente."};
+
     }else{
+
       const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [false, clientId]);
       
       const reject = {Client_idClient: clientId, observation: observation !== undefined ? observation : null};
@@ -331,12 +401,12 @@ const approveCustomers = async (clientId, approve, adminId, observation) => {
 
 };
 
-const changeCustomersStatus = async (clientid, status) => {
+const changeCustomersStatus = async (clientid, active) => {
 
-  console.log("CI", clientid, status);
+  console.log("CI", clientid, active);
   
   try{   
-    if(status === "true"){
+    if(active === "true"){
       const clientQuery = await pool.query('UPDATE Client SET platformState = ? where idClient = ?', [true, clientid]);
       return {status: 200, message: {message:"El usuario ha sido activado exitosamente."}};
     }else{

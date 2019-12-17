@@ -109,7 +109,8 @@ const newPreregister = async (client, user, files, auth) => {
 
   try{
 
-    const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [client.identificationId]);
+    const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
+    console.log("UR", userRow);
     consultUser = userRow;
 
     if(JSON.stringify(userRow) === '[]'){
@@ -158,169 +159,55 @@ const newPreregister = async (client, user, files, auth) => {
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
-      //Confirmation link
-      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [client.identificationId]);
-      const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
-      const url = base_URL + `/Account/Confirm/${jwtoken}`;
-      console.log(url.toString());
-        
-      //Mailer
-      sgMail.setApiKey('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');
-
-      let output = `<div>
-              <div class="header-confirmation">
-                <h2 class="confirmation-title">
-                  Avanzo
-                </h2>
-                <h4 class="confirmation-subtitle">
-                  Créditos al instante
-                </h4>
-              </div>
-          
-              <hr/>
-              
-              <div class="greet-confirmation">
-                <h3 class="greet-title">
-                  Hola, apreciado/a ${user.name}.
-                </h3>
-                <br/>
-                
-                <h3>
-                  Gracias por registrarse en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
-                </h3>
-              </div>
-          
-              <div class="body-confirmation">
-                <h3 class="body-title">
-                  Para continuar en el proceso, por favor realice la confirmación de su cuenta.
-                </h3>
-                <h3>
-                  Confirme su cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
-                </h3>
-              </div>
-          
-              <div class="footer-confirmation">
-                <h3 class="footer-title">
-                  Gracias por confiar en nosotros.
-                </h3>
-                <div>
-                  <img alt="avanzoLogo" class="avanzo-logo" src="logoURL"/>
-                </div>
-              </div>
-          
-            </div>`;
-
-      let info = {
-          from: 'operaciones@avanzo.co', // sender address
-          to: user.email, // list of receivers
-          subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
-          text: 'Hola', // plain text body
-          html: output // html body
-      };
-
-      await sgMail.send(info);
-
-      return {status: 200, message: "Has sido registrado satisfactoriamente. Se te ha envíado un correo electrónico que te permitirá confirma la cuenta y posteriormente, iniciar sesión."};
+      return {status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico."};
+    
     }else{
-
-      //DocumentClients
-      const filesPath = files;
-      const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
-
-      //New Client
-      const newClient = client;
-      newClient.registeredBy = 1;
-      newClient.documentType = "Cédula";
-      newClient.isApproved = false;
-      newClient.registeredDate = new Date();
-      newClient.createdDate = new Date();
-      newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
-      //console.log("NC", newClient);
-      const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
-
-      //Insert in user
-      const newUser = user;
-      newUser.registeredBy = 1;
-      newUser.registeredDate = new Date();
-      newUser.createdDate = new Date();
-      newUser.Role_idRole = 4;
-      newUser.status = true;
-      const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
-
-      console.log(consultUser);
-      //Insert into auth
-      const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date(),
-        createdDate: new Date()};
-      newAuth.password = await helpers.encryptPassword(auth.password);
-      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
-
-      //Confirmation link
-      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [client.identificationId]);
-      const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
-      const url = base_URL + `/Account/Confirm/${jwtoken}`;
-      console.log(url.toString());
+    
+      if(parseInt(consultUser[0].status, 10) === 0 ){
         
-      //Mailer
-      sgMail.setApiKey('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');
+        //DocumentClients
+        const filesPath = files;
+        const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
 
-      let output = `<div>
-              <div class="header-confirmation">
-                <h2 class="confirmation-title">
-                  Avanzo
-                </h2>
-                <h4 class="confirmation-subtitle">
-                  Créditos al instante
-                </h4>
-              </div>
-          
-              <hr/>
-              
-              <div class="greet-confirmation">
-                <h3 class="greet-title">
-                  Hola, apreciado/a ${user.name}.
-                </h3>
-                <br/>
-                
-                <h3>
-                  Gracias por registrarse en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
-                </h3>
-              </div>
-          
-              <div class="body-confirmation">
-                <h3 class="body-title">
-                  Para continuar en el proceso, por favor realice la confirmación de su cuenta.
-                </h3>
-                <h3>
-                  Confirme su cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
-                </h3>
-              </div>
-          
-              <div class="footer-confirmation">
-                <h3 class="footer-title">
-                  Gracias por confiar en nosotros.
-                </h3>
-                <div>
-                  <img alt="avanzoLogo" class="avanzo-logo" src="logoURL"/>
-                </div>
-              </div>
-          
-            </div>`;
+        //New Client
+        const newClient = client;
+        newClient.registeredBy = 1;
+        newClient.documentType = "Cédula";
+        newClient.isApproved = false;
+        newClient.registeredDate = new Date();
+        newClient.createdDate = new Date();
+        newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
 
-      let info = {
-          from: 'operaciones@avanzo.co', // sender address
-          to: user.email, // list of receivers
-          subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
-          text: 'Hola', // plain text body
-          html: output // html body
-      };
+        
+        const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
 
-      await sgMail.send(info);
+        //Insert in user
+        const newUser = user;
+        newUser.registeredBy = 1;
+        newUser.registeredDate = new Date();
+        newUser.createdDate = new Date();
+        newUser.Role_idRole = 4;
+        newUser.status = true;
+        const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
 
-      return {status: 200, message: "Tu usuario ha sido actualizado exitosamente. Se ha envíado un correo electrónico que te permitirá confirmar la cuenta y posteriormente, iniciar sesión."};
+        //Insert into auth
+        const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date(),
+                          createdDate: new Date()};
+        newAuth.password = await helpers.encryptPassword(auth.password);
+        const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+
+        return {status: 200, message: "Tu usuario ha sido actualizado exitosamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico."};
+      
+      }else{
+        
+        return {status: 404, message: "Tu usuario ya ha sido registrado anteriormente en la plataforma con tu cédula o con tu correo. Inicia sesión o espera el correo de aprobación de tu cuenta."};
+
+      }
     }        
   }catch(e){
-    //console.log(e);
-    return {status: 500, message: "Error interno del servidor."};
+    
+    console.log(e);
+    return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 
 };
