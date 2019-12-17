@@ -234,6 +234,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
     const stateRow = await pool.query('SELECT * FROM RequestState');
     const requestQuery = await pool.query('SELECT quantity, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
     let requeststate = -1;
+    let sendApprovedEmail = -1;
     let response = "";
     if(requestQuery){
       if(approve === "true"){
@@ -254,6 +255,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
           }else if(requestQuery[0].RequestState_idRequestState === stateAnalysis){
             requeststate = requestQuery[0].approveHumanResources === 1 ? stateRH : stateApprove;
           }else if (requestQuery[0].RequestState_idRequestState === stateRH){
+            sendApprovedEmail = getStateIdFromName(stateRow, "Aprobada Admon.");
             requeststate = stateApprove;
           }
         }else if(userId.role === 3 ){
@@ -273,7 +275,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
 
-      if (response === "desembolsada"){
+      if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Admon.")){
         //Mailer
         sgMail.setApiKey('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');
 
@@ -296,7 +298,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
                   <br/>
                   
                   <h3>
-                    Tu solicitud ha sido desembolsada exitosamente. Ahora solo falta esperar el desembolso del banco.
+                    Tu solicitud ha sido aprobada exitosamente. Ahora solo falta esperar el desembolso del banco.
                   </h3>
                 </div>
                                     
@@ -305,7 +307,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
         let info = {
             from: 'operaciones@avanzo.co', // sender address
             to: user.email, // list of receivers
-            subject: 'Avanzo (Desembolsos al instante) - Desembolso', // Subject line
+            subject: 'Avanzo (Desembolsos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
             text: 'Hola', // plain text body
             html: output // html body
         };

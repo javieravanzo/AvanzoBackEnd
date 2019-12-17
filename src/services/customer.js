@@ -281,7 +281,7 @@ const getAllCustomerWithCompanies = async () =>{
 const getCustomerToApprove = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ?)', [false]);
+    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ? and C.rejectState = ?)', [false, false]);
     
     if(clientRow){
       return {status: 200, data: clientRow};
@@ -313,8 +313,6 @@ const getTransactionsByUsersId = async (userId) => {
 
 //Pendiente traer IDENTIFICATION ID
 const approveCustomers = async (clientId, approve, adminId, observation, identificationId) => {
-
-  console.log("CI", clientId, approve, adminId);
   
   try{   
     
@@ -387,9 +385,10 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
 
     }else{
 
-      const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [false, clientId]);
+      const clientQuery = await pool.query('UPDATE Client SET rejectState = ? where idClient = ?', [true, clientId]);
       
       const reject = {Client_idClient: clientId, observation: observation !== undefined ? observation : null};
+
       const rejectQuery = await pool.query('INSERT INTO RejectClient SET ?', [reject]) ;
 
       return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
