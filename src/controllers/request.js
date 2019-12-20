@@ -34,7 +34,7 @@ function getUserId(req){
   const bearer = bearerHeader.split(" ")[1];
   //Set the token
   const decoded = jwt.decode(bearer);
-  console.log("Decoded", decoded);
+  //console.log("Decoded", decoded);
 
   return {idUser: decoded.userRow[0].idUser, role: decoded.userRow[0].Role_idRole, email: decoded.userRow[0].email};  
 
