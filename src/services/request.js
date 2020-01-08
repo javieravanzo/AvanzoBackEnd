@@ -123,7 +123,7 @@ const createRequest = async (body, file, clientId) => {
 
   try{
 
-    const { quantity, split, moyen, accountType, accountNumber, interest, administration } = body;
+    const { quantity, split, moyen, accountType, accountNumber, interest, administration, isBank } = body;
 
     const approvedClient = await pool.query('SELECT isApproved, platformState FROM Client where idClient = ?', clientId);
     //console.log("AC", approvedClient);
@@ -158,8 +158,20 @@ const createRequest = async (body, file, clientId) => {
           await browser.close();
           //process.exit();*/
 
+          //Update client info
+          let newClient = {};
+          console.log("IB", isBank);
+          if(isBank === "true"){
+            newClient = { accountBank: moyen, accountNumber, accountType };
+            const clientInfo = await pool.query('UPDATE Client SET ? where idClient = ?', [newClient, clientId]);
+          }
+
           //Update account value
-          const newAccount = { partialCapacity: userRow[0].partialCapacity - quantity, accumulatedQuantity: userRow[0].accumulatedQuantity + quantity };
+          console.log("OLDQ", userRow[0].accumulatedQuantity);
+          console.log("Q", quantity);
+          const newQuantity = parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10);
+          console.log("NQ", newQuantity);
+          const newAccount = { partialCapacity: (parseInt(userRow[0].partialCapacity, 10) - parseInt(quantity, 10)), accumulatedQuantity: newQuantity };
           console.log("Q", quantity, "PC", newAccount.partialCapacity );
           const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientId]);
 
@@ -192,6 +204,7 @@ const createRequest = async (body, file, clientId) => {
           //Request
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
           //console.log("REQ", request);
+
           return {status: 200, message: {message: "El solicitud ha sido creada exitosamente."}};
         }else{
           return {status: 404, message: {message: "El usuario no tiene cupo disponible para realizar la solicitud."}};
@@ -211,7 +224,7 @@ const createRequest = async (body, file, clientId) => {
 const getAllRequests = async (clientId) => {
   
   try{ 
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.idClient = ?', [clientId]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, C.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where C.idClient = ? ORDER BY R.createdDate DESC', [clientId]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
@@ -231,7 +244,7 @@ const getAllRequestsByCompany = async (companyId) => {
 
 };
 
-const approveOrRejectRequest = async (requestid, approve, userId) => { 
+const approveOrRejectRequest = async (requestid, approve, userId, transactionCode) => { 
 
   try{
     //Change the approval/reject state
@@ -276,7 +289,8 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
       return {status: 404, message: {message: "La solicitud no está registrada en nuestro sistema."}}
     }  
 
-    const request = {registeredDate: new Date(), registeredBy: userId, RequestState_idRequestState: requeststate};
+    const request = {registeredDate: new Date(), registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: transactionCode !== null ? transactionCode : null };
+    console.log("R", request);
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
       console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
@@ -321,7 +335,7 @@ const approveOrRejectRequest = async (requestid, approve, userId) => {
                   <br/>
                   
                   <h3>
-                    Tu solicitud ha sido aprobada exitosamente. Ahora solo falta esperar el desembolso del banco.
+                    Tu solicitud ha sido aprobada exitosamente. Tu dinero ya está en camino.
                   </h3>
                 </div>
 

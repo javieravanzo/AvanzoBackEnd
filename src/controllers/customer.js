@@ -6,7 +6,8 @@ const Excel = require('xlsx');
 //Imports
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
-        getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers } = require('../services/customer');
+        getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers, 
+        makePayments } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -311,11 +312,34 @@ const changeCustomerStatus = async (req, res, next) => {
 
 };
 
+const makePayment = async (req, res, next) => {
+    
+    try {
+
+        //Get the user id
+        //const adminId = getAdminId(req);
+        const {clientid, quantity} = req.headers;
+
+        console.log("CI", clientid, "S", quantity);
+        const result = await makePayments(clientid, quantity);
+        if(result.status === 200){
+            res.status(result.status).json(result.message);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+    } catch(e) {
+        console.log(e);
+        res.status(500).json("No es posible realizar el pago de la cuenta en este momento.");
+    };
+
+};
+
 
 
 
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
-  approveCustomer, changeCustomerStatus, updateCustomer
+  approveCustomer, changeCustomerStatus, updateCustomer, makePayment
 };

@@ -13,12 +13,10 @@ const getInitialsData = async (userId) => {
   try {
       const userRow = await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
       //console.log("UR", userRow);
-      const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ?', [userRow[0].idAccount]);
+      const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ? ORDER BY createdDate DESC LIMIT 3', [userRow[0].idAccount]);
       //console.log("UT", transactions);
       const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.name <> ?) where REQUEST.Account_idAccount = ?', ["Desembolsada", userRow[0].idAccount]);
-     // console.log("URE", request);
-      //console.log("userRow[0].maximumAmount", userRow[0].maximumAmount);
-      //console.log(JSON.stringify(transactions) !== '[]' ? transactions : '[]');
+      // console.log("URE", request);
       if(userRow){
         return {status: 200, message: "", 
                 data: {
@@ -285,7 +283,7 @@ const getAllCustomerWithCompanies = async () =>{
 const getCustomerToApprove = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ? and C.rejectState = ?)', [false, false]);
+    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber, CD.documentId, CD.photo, CD.paymentReport FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Account A JOIN Company CO ON (C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ? and C.rejectState = ?)', [false, false]);
     
     if(clientRow){
       return {status: 200, data: clientRow};
@@ -423,8 +421,47 @@ const changeCustomersStatus = async (clientid, active) => {
 
 };
 
+const makePayments = async(clientid, quantity) => {
+
+  try{   
+
+    //Account - Request
+    const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientid]);
+
+    console.log("PC", userRow[0].maximumAmount, "AQ", userRow[0].accumulatedQuantity, "Q", quantity);
+
+    const newPartialCapacity = (parseInt(userRow[0].maximumAmount, 10) - parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10));
+    console.log("NPC", newPartialCapacity);
+    const newAccumulatedQuantity = (parseInt(userRow[0].accumulatedQuantity, 10) - parseInt(quantity, 10));
+    console.log("NPC", newAccumulatedQuantity);
+    const newAccount = { partialCapacity: newPartialCapacity, accumulatedQuantity: newAccumulatedQuantity };
+
+    console.log("newAccount", newAccount);
+
+    const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientid]);
+
+    //Transaction
+    const paymentTransaction = {quantity: quantity, transactionType: "Pago", createdDate: new Date(), registeredDate: new Date, Account_idAccount: userRow[0].idAccount}
+    
+    //Transaction Query
+    const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [paymentTransaction]);
+        
+
+    //const clientQuery = await pool.query('UPDATE Client SET platformState = ? where idClient = ?', [true, clientid]);
+    return {status: 200, message: {message:"El pago ha sido realizado exitosamente."}};
+  //}else{
+    //const clientQuery = await pool.query('UPDATE Client SET platformState = ? where idClient = ?', [false, clientid]);
+    //return {status: 200, message: {message: "El pago no ha sido realizado exitosamente."}};
+  //}
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
-  approveCustomers, changeCustomersStatus, updateCustomers
+  approveCustomers, changeCustomersStatus, updateCustomers, makePayments
 }

@@ -9,6 +9,10 @@ const app = express();
 app.set('port', process.env.PORT || 4000)
 
 //Middlewares
+app.use(express.static('../files/images'));
+app.use(express.static('../files/contracts'));
+app.use(express.static('../files/documents'));
+//app.use(express.static(__dirname + '../files')); 
 app.use(express.json());
 app.use(morgan('dev'));
 app.all('*', function(req, res, next) {
@@ -31,3 +35,4 @@ app.use(require('./routes/integration/integration'));
 app.listen( app.get('port'), () => {
     console.log('Server in port: 4000');
 });
+

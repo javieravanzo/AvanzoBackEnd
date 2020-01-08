@@ -8,7 +8,8 @@ const multer = require('multer');
 const { verifyToken } = require('../../controllers/validator');
 const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
-        getAllCustomerToApprove, approveCustomer, updateCustomer, changeCustomerStatus} = require('../../controllers/customer');
+        getAllCustomerToApprove, approveCustomer, updateCustomer, changeCustomerStatus,
+        makePayment} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -108,6 +109,8 @@ router.get('/Customer/GetAllToApprove',
 
 router.put('/Customer/ApproveorReject',
 [verifyToken], approveCustomer);
+
+router.post('/Customer/MakePayment', [verifyToken], makePayment);
 
 //Export
 module.exports = router;

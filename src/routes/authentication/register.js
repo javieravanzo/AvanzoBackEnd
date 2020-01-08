@@ -2,6 +2,7 @@
 const express = require('express');
 const { body, check } = require('express-validator');
 const multer = require('multer');
+var mkdirp = require('mkdirp');
 
 //Initialize
 const router = express.Router();
@@ -12,13 +13,18 @@ const { registerClient, registerAdmin, preRegister } = require('../../controller
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
-    //Production
-    callback(null, '../files/documents/');
-    //Development
-    //callback(null, './files/documents/');
+    
+    //--Production
+    //var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
+    //mkdirp.sync(dest);
+    //callback(null, dest);
+    //--Development
+    var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
+    mkdirp.sync(dest);
+    callback(null, dest);
   },
   filename: function(req, file, callback){
-    callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+    callback(null, file.fieldname + ".pdf");
   }
 });
 

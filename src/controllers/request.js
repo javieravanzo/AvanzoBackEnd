@@ -101,9 +101,9 @@ const decode_base64 = async (base64str , filename) => {
   var buf = Buffer.from(base64DataReplaced,'base64');
 
   //Production
-  fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
+  //fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
   //Development
-  //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
+  fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
       throw error;
     }else{
@@ -180,10 +180,10 @@ const getAllRequestByCompany = async (req, res, next) => {
 const approveOrReject = async (req, res, next) => {
 
   const userId = getUserId(req);
-  const {requestid, approve} = req.headers;
+  const {requestid, approve, transactioncode} = req.headers;
 
   try {
-    const result = await approveOrRejectRequest(requestid, approve, userId);
+    const result = await approveOrRejectRequest(requestid, approve, userId, transactioncode);
     if(result.status === 200){
         res.status(result.status).json(result.message);
     }else{

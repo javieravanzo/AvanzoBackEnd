@@ -1,5 +1,6 @@
 //Requires
 const { validationResult } = require('express-validator');
+const path = require('path');
 
 //Imports
 const { registerCustomer, registerAdmins, newPreregister } = require('../services/register');
@@ -56,7 +57,11 @@ const preRegister = async (req, res, next) => {
   //Logic
   const client = {lastName, identificationId, phoneNumber, Company_idCompany: company};
   const user = {name, email};
-  const files = {documentId: req.files.documentId[0].path, photo: req.files.photo[0].path, paymentReport: req.files.paymentReport[0].path};
+  //console.log("RF", req.files);
+  const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""), 
+                 photo: path.normalize(req.files.photo[0].path).replace("../files/documents/",""),
+                 paymentReport: path.normalize(req.files.paymentReport[0].path).replace("../files/documents/","")};
+  console.log("files", files);
   const auth = {password};
   const request = {}
 
