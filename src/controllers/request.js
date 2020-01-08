@@ -101,9 +101,9 @@ const decode_base64 = async (base64str , filename) => {
   var buf = Buffer.from(base64DataReplaced,'base64');
 
   //Production
-  //fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
+  fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
   //Development
-  fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
+  //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
       throw error;
     }else{
