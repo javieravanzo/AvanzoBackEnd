@@ -74,7 +74,7 @@ const integrationCheckPhone = async (phoneNumber) => {
   try{
     const clientQuery = await pool.query('SELECT idClient FROM Client where phoneNumber = ?', [phoneNumber]);
     if(clientQuery.length>0){
-      return {status: 500, message: "El número se encuentra registrado en nuestro sistema."};
+      return {status: 200, message: "El número se encuentra registrado en nuestro sistema."};
     }else{
       return {status: 200, message: "El número no se encuentra registrado en nuestro sistema."}
     }

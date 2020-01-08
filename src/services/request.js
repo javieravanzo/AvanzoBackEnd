@@ -446,14 +446,17 @@ const generateContracts = async (customerid, split, quantity) => {
 
   try{
 
+    //Account - Request
+    const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [customerid]);
+
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    const content = await compile('contract', user);
+    const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
 
     await page.setContent(content);
     await page.emulateMedia('screen');
     const pathname = await page.pdf({
-      path: '/files/contracts/contrato-libranza'+toString(2)+'.pdf',
+      path: '../files/contracts/contrato-libranza'+userRow[0].identificationId+'.pdf',
       format: 'A4',
       printBackground: true
     });
@@ -461,11 +464,11 @@ const generateContracts = async (customerid, split, quantity) => {
     console.log("Page", page, pathname);
 
     await browser.close();
-    process.exit();
+    
 
     return pathname;
   }catch(e){
-    //console.log(e);
+    console.log(e);
   }
 
 };

@@ -259,17 +259,18 @@ const generateContract = async (req, res, next) => {
   }
 
   const {split, quantity} = req.headers;
-  const customerid = getUserId(req);
+  const customerid = getClientId(req);
 
   try {
     const result = await generateContracts(customerid, split, quantity);
-    if(result.status === 200){
-      res.status(result.status).json(result.data);
+    if(result){
+      res.status(200).json(result.data);
     }else{
-      res.status(result.status).json(result.message);
+      res.status(500).json("No es posible generar el documento en este momento.");
     }
     next();
   }catch(e) {
+    console.log("E", e);
     res.status(500).json("No es posible generar el documento en este momento.");
   };  
 
