@@ -7,6 +7,7 @@ const hbs = require('handlebars');
 const moment = require('moment');
 const path = require('path');
 const sgMail = require('@sendgrid/mail');
+const mkdirp = require('mkdirp');
 
 //Functions
 function getStateIdFromName (row, name){
@@ -37,9 +38,9 @@ const compile = async function(templateName, data){
   const html = await fs.readFile(filePath, 'utf-8');
   let template = hbs.compile(html);
   let new_user = {
-    name: "Juan",
+    name: data.name,
     email: "juan@gmail.com",
-    identificationId: "1032488213"
+    identificationId: data.identificationId
   }
 
   let  result = template(new_user);
@@ -442,26 +443,29 @@ const getRequestsToOutLay = async (userId) => {
 
 };
 
-const generateContracts = async (customerid, split, quantity) => {
+const generateContracts = async (customerid, split, quantity, company) => {
 
   try{
 
     //Account - Request
     const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [customerid]);
 
-    const browser = await puppeteer.launch();
+    //const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page = await browser.newPage();
     const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
 
     await page.setContent(content);
     await page.emulateMedia('screen');
+    var dest = '../files/contracts/'+userRow[0].identificationId+'-'+company+'/';
+    mkdirp.sync(dest);
     const pathname = await page.pdf({
-      path: '../files/contracts/contrato-libranza'+userRow[0].identificationId+'.pdf',
+      path: '../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf',
       format: 'A4',
       printBackground: true
     });
 
-    console.log("Page", page, pathname);
+    //console.log("Page", page, pathname);
 
     await browser.close();
     

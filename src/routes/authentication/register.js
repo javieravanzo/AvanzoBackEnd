@@ -2,7 +2,7 @@
 const express = require('express');
 const { body, check } = require('express-validator');
 const multer = require('multer');
-var mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp');
 
 //Initialize
 const router = express.Router();

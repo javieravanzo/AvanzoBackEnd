@@ -258,11 +258,11 @@ const generateContract = async (req, res, next) => {
       return;
   }
 
-  const {split, quantity} = req.headers;
+  const {split, quantity, company} = req.headers;
   const customerid = getClientId(req);
 
   try {
-    const result = await generateContracts(customerid, split, quantity);
+    const result = await generateContracts(customerid, split, quantity, company);
     if(result){
       res.status(200).json(result.data);
     }else{
