@@ -15,13 +15,13 @@ const storage = multer.diskStorage({
   destination: function(req, file, callback){
     
     //--Production
-    //var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
-    //mkdirp.sync(dest);
-    //callback(null, dest);
-    //--Development
     var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
     mkdirp.sync(dest);
     callback(null, dest);
+    //--Development
+    //var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
+    //mkdirp.sync(dest);
+    //callback(null, dest);
   },
   filename: function(req, file, callback){
     callback(null, file.fieldname + ".pdf");

@@ -8,6 +8,7 @@ const moment = require('moment');
 const path = require('path');
 const sgMail = require('@sendgrid/mail');
 const mkdirp = require('mkdirp');
+const pdf = require('html-pdf');
 
 //Functions
 function getStateIdFromName (row, name){
@@ -449,28 +450,19 @@ const generateContracts = async (customerid, split, quantity, company) => {
 
     //Account - Request
     const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [customerid]);
-
-    //const browser = await puppeteer.launch();
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-    const page = await browser.newPage();
-    const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
-
-    await page.setContent(content);
-    await page.emulateMedia('screen');
+    //Production
     var dest = '../files/contracts/'+userRow[0].identificationId+'-'+company+'/';
     mkdirp.sync(dest);
-    const pathname = await page.pdf({
-      path: '../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf',
-      format: 'A4',
-      printBackground: true
+    const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
+    //Production
+    const result = await pdf.create(content, {}).toFile('../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf', (err) => {
+      if(err){
+        console.log("Entro2");
+        return {status: 500, data: "false"};
+      }
+      return 200;
     });
-
-    //console.log("Page", page, pathname);
-
-    await browser.close();
-    
-
-    return pathname;
+    return {status: 200, data: "true"};
   }catch(e){
     console.log(e);
   }
