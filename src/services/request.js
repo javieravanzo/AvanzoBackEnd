@@ -35,7 +35,7 @@ hbs.registerHelper('dateFormat', function(value, format){
 
 const compile = async function(templateName, data){
 
-  const filePath = path.join(process.cwd(), 'files/templates', `${templateName}.hbs`);
+  const filePath = path.join(process.cwd(), './files/templates', `${templateName}.hbs`);
   const html = await fs.readFile(filePath, 'utf-8');
   let template = hbs.compile(html);
   let new_user = {
