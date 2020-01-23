@@ -114,9 +114,40 @@ const newPreregister = async (client, user, files, auth) => {
     consultUser = userRow;
 
     if(JSON.stringify(userRow) === '[]'){
+
+      //Select the totalRemainder by Company
+      const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [client.Company_idCompany]);
         
+      //Create password
+      const newPassword = await helpers.encryptPassword(auth.password);
+
+      //Create client
+      const preClient = {
+        name: user.name,
+        lastName: user.lastName,
+        identificationId: client.identificationId,
+        phoneNumber: client.phoneNumber,
+        email: user.email,
+        password: newPassword,
+        file1: files.documentId,
+        file2: files.photo,
+        file3: files.paymentReport,
+        //status: 0 = Created, 1 = Approved, 2 = Rejected.
+        status: 0,
+        totalRemainder:  companyQuery[0].defaultAmount,
+        createdDate: new Date(),
+        registeredDate: new Date(),
+        registeredBy: 0,
+        Company_idCompany: client.Company_idCompany,
+        Role_idRole: 4
+      };
+
+      const preClientQuery = await pool.query('INSERT INTO NewClient SET ?', [preClient]);
+
+      return {status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico."};
+
       //DocumentClients
-      const filesPath = files;
+      /*const filesPath = files;
       const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
 
       //New Client
@@ -160,7 +191,8 @@ const newPreregister = async (client, user, files, auth) => {
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
       return {status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico."};
-    
+      */
+
     }else{
     
       if(parseInt(consultUser[0].status, 10) === 0 ){
@@ -177,7 +209,6 @@ const newPreregister = async (client, user, files, auth) => {
         newClient.registeredDate = new Date();
         newClient.createdDate = new Date();
         newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
-
         
         const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
 
@@ -205,8 +236,7 @@ const newPreregister = async (client, user, files, auth) => {
       }
     }        
   }catch(e){
-    
-    console.log(e);
+    console.log("E", e);
     return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 

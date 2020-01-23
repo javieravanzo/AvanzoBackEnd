@@ -3,7 +3,8 @@ const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 //Imports
-const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies } = require('../services/company');
+const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies,
+        getCompanyWithSalaries } = require('../services/company');
 
 //Functions
 //Get the user with token
@@ -112,9 +113,27 @@ const getCompaniesForUser = async (req, res, next) => {
 
 };
 
+const getCompanyWithSalary = async (req, res, next) => {
+  
+  const {companyid} = req.headers;
+
+  try {
+    const result = await getCompanyWithSalaries(companyid);
+    if(result.status === 200){
+        res.status(result.status).json(result.data);
+    }else{
+        res.status(result.status).json({message: result.message});
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  }
+
+};
+
 
 
 module.exports = {
-  createCompany, getAllCompanies, getCompaniesForUser, updateCompany
+  createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary
 };
 

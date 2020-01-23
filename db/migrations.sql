@@ -5,11 +5,12 @@ INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate)
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (10, 'User', NOW(), 1, NOW());
 
 /* Main Administrator */
-INSERT INTO Administrator (lastName, identificationId, adminType) values ("Orjuela", "1032488727", "superAdmin");
-INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", false, false, NOW(), 1, NOW(), 1, null, null, 1);
+INSERT INTO Administrator (identificationId, adminType) values ("1032488727", "superAdmin");
+INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", "Orjuela", false, false, NOW(), 1, NOW(), 1, null, null, 1);
+
 /* Main Administrator */
-INSERT INTO Administrator (lastName, identificationId, adminType) values ("Sarmiento", "1011222333", "admin");
-INSERT INTO User (email, name, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Laura", false, false, NOW(), 1, NOW(), 2, null, null, 2);
+INSERT INTO Administrator (identificationId, adminType) values ("1011222333", "admin");
+INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Laura", "Sarmiento", false, false, NOW(), 1, NOW(), 2, null, null, 2);
 
 /* Request */
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Solicitada", NOW(), 1, NOW());

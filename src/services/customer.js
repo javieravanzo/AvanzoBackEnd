@@ -154,7 +154,7 @@ const updateCustomers = async (body, user, adminId) => {
   //NewClient
   const {identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee} = body;
   
-  const newClient = {identificationId, lastName, phoneNumber, profession};
+  const newClient = {identificationId, phoneNumber, profession};
   newClient.registeredBy = adminId;
   newClient.registeredDate = new Date();
 
@@ -164,6 +164,7 @@ const updateCustomers = async (body, user, adminId) => {
 
     //Insert in user
     const newUser = user;
+    newUser.lastName = lastName;
     newUser.registeredBy = adminId;
     newUser.registeredDate = new Date();
     const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
@@ -267,7 +268,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, C.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    const clientRow =  await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
     if(clientRow){
       return {status: 200, data: clientRow};
     }else{
@@ -283,7 +284,7 @@ const getAllCustomerWithCompanies = async () =>{
 const getCustomerToApprove = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.name, U.email, U.createdDate, C.idClient, C.identificationId, C.lastName, C.profession, A.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, C.accountBank, C.accountType, C.accountNumber, CD.documentId, CD.photo, CD.paymentReport FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Account A JOIN Company CO ON (C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where (C.isApproved = ? and C.rejectState = ?)', [false, false]);
+    const clientRow =  await pool.query('SELECT N.idNewClient, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
     
     if(clientRow){
       return {status: 200, data: clientRow};
@@ -319,13 +320,74 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
   try{   
     
     if(approve === "true"){
+      console.log("CI", clientId);
+      const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientId]);
 
-      //Client
-      const clientQuery = await pool.query('UPDATE Client SET isApproved = ? where idClient = ?', [true, clientId]);
+      const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientId]);
+
+      //DocumentClients
+      const filesPath = {
+        documentId: newClient[0].file1,
+        photo: newClient[0].file2,
+        paymentReport: newClient[0].file3
+      };
+
+      const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
+
+      //New Client
+      const client = {
+        identificationId: newClient[0].identificationId,
+        documentType: "Cédula",
+        phoneNumber: newClient[0].phoneNumber,
+        Company_idCompany: newClient[0].Company_idCompany,
+        registeredBy: 1,
+        registeredDate: new Date(),
+        platformState:  true,
+        createdDate: new Date(),
+        ClientDocuments_idClientDocuments: fileQuery.insertId,
+      };
+      
+      const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
+      
+      //Insert in user
+      const newUser = {
+        name: newClient[0].name,
+        lastName: newClient[0].lastName,
+        email: newClient[0].email,
+        status: true,
+        registeredBy: 1,
+        registeredDate: new Date(),
+        createdDate: new Date(),
+        Role_idRole: 4,
+        Client_idClient: clientQuery.insertId,
+      };
+      
+      const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
+      
+      //Create an account
+      const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
+      const newAccount = {maximumAmount: companyQuery[0].defaultAmount,
+                         partialCapacity: companyQuery[0].defaultAmount,
+                         documentsUploaded: true,
+                         montlyFee: companyQuery[0].maximumSplit,
+                         totalInterest: 0, totalFeeAdministration: 0,
+                         totalOtherCollection: 0, totalRemainder: 0,
+                         approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+                         registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+      const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
+
+      //Insert into auth
+      const newAuth = { User_idUser: userQuery.insertId,
+                        registeredBy: 1,
+                        registeredDate: new Date(),
+                        createdDate: new Date(),
+                        password: newClient[0].password};
+      
+      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
       //Confirmation link
-      const consultEmail = await pool.query('SELECT U.email, U.name FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.idClient = ?', [clientId]);
-      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientId]);
+      const consultEmail = await pool.query('SELECT U.email, U.name FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.idClient = ?', [clientQuery.insertId]);
+      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientQuery.insertId]);
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       console.log(url.toString());
@@ -387,12 +449,8 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
 
     }else{
 
-      const clientQuery = await pool.query('UPDATE Client SET rejectState = ? where idClient = ?', [true, clientId]);
+      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idClient = ?', [2, clientId]);
       
-      const reject = {Client_idClient: clientId, observation: observation !== undefined ? observation : null};
-
-      const rejectQuery = await pool.query('INSERT INTO RejectClient SET ?', [reject]) ;
-
       return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
     }
   }catch(e){
@@ -426,7 +484,7 @@ const makePayments = async(clientid, quantity) => {
   try{   
 
     //Account - Request
-    const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientid]);
+    const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientid]);
 
     console.log("PC", userRow[0].maximumAmount, "AQ", userRow[0].accumulatedQuantity, "Q", quantity);
 

@@ -55,20 +55,20 @@ const preRegister = async (req, res, next) => {
   }
 
   //Logic
-  const client = {lastName, identificationId, phoneNumber, Company_idCompany: company};
-  const user = {name, email};
+  const client = {identificationId, phoneNumber, Company_idCompany: company};
+  const user = {name, email, lastName};
   //console.log("RF", req.files);
   const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""), 
                  photo: path.normalize(req.files.photo[0].path).replace("../files/documents/",""),
                  paymentReport: path.normalize(req.files.paymentReport[0].path).replace("../files/documents/","")};
   console.log("files", files);
   const auth = {password};
-  const request = {}
 
   try {
     const result = await newPreregister(client, user, files, auth);
     res.status(result.status).json({message: result.message});      
   }catch(e) {
+    console.log("E", e);
     res.status(500).json({message:"No es posible realizar el registro en este momento."});
   };
 
@@ -89,13 +89,14 @@ const registerAdmin = async (req, res, next) => {
   }
 
   //Logic
-  const admin = {lastName, identificationId, adminType: "superAdmin" };
-  const user = {name, email};
+  const admin = {identificationId, adminType: "superAdmin" };
+  const user = {name, email, lastName};
   const auth = {email, password};
   try {
     const result = await registerAdmins(admin, user, auth);
     res.status(result.status).json({message: result.message});      
   }catch(e) {
+    console.log("E", e);
     res.status(500).json({message:"No es posible realizar el registro en este momento."});
   };
 

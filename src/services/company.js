@@ -19,13 +19,12 @@ const createCompanies = async (req, userId) => {
 
     //CompanySalaries
     for (let i in companySalaries){
-      const cycle = companySalaries[0];
+      const cycle = companySalaries[i];
       cycle.companyRateName = cycle.companyRate;
       cycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
-      cycle.companyRate = cycle.companyRate === "Mensual" ? 1 : 2;
+      cycle.companyRate = cycle.companyRate === "Mensual" ? 30 : 15;
       cycle.companySecondDate = cycle.companySecondDate !== undefined ? cycle.companySecondDate : null;
       const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [cycle]);
-      console.log("CSR", companySalaryRow);
 
       const newLinks = {
         Company_idCompany: companyRow.insertId,
@@ -33,7 +32,6 @@ const createCompanies = async (req, userId) => {
       };
 
       const companyLink = await pool.query('INSERT INTO Company_has_CompanySalaries SET ?', [newLinks]);
-      console.log("CSR", companyLink);
     }
 
     //CompanyMembers
@@ -107,7 +105,8 @@ const updateCompanies = async (req, userId) => {
 const getCompanies = async (req, userId) => {
   
   try{
-    const companyRow = await pool.query('SELECT * FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
+    //const companyRow = await pool.query('SELECT C.*, U.email FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
+    const companyRow = await pool.query('SELECT C.*, U.email FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);
@@ -120,7 +119,7 @@ const getCompanies = async (req, userId) => {
 const getAllCompaniesForUser = async ( ) => {
   
   try{
-    const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C ');
+    const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C');
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);
@@ -130,6 +129,19 @@ const getAllCompaniesForUser = async ( ) => {
 
 };
 
+const getCompanyWithSalaries = async (companyId) => {
+
+  try{
+    const companyRow = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyPaymentNumber, CS.companyRate, CS.companyReportDate, CS.companyFirstDate, CS.companySecondDate FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CS.idCompanySalaries = CHS.CompanySalaries_idCompanySalaries) WHERE (CHS.Company_idCompany = ?)', [companyId]);
+    return {status: 200, data: companyRow};
+  }catch(e){
+    console.log(e);
+    //throw e;
+    return {status: 500, message: "Error interno del servidor."};
+  }  
+
+};
+
 module.exports = {
-  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies
+  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries
 };
