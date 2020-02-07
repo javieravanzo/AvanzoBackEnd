@@ -105,7 +105,7 @@ const decode_base64 = async (base64str , filename) => {
   //Development
   //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
-      throw error;
+      return {status: 500, message: "Error con el archivo de firma."}
     }else{
       return true;
     }

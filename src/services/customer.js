@@ -414,16 +414,16 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
                 <br/>
                 
                 <h3>
-                  Gracias por registrarse en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
+                  Gracias por registrarte en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
                 </h3>
               </div>
           
               <div class="body-confirmation">
                 <h3 class="body-title">
-                  Tu usuario ha sido aprobado para interactuar en la plataforma. Para continuar en el proceso, por favor realiza la confirmación de tu cuenta.
+                  Te informamos que tu usuario ha sido aprobado para interactuar en la plataforma. 
                 </h3>
                 <h3>
-                  Confirme tu cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
+                 Para continuar con el proceso, por favor realiza la confirmación de tu cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
                 </h3>
               </div>
           

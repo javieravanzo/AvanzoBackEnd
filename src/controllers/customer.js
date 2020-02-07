@@ -297,7 +297,7 @@ const changeCustomerStatus = async (req, res, next) => {
         const adminId = getAdminId(req);
         const {clientid, status} = req.headers;
 
-        console.log("CI", clientid, "S", status);
+        //console.log("CI", clientid, "S", status);
         const result = await changeCustomersStatus(clientid, status);
         if(result.status === 200){
             res.status(result.status).json(result.message);
@@ -320,7 +320,7 @@ const makePayment = async (req, res, next) => {
         //const adminId = getAdminId(req);
         const {clientid, quantity} = req.headers;
 
-        console.log("CI", clientid, "S", quantity);
+        //console.log("CI", clientid, "S", quantity);
         const result = await makePayments(clientid, quantity);
         if(result.status === 200){
             res.status(result.status).json(result.message);

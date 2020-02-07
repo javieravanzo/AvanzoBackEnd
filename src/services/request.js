@@ -144,7 +144,7 @@ const createRequest = async (body, file, clientId) => {
           mkdirp.sync(dest);
           const content = await compile('contract', {identificationId: userRow[0].identificationId, lastName: userRow[0].lastName, name: userRow[0].name});
           //Production
-          const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+company+'/contrato-colaboración.pdf', (err) => {
+          const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
           //Development
           //const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
             if(err){

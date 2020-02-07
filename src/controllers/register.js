@@ -61,7 +61,7 @@ const preRegister = async (req, res, next) => {
   const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""), 
                  photo: path.normalize(req.files.photo[0].path).replace("../files/documents/",""),
                  paymentReport: path.normalize(req.files.paymentReport[0].path).replace("../files/documents/","")};
-  console.log("files", files);
+  //console.log("files", files);
   const auth = {password};
 
   try {

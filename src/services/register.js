@@ -110,7 +110,7 @@ const newPreregister = async (client, user, files, auth) => {
   try{
 
     const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
-    console.log("UR", userRow);
+    //console.log("UR", userRow);
     consultUser = userRow;
 
     if(JSON.stringify(userRow) === '[]'){
