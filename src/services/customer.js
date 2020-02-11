@@ -455,6 +455,16 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
           
       };
 
+      /*attachments: [
+        {
+          content: contractFile,
+          filename: 'Contrato Avanzo.pdf',
+          type: 'application/pdf',
+          disposition: 'attachment',
+          contentId: 'mytext'
+        }
+      ]*/
+
       await sgMail.send(info);
 
       return {status: 200, message: "El usuario ha sido aprobado exitosamente."};
