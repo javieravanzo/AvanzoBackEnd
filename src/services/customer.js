@@ -4,6 +4,8 @@ const pool = require('../config/database.js');
 const jwt = require('jsonwebtoken');
 const {my_secret_key, base_URL} = require('../config/global');
 const sgMail = require('@sendgrid/mail');
+const path = require('path');
+const fs = require('fs-extra');
 
 //Services
 const getInitialsData = async (userId) => {
@@ -93,6 +95,13 @@ const getCustomersByAdmin = async ( ) => {
   }catch(e) {
     return {status: 500, message: "Error interno del servidor."};
   }
+};
+
+const compileContract = async function(filePath){
+  const html = await fs.readFile(filePath, 'utf-8');
+  //let template = hbs.compile(html);
+  //let  result = template(data);
+  return html;
 };
 
 const createCustomer = async (body, user, company, adminId) => {
@@ -391,7 +400,9 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       console.log(url.toString());
-        
+      
+      //let contractFile = await compileContract("./files/contracts/contractoAvanzo.pdf");
+
       //Mailer
       sgMail.setApiKey('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');
 
@@ -440,7 +451,8 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
           to: consultEmail[0].email, // list of receivers
           subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
           text: 'Hola', // plain text body
-          html: output // html body
+          html: output, // html body,
+          
       };
 
       await sgMail.send(info);
