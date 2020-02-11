@@ -74,7 +74,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
   try {
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
-    console.log("UR", userRow);
+    //console.log("UR", userRow);
     const dateRate = userRow[0].companyRate;
 
     //Interest

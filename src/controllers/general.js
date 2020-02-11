@@ -7,6 +7,19 @@ const {my_secret_key} = require('../config/global');
 //Imports
 const { login, confirmAccounts, getDocumentsTypes, resetPassword, confirmedPassword } = require('../services/general');
 
+//Get the user with token
+function getUserId(req){
+
+  //Get the clientId
+  const bearerHeader = req.headers['authorization'];
+  //Get the real token
+  const bearer = bearerHeader.split(" ")[1];
+  //Set the token
+  const decoded = jwt.decode(bearer);
+  return (decoded.userRow[0].idUser);  
+
+};
+
 //Controllers
 const makeLogin = async (req, res, next) => {
   
@@ -93,7 +106,7 @@ const confirmPassword = async (req, res, next) => {
     const {password, confirmPassword} = req.body;
     
     //Get the userid
-    const userId = getUserIdFromToken(req);
+    const userId = getUserId(req);
 
     try {
         if (password === confirmPassword){
