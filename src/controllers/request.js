@@ -263,7 +263,7 @@ const generateContract = async (req, res, next) => {
 
   try {
     const result = await generateContracts(customerid, split, quantity, company);
-    console.log("R", result);
+    //console.log("R", result);
     if(result){
       res.status(200).json(result.data);
     }else{

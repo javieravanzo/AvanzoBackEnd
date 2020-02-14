@@ -1,14 +1,15 @@
 //Requires
 const math = require('math');
 const pool = require('../config/database.js');
-const puppeteer = require('puppeteer');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
 const moment = require('moment');
 const path = require('path');
 const sgMail = require('@sendgrid/mail');
+const {base_URL} = require('../config/global');
 const mkdirp = require('mkdirp');
 const pdf = require('html-pdf');
+const jwt = require('jsonwebtoken');
 
 //Functions
 function getStateIdFromName (row, name){
@@ -278,10 +279,10 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     }  
 
     const request = {registeredDate: new Date(), registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: transactionCode !== null ? transactionCode : null };
-    console.log("R", request);
+    //console.log("R", request);
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
-      console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
+      //console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
       if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Admon.")){
 
         //Transactions
@@ -444,12 +445,13 @@ const generateContracts = async (customerid, split, quantity, company) => {
     //Production
     const result = await pdf.create(content, {}).toFile('../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf', (err) => {
       if(err){
-        console.log("Entro2");
+        //console.log("Entro2");
         return {status: 500, data: "false"};
       }
       return 200;
     });
     return {status: 200, data: "true"};
+    
   }catch(e){
     console.log(e);
   }

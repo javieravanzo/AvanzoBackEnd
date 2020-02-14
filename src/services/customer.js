@@ -7,6 +7,12 @@ const sgMail = require('@sendgrid/mail');
 const path = require('path');
 const fs = require('fs-extra');
 
+//Functions
+const compileContract = async function(filePath){
+  const pdf = await fs.readFileSync(filePath).toString("base64");
+  return pdf;
+};
+
 //Services
 const getInitialsData = async (userId) => {
 
@@ -95,13 +101,6 @@ const getCustomersByAdmin = async ( ) => {
   }catch(e) {
     return {status: 500, message: "Error interno del servidor."};
   }
-};
-
-const compileContract = async function(filePath){
-  const html = await fs.readFile(filePath, 'utf-8');
-  //let template = hbs.compile(html);
-  //let  result = template(data);
-  return html;
 };
 
 const createCustomer = async (body, user, company, adminId) => {
@@ -242,8 +241,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
         //Consult the company info
         const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
         
-        console.log("MCA", customersData[i].CantidadMaximaPrestamo, customersData[i].CantidadMaximaPrestamo !== " ");
-        console.log("FEE", customersData[i].CantidadMaximaCuotas);
+        //console.log("MCA", customersData[i].CantidadMaximaPrestamo, customersData[i].CantidadMaximaPrestamo !== " ");
+        //console.log("FEE", customersData[i].CantidadMaximaCuotas);
         //Create the account
         const newAccount = {
           maximumAmount: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo,10) : parseInt(companyQuery[0].defaultAmount, 10),
@@ -329,7 +328,7 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
   try{   
     
     if(approve === "true"){
-      console.log("CI", clientId);
+      //console.log("CI", clientId);
       const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientId]);
 
       const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientId]);
@@ -399,9 +398,9 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
       const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientQuery.insertId]);
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
-      console.log(url.toString());
+      //console.log(url.toString());
       
-      //let contractFile = await compileContract("./files/contracts/contractoAvanzo.pdf");
+      let contractFile = await compileContract("../files/contracts/contratoAvanzo.pdf");
 
       //Mailer
       sgMail.setApiKey('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');
@@ -452,20 +451,19 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
           subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
           text: 'Hola', // plain text body
           html: output, // html body,
-          
+          attachments: [
+            {
+              content: contractFile,
+              filename: 'contratoAvanzo.pdf',
+              type: 'application/pdf',
+              disposition: 'attachment'
+            }
+          ]
       };
 
-      /*attachments: [
-        {
-          content: contractFile,
-          filename: 'Contrato Avanzo.pdf',
-          type: 'application/pdf',
-          disposition: 'attachment',
-          contentId: 'mytext'
-        }
-      ]*/
-
-      await sgMail.send(info);
+      await sgMail.send(info).catch(err => {
+        console.log("Error", err);
+      });
 
       return {status: 200, message: "El usuario ha sido aprobado exitosamente."};
 
@@ -477,14 +475,14 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
     }
   }catch(e){
     console.log(e);
-    return {status: 500, message: "Error interno del servidor."};
+    return {status: 500, message: e.sqlMessage};
   }
 
 };
 
 const changeCustomersStatus = async (clientid, active) => {
 
-  console.log("CI", clientid, active);
+  //console.log("CI", clientid, active);
   
   try{   
     if(active === "true"){
@@ -508,15 +506,15 @@ const makePayments = async(clientid, quantity) => {
     //Account - Request
     const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [clientid]);
 
-    console.log("PC", userRow[0].maximumAmount, "AQ", userRow[0].accumulatedQuantity, "Q", quantity);
+    //console.log("PC", userRow[0].maximumAmount, "AQ", userRow[0].accumulatedQuantity, "Q", quantity);
 
     const newPartialCapacity = (parseInt(userRow[0].maximumAmount, 10) - parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10));
-    console.log("NPC", newPartialCapacity);
+    //console.log("NPC", newPartialCapacity);
     const newAccumulatedQuantity = (parseInt(userRow[0].accumulatedQuantity, 10) - parseInt(quantity, 10));
-    console.log("NPC", newAccumulatedQuantity);
+    //console.log("NPC", newAccumulatedQuantity);
     const newAccount = { partialCapacity: newPartialCapacity, accumulatedQuantity: newAccumulatedQuantity };
 
-    console.log("newAccount", newAccount);
+    //console.log("newAccount", newAccount);
 
     const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientid]);
 

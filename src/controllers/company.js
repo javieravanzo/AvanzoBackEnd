@@ -41,7 +41,8 @@ const createCompany = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    console.log("Error", e);
+    res.status(500).json( "No es posible realizar el proceso en este momento. Por favor, valida los datos ingresados e intenta nuevamente.");
   }
 
 };

@@ -9,8 +9,8 @@ const {my_secret_key, base_URL} = require('../config/global');
 const integrationRegister = async (identificationId, client, user, auth) => {
   
   try{
-     console.log("U", identificationId, user.email, client.phoneNumber);    
-   const userRow = await pool.query('SELECT C.idClient, C.identificationId, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.identificationId = ?', [identificationId]);
+    //console.log("U", identificationId, user.email, client.phoneNumber);    
+    const userRow = await pool.query('SELECT C.idClient, C.identificationId, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.identificationId = ?', [identificationId]);
     //console.log("Row", userRow);
     if(userRow.length !== 0){
 
@@ -29,7 +29,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       newClient.registeredDate = new Date();
 
       const updateClient = await pool.query('UPDATE Client SET ? WHERE identificationId = ?', [newClient, identificationId]);
-      console.log("up", updateClient);
+      //console.log("up", updateClient);
 
       //Check token_info
       const userRow = await pool.query('SELECT * FROM User U JOIN Auth A ON (A.User_idUser = U.idUser) where U.email = ?', [user.email]);

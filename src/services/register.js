@@ -36,7 +36,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
       //Confirmation link
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
-      console.log(url);
+      //console.log(url);
       
       //Mailer
       sgMail.setApiKey('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');

@@ -335,9 +335,6 @@ const makePayment = async (req, res, next) => {
 
 };
 
-
-
-
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
