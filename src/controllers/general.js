@@ -50,6 +50,20 @@ const makeLogin = async (req, res, next) => {
   }
 };
 
+const newLogin = async (req, res, next) => {
+
+  try {
+    const {email, password} = req.body;
+    console.log("Req.body", req.body);
+    //console.log("Req.hed", req.headers);
+    res.status(500).json({message:"No es posible realizar el login en este momento."});
+  } catch(e) {
+    res.status(404).json({message:"Ingrese correctamente los datos, por favor."});
+  }
+
+
+};
+
 const confirmAccount = async (req, res, next) => {
 
   //Get the userid
@@ -126,5 +140,5 @@ const confirmPassword = async (req, res, next) => {
 };
 
 module.exports = {
-  makeLogin, confirmAccount, getDocumentTypes, modifyPassword, confirmPassword
+  makeLogin, confirmAccount, getDocumentTypes, modifyPassword, confirmPassword, newLogin
 };

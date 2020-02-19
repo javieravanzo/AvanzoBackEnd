@@ -174,7 +174,7 @@ const createRequest = async (body, file, clientId) => {
           newRequest.approveHumanResources = true;
           newRequest.createdDate = new Date();
           newRequest.registeredBy = 1;
-          newRequest.filePath = '/files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf';
+          newRequest.filePath = '/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf';
           newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
           newRequest.observation = "";
 
@@ -348,7 +348,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       
       }
 
-      return {status: 200, message: {message: "La solicitud ha sido " + response + "satisfactoriamente."}};
+      return {status: 200, message: {message: "La solicitud ha sido " + response + " satisfactoriamente."}};
     }else{
       return {status: 500, message: "Error interno del servidor."};
     }

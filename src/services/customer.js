@@ -109,7 +109,7 @@ const createCustomer = async (body, user, company, adminId) => {
   const {identificationId, lastName, documentType, phoneNumber, fixedNumber, birthDate, expeditionDate, 
          contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany} = body;
   
-  const newClient = {identificationId, lastName, documentType, phoneNumber, fixedNumber, contractType, salary,
+  const newClient = {identificationId, documentType, phoneNumber, fixedNumber, contractType, salary,
      entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate};
 
   //newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
@@ -125,6 +125,7 @@ const createCustomer = async (body, user, company, adminId) => {
 
     //Insert in user
     const newUser = user;
+    newUser.lastName = lastName;
     newUser.registeredBy = adminId;
     newUser.registeredDate = new Date();
     newUser.createdDate = new Date();
@@ -204,7 +205,6 @@ const createMultipleCustomers = async (customersData, adminId) => {
       if (companyNitQuery !== '[]'){
         //Create the client
         let new_client = {
-          lastName: customersData[i].Apellido,
           documentType: customersData[i].TipoDocumento,
           identificationId: customersData[i].NumeroDocumento,
           expeditionDate: customersData[i].FechaExpedicionCedula,
@@ -225,6 +225,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 
         //Insert in user
         const newUser = {
+          lastName: customersData[i].Apellido,
           name: customersData[i].Nombre,
           email: customersData[i].CorreoElectronico,
           registeredBy: adminId,

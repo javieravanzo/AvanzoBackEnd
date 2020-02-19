@@ -42,7 +42,7 @@ const createCompanies = async (req, userId) => {
     }
 
     //User
-    const user = {email, name: socialReason, status: true, createdDate: new Date(), registeredBy: userId, registeredDate: new Date(), Role_idRole: 3, Company_idCompany: companyRow.insertId};
+    const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date(), registeredBy: userId, registeredDate: new Date(), Role_idRole: 3, Company_idCompany: companyRow.insertId};
     const userRow = await pool.query('INSERT INTO User SET ?', [user]);
 
     //Auth
