@@ -100,7 +100,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
         let new_date = {
           id: i,
-          name: "Desembolso No. " + (i+1),
+          name: "Descuento No. " + (i+1),
           quantity: partialQuantity,
           date: firstDate
         };
@@ -233,14 +233,14 @@ const getAllRequestsByCompany = async (companyId) => {
 
 };
 
-const approveOrRejectRequest = async (requestid, approve, userId, transactionCode) => { 
+const approveOrRejectRequest = async (requestid, approve, userId, transactionCode, text) => { 
 
   try{
     //Change the approval/reject state
     const stateRow = await pool.query('SELECT * FROM RequestState');
 
     const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
-    const clientEmail = await pool.query('SELECT U.email, A.totalInterest, A.totalFeeAdministration, A.totalRemainder FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
+    const clientEmail = await pool.query('SELECT U.email, A.partialCapacity, A.totalInterest, A.accumulatedQuantity, A.totalFeeAdministration, A.totalRemainder FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
     let requeststate = -1;
     let sendApprovedEmail = -1;
     let response = "";
@@ -273,12 +273,15 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       }else{
         response = "rechazada";
         requeststate = getStateIdFromName(stateRow, "Rechazada");
+        //Update account values
+        const rejectAccount = {partialCapacity: clientEmail[0].partialCapacity + requestQuery[0].quantity, accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
+        const rejectAccountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [rejectAccount, requestQuery[0].Account_idAccount]);
       }
     }else{
       return {status: 404, message: {message: "La solicitud no está registrada en nuestro sistema."}}
     }  
 
-    const request = {registeredDate: new Date(), registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: transactionCode !== null ? transactionCode : null };
+    const request = {registeredDate: new Date(), observation: text, registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null };
     //console.log("R", request);
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){

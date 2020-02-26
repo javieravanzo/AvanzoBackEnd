@@ -180,10 +180,10 @@ const getAllRequestByCompany = async (req, res, next) => {
 const approveOrReject = async (req, res, next) => {
 
   const userId = getUserId(req);
-  const {requestid, approve, transactioncode} = req.headers;
+  const {requestid, approve, transactioncode, text} = req.headers;
 
   try {
-    const result = await approveOrRejectRequest(requestid, approve, userId, transactioncode);
+    const result = await approveOrRejectRequest(requestid, approve, userId, transactioncode, text);
     if(result.status === 200){
         res.status(result.status).json(result.message);
     }else{

@@ -41,8 +41,8 @@ const createCompany = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    console.log("Error", e);
-    res.status(500).json( "No es posible realizar el proceso en este momento. Por favor, valida los datos ingresados e intenta nuevamente.");
+    //console.log("Error", e.stack);
+    res.status(500).json({message: "Por favor, valida los datos ingresados e intenta nuevamente."});
   }
 
 };

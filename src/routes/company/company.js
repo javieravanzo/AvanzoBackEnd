@@ -13,7 +13,7 @@ const { createCompany, getAllCompanies, getCompaniesForUser, updateCompany,
 //Routes 
 router.post('/Company/Create', 
   [
-    body('nit', 'El número nit no es válido.').exists().isInt(),
+    body('nit', 'El número nit no es válido.').exists().not().isEmpty(),
     body('address', 'La dirección no es válida.').exists().not().isEmpty(),
     body('socialReason', 'La razón social no es válida.').exists().not().isEmpty(),
     body('economyActivity', 'La actividad económica no es válida.').exists().not().isEmpty(),
@@ -29,7 +29,7 @@ router.post('/Company/Create',
 
 router.put('/Company/Update', 
   [
-    body('nit', 'El número nit no es válido.').exists().isInt(),
+    body('nit', 'El número nit no es válido.').exists().not().isEmpty(),
     body('address', 'La dirección no es válida.').exists().not().isEmpty(),
     body('socialReason', 'La razón social no es válida.').exists().not().isEmpty(),
     body('economyActivity', 'La actividad económica no es válida.').exists().not().isEmpty(),

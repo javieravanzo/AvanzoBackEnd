@@ -15,44 +15,50 @@ const createCompanies = async (req, userId) => {
     const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources};
     company.registeredDate = new Date();
     company.registeredBy = userId;
-    const companyRow = await pool.query('INSERT INTO Company SET ?', [company]);
+    const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
+    console.log("CE", consultEmail.length > 0);
+    if(consultEmail.length === 0){
+      const companyRow = await pool.query('INSERT INTO Company SET ?', [company]);
+      //CompanySalaries
+      for (let i in companySalaries){
+        const cycle = companySalaries[i];
+        cycle.companyRateName = cycle.companyRate;
+        cycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
+        cycle.companyRate = cycle.companyRate === "Mensual" ? 30 : 15;
+        cycle.companySecondDate = cycle.companySecondDate !== undefined ? cycle.companySecondDate : null;
+        const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [cycle]);
 
-    //CompanySalaries
-    for (let i in companySalaries){
-      const cycle = companySalaries[i];
-      cycle.companyRateName = cycle.companyRate;
-      cycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
-      cycle.companyRate = cycle.companyRate === "Mensual" ? 30 : 15;
-      cycle.companySecondDate = cycle.companySecondDate !== undefined ? cycle.companySecondDate : null;
-      const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [cycle]);
+        const newLinks = {
+          Company_idCompany: companyRow.insertId,
+          CompanySalaries_idCompanySalaries: companySalaryRow.insertId
+        };
 
-      const newLinks = {
-        Company_idCompany: companyRow.insertId,
-        CompanySalaries_idCompanySalaries: companySalaryRow.insertId
-      };
+        const companyLink = await pool.query('INSERT INTO Company_has_CompanySalaries SET ?', [newLinks]);
+      }
 
-      const companyLink = await pool.query('INSERT INTO Company_has_CompanySalaries SET ?', [newLinks]);
+      //CompanyMembers
+      for (let i in companyMembers){
+        const member = companyMembers[i];
+        member.Company_idCompany = companyRow.insertId; 
+        const memberRow = await pool.query('INSERT INTO CompanyMembers SET ?', [member]);
+      }
+
+      //User
+      const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date(), registeredBy: userId, registeredDate: new Date(), Role_idRole: 3, Company_idCompany: companyRow.insertId};
+      const userRow = await pool.query('INSERT INTO User SET ?', [user]);
+
+      //Auth
+      const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date(), createdDate: new Date()};
+      newAuth.password = await helpers.encryptPassword(password);
+      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+
+      return {status: 200, message: {message: "La empresa ha sido creada de manera exitosa."}};
+    }else{
+      
+      return {status: 500, message: {message: "El NIT o el correo electrónico que suministraste ya ha sido registrado en la plataforma."}};
     }
-
-    //CompanyMembers
-    for (let i in companyMembers){
-      const member = companyMembers[i];
-      member.Company_idCompany = companyRow.insertId; 
-      const memberRow = await pool.query('INSERT INTO CompanyMembers SET ?', [member]);
-    }
-
-    //User
-    const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date(), registeredBy: userId, registeredDate: new Date(), Role_idRole: 3, Company_idCompany: companyRow.insertId};
-    const userRow = await pool.query('INSERT INTO User SET ?', [user]);
-
-    //Auth
-    const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date(), createdDate: new Date()};
-    newAuth.password = await helpers.encryptPassword(password);
-    const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
-
-    return {status: 200, message: {message: "La empresa ha sido creada de manera exitosa."}};
   }catch(e){
-    console.log(e);
+    console.log("Stack", e.message);
     throw e;
     //return {status: 500, message: "Error interno de l servidor."};
   }    
@@ -119,7 +125,7 @@ const getCompanies = async (req, userId) => {
 const getAllCompaniesForUser = async ( ) => {
   
   try{
-    const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C');
+    const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C ORDER BY C.socialReason ASC');
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);
