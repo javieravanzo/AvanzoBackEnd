@@ -331,9 +331,8 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
     if(approve === "true"){
       //console.log("CI", clientId);
       const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientId]);
-
+      
       const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientId]);
-
       //DocumentClients
       const filesPath = {
         documentId: newClient[0].file1,
@@ -470,7 +469,7 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
 
     }else{
 
-      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idClient = ?', [2, clientId]);
+      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [2, clientId]);
       
       return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
     }

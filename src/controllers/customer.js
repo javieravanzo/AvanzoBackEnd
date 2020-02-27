@@ -272,7 +272,7 @@ const approveCustomer = async (req, res, next) => {
         //Get the user id
         const adminId = getAdminId(req);
         const {clientid, approve, observation} = req.headers;
-
+        console.log("CI", clientid);
         const result = await approveCustomers(clientid, approve, adminId, observation);
         if(result.status === 200){
             res.status(result.status).json(result.message);
