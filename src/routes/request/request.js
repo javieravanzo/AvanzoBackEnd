@@ -38,7 +38,7 @@ const router = express.Router();
 const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
-        generateContract } = require('../../controllers/request');
+        generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC } = require('../../controllers/request');
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
@@ -52,6 +52,10 @@ router.get('/Request/GetOultayDatesList',[
 router.post('/Request/Create', uploads.single('file'), [verifyToken], createNewRequest);
 
 router.get('/Request/GetAll', [verifyToken], getAllRequest);
+
+router.get('/Request/GetAllWasOutlayed', [verifyToken], getAllRequestWasOutlayedC);
+
+router.get('/Request/GetAllWasRejected', [verifyToken], getAllRequestWasRejectedC);
 
 router.get('/Request/GetAllRequestByCompany', [verifyToken], getAllRequestByCompany);
 

@@ -23,7 +23,7 @@ const getInitialsData = async (userId) => {
       //console.log("UR", userRow);
       const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ? ORDER BY createdDate DESC LIMIT 3', [userRow[0].idAccount]);
       //console.log("UT", transactions);
-      const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.name <> ?) where REQUEST.Account_idAccount = ?', ["Desembolsada", userRow[0].idAccount]);
+      const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.idRequestState < ?) where REQUEST.Account_idAccount = ?', [5, userRow[0].idAccount]);
       // console.log("URE", request);
       if(userRow){
         return {status: 200, message: "", 

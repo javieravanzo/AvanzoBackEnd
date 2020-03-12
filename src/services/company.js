@@ -112,7 +112,7 @@ const getCompanies = async (req, userId) => {
   
   try{
     //const companyRow = await pool.query('SELECT C.*, U.email FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
-    const companyRow = await pool.query('SELECT C.*, U.email FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
+    const companyRow = await pool.query('SELECT C.*, U.email, U.status FROM Company C JOIN User U ON (C.idCompany = U.Company_idCompany)');
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);
@@ -148,6 +148,23 @@ const getCompanyWithSalaries = async (companyId) => {
 
 };
 
+const activateCompanies = async (companyId, active) => {
+
+  try{   
+    if(active === "true"){
+      const companyQuery = await pool.query('UPDATE User SET status = ? where Company_idCompany = ?', [true, companyId]);
+      return {status: 200, message: {message:"La empresa ha sido activada exitosamente."}};
+    }else{
+      const companyQuery = await pool.query('UPDATE User SET status = ? where Company_idCompany = ?', [false, companyId]);
+      return {status: 200, message: {message: "La empresa ha sido desactivada  exitosamente."}};
+    }
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 module.exports = {
-  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries
+  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries, activateCompanies
 };

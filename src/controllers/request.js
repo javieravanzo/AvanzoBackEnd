@@ -9,7 +9,7 @@ var fs = require('fs');
 //Imports
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
-        generateContracts } = require('../services/request');
+        generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected } = require('../services/request');
 
 //Get the client with token
 function getClientId(req){
@@ -154,6 +154,43 @@ const getAllRequest = async (req, res, next) => {
   };
 };
 
+const getAllRequestWasOutlayedC = async (req, res, next) => {
+
+  const clientId = getClientId(req);
+  //console.log("CI", clientId);
+
+  try {
+    const result = await getAllRequestsWasOutlayed(clientId);
+    if(result.status === 200){
+        res.status(result.status).json(result.data);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    console.log(e);
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };
+};
+
+const getAllRequestWasRejectedC = async (req, res, next) => {
+
+  const clientId = getClientId(req);
+  //console.log("CI", clientId);
+
+  try {
+    const result = await getAllRequestWasRejected(clientId);
+    if(result.status === 200){
+        res.status(result.status).json(result.data);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };
+};
+
 const getAllRequestByCompany = async (req, res, next) => {
 
   const companyId = getCompanyId(req);
@@ -279,5 +316,6 @@ const generateContract = async (req, res, next) => {
 
 module.exports = {
   getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getAllRequestByCompany,
-  approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract
+  approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
+  getAllRequestWasRejectedC, getAllRequestWasOutlayedC
 };

@@ -6,9 +6,10 @@ const morgan = require('morgan');
 const app = express();
 
 //Settings
-app.set('port', process.env.PORT || 4000)
+app.set('port', process.env.PORT || 4000);
 
 //Middlewares
+app.use(express.static('../files/terms'));
 app.use(express.static('../files/images'));
 app.use(express.static('../files/contracts'));
 app.use(express.static('../files/documents'));

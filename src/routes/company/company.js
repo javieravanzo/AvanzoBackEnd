@@ -8,7 +8,7 @@ const router = express.Router();
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
 const { createCompany, getAllCompanies, getCompaniesForUser, updateCompany,
-        getCompanyWithSalary } = require('../../controllers/company');
+        getCompanyWithSalary, activateCompany } = require('../../controllers/company');
  
 //Routes 
 router.post('/Company/Create', 
@@ -46,6 +46,8 @@ router.get('/Company/GetAll', [verifyToken], getAllCompanies);
 router.get('/Company/GetWithSalaries', [verifyToken], getCompanyWithSalary);
 
 router.get('/Company/GetAllForUsers', getCompaniesForUser);
+
+router.put('/Company/ChangePlatformStatus', activateCompany);
 
 //Export
 module.exports = router;

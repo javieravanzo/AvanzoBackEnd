@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 //Imports
 const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies,
-        getCompanyWithSalaries } = require('../services/company');
+        getCompanyWithSalaries, activateCompanies } = require('../services/company');
 
 //Functions
 //Get the user with token
@@ -19,6 +19,19 @@ function getUserId(req){
   return (parseInt(decoded.userRow[0].Administrator_idAdministrator, 10));  
 
 }; 
+
+//Get the admin with token
+function getAdminId(req){
+
+  //Get the clientId
+  const bearerHeader = req.headers['authorization'];
+  //Get the real token
+  const bearer = bearerHeader.split(" ")[1];
+  //Set the token
+  const decoded = jwt.decode(bearer);
+  return (decoded.userRow[0].Administrator_idAdministrator);  
+
+};
 
 const createCompany = async (req, res, next) => {
 
@@ -132,9 +145,31 @@ const getCompanyWithSalary = async (req, res, next) => {
 
 };
 
+const activateCompany = async (req, res, next) => {
+    
+  try {
+
+      //Get the user id
+      const adminId = getAdminId(req);
+      const {companyid, status} = req.headers;
+
+      //console.log("CI", clientid, "S", status);
+      const result = await activateCompanies(companyid, status);
+      if(result.status === 200){
+          res.status(result.status).json(result.message);
+      }else{
+          res.status(result.status).json(result.message);
+      }
+      next();
+  } catch(e) {
+      console.log(e);
+      res.status(500).json("No es posible realizar el cambio de estado en este momento.");
+  };
+
+};
 
 
 module.exports = {
-  createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary
+  createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary, activateCompany
 };
 
