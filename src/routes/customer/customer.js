@@ -21,9 +21,7 @@ const storageAdmin = multer.diskStorage({
     //Production
     callback(null, '../files/admin/reads');
     //Development
-    //callback(null, './files/admin/reads');
-
-    
+    //callback(null, './files/admin/reads');    
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);

@@ -197,12 +197,12 @@ const updateCustomers = async (body, user, adminId) => {
 const createMultipleCustomers = async (customersData, adminId) => {
 
   try{
-  //console.log("CD", customersData);
-    
+  
     for (let i in customersData){
-      
+
       const companyNitQuery = await pool.query('SELECT C.idCompany FROM Company C where C.nit = ?', [customersData[i].EmpresaAsociada]);
       if (companyNitQuery !== '[]'){
+        
         //Create the client
         let new_client = {
           documentType: customersData[i].TipoDocumento,
@@ -217,11 +217,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
           registeredDate: new Date(),
         };
 
-        //console.log("New Client", new_client);
-
         //Insert the client
         const clientQuery = await pool.query('INSERT INTO Client SET ?', [new_client]);
-        //console.log("ClientQuery", clientQuery);
 
         //Insert in user
         const newUser = {
@@ -242,8 +239,6 @@ const createMultipleCustomers = async (customersData, adminId) => {
         //Consult the company info
         const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
         
-        //console.log("MCA", customersData[i].CantidadMaximaPrestamo, customersData[i].CantidadMaximaPrestamo !== " ");
-        //console.log("FEE", customersData[i].CantidadMaximaCuotas);
         //Create the account
         const newAccount = {
           maximumAmount: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo,10) : parseInt(companyQuery[0].defaultAmount, 10),
@@ -261,11 +256,12 @@ const createMultipleCustomers = async (customersData, adminId) => {
         };
         
         const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
-        return {status: 200, message: "Los usuarios han sido registrados a la plataforma satisfactoriamente."};
+
       }else{
         return {status: 404, message: "La empresa asociada no se encuentra dentro de nuestros registros."};
-      }
-    }    
+      } 
+    } 
+    return {status: 200, message: "Los usuarios han sido registrados a la plataforma satisfactoriamente."}   
   }catch(e){
     console.log(e);
     return {status: 500, message: "Error interno del servidor"};
