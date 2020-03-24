@@ -48,7 +48,7 @@ const getRequestsData = async (userId) => {
       const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
       const companyInfo = await pool.query('SELECT maximumSplit FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
       const interest = await pool.query('SELECT interestValue FROM InterestRequest');
-      const adminFee = await pool.query('SELECT managementPaymentValue FROM ManagementPayment');
+      const adminFee = await pool.query('SELECT managementPaymentRate FROM ManagementPayment');
       if(userRow){
         return {status: 200, message: "", 
                 data: {
@@ -57,7 +57,7 @@ const getRequestsData = async (userId) => {
                   maximumSplit: companyInfo[0].maximumSplit,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
                   interestValue: interest[0].interestValue,
-                  adminValue: adminFee[0].managementPaymentValue,
+                  adminValue: adminFee[0].managementPaymentRate,
                   otherCollectionValue: 0,
                   phoneNumber: userRow[0].phoneNumber,
                   accountNumber: userRow[0].accountNumber,

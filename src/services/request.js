@@ -11,6 +11,8 @@ const mkdirp = require('mkdirp');
 const pdf = require('html-pdf');
 const jwt = require('jsonwebtoken');
 
+//const { checkDateList } = require('./loan');
+
 //Functions
 function getStateIdFromName (row, name){
   
@@ -56,11 +58,11 @@ const getOutLaysData = async () => {
     const walletRow = await pool.query('SELECT * FROM Wallet');
     if(walletRow){
       return {status: 200, message: "", 
-              data: {
-                walletInfo: walletRow,
-                bankInfo: bankRow,
-                bankTypeAccountInfo: accountTypeRow,
-              }
+                data: {
+                    walletInfo: walletRow,
+                    bankInfo: bankRow,
+                    bankTypeAccountInfo: accountTypeRow,
+                  }
               };
     }else{
         return {status: 500, message: "Error interno del servidor."};
@@ -73,51 +75,175 @@ const getOutLaysData = async () => {
 const getOultayDatesLists = async (customerId, split, quantity) => {
 
   try {
+
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
-    //console.log("UR", userRow);
     const dateRate = userRow[0].companyRate;
 
     //Interest
     const interestRow = await pool.query('SELECT interestValue FROM InterestRequest');
-    const interest = parseInt(interestRow[0].interestValue, 10);
+    const interest = parseFloat(interestRow[0].interestValue);
 
     //ManagementValue
     const adminRow = await pool.query('SELECT managementPaymentValue FROM ManagementPayment');
-    const adminValue = adminRow[0].managementPaymentValue;
-    
+    const adminValue = adminRow[0].managementPaymentRate;   
 
     if(userRow){
+      
       //Define value
-      const realRequestValue = (quantity*interest*split) + (quantity*adminValue*split) + parseInt(quantity, 10);
-      const partialQuantity = realRequestValue / split;
-      const datesList = [];
-      let firstDate = new Date();
-
-      for (let i=0; i<split; i++){
-        
-        //console.log("FD", firstDate);
-
-        let new_date = {
-          id: i,
-          name: "Descuento No. " + (i+1),
-          quantity: partialQuantity,
-          date: firstDate
-        };
-        
-        datesList.push(new_date);
-        firstDate.setDate((firstDate.getDate()+dateRate));
-      }
+      let datesList = await checkDateList(customerId, split, interest, adminValue, quantity);
+      //console.log("datesList", datesList);
       
       return {status: 200, data: datesList};
     }else{
-        return {status: 500, message: "Error interno del servidor1."};
+      return {status: 500, message: "Error interno del servidor1."};
     }
   } catch(e) {
-    console.log(e);
+      console.log(e);
       return {status: 500, message: "Error interno del servidor2."};
   }
 };
+
+const checkDateList = async function(customerId, split, interest, adminValue, quantity){
+
+  try {
+
+    //Dates
+    const userRow =  await pool.query('SELECT COMSAL.* FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
+    
+    let today = new Date();
+
+    let todayNumber = parseInt(today.getDate(),10);
+
+    //ReportDays
+    let reportDays = userRow[0].companyReportDate.split(',');
+
+    let initialDate = null;
+
+    if(userRow[0].companyPaymentNumber > 1){
+      let result = todayNumber - parseInt(reportDays[0],10);
+      //console.log("Result", result);
+      let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
+      //console.log("DailyMonth", month);
+      if(result > 0){
+        initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);
+      }else{
+        initialDate = new Date(today.getFullYear(), month, userRow[0].companySecondDate);
+      }
+    }else{
+      let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
+      initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);                  
+    }
+
+    //NumberPayments
+    let datesList = new Array();
+    let new_date = {};
+    let originDate = initialDate;
+    let cashValues = [];
+    let lastDate = null;
+    let collectedDates = [];
+    collectedDates.push(new Date(today));
+    //console.log("CollectedDates1", collectedDates);
+    let asignedDate = null;
+    let real_date = null;
+
+    //Quantity
+    let splitQuantity = Math.ceil(quantity / split);
+
+    console.log("Interest", interest);
+
+    for (let i=0; i<split; i++){
+      
+      if(i !== 0){
+        real_date = await returnDateList(initialDate, userRow[0].companyRate, userRow[0].companyFirstDate, userRow[0].companySecondDate, i, collectedDates);
+        asignedDate = new Date(real_date);
+        //console.log("Real_date", real_date);
+        
+      }else{
+        real_date = initialDate;
+        asignedDate = new Date(real_date);
+      }
+      
+      collectedDates.push(asignedDate);
+      asignedDate = null;      
+
+      //console.log("Resta", new Date(real_date), originDate);
+
+      let days_per_split = Math.ceil((collectedDates[i+1].getTime() - collectedDates[i].getTime()) / (1000 * 3600 * 24));
+
+      others = {
+        days: days_per_split,
+        capital: splitQuantity + (quantity*interest*days_per_split),
+      };
+
+      new_date = {
+        id: i,
+        name: "Descuento No. " + (i+1),
+        quantity: splitQuantity + (quantity*interest*days_per_split),
+        date: new Date(real_date),
+      };
+      
+      //console.log("new_date", new_date);
+      if(i === split-1){
+        lastDate = real_date;
+      }
+      
+      cashValues.push(others);
+      datesList.push(new_date);
+
+    };
+
+    console.log("CollectedDates2", collectedDates);
+
+    let months = Math.ceil((collectedDates[split-1].getTime() - collectedDates[0].getTime()) / (1000 * 3600 * 24));
+
+    console.log("New Month", months);
+    //console.log("Initial Month", initialDate.getMonth());
+
+    //console.log("Months", months);
+
+    console.log("Days", cashValues);
+
+    return datesList;
+
+  }catch(e){
+
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+
+  }
+
+};
+
+const returnDateList = async function(initialDate, companyRate, firstDate, secondDate, i, collectedDates){
+
+  //console.log(initialDate, companyRate, firstDate, secondDate, i);
+
+  let originDate = initialDate; 
+
+  originDate.setDate(originDate.getDate()+companyRate-1);
+
+  //console.log("FuncDate", originDate, "I", parseInt(i,10), parseInt(i,10) === 0);
+
+  let month = originDate.getMonth();
+  let year = originDate.getFullYear();
+  //console.log("Year", year, "Month", month);
+    
+  //originDate = new Date(year, month, parseInt(secondDate, 10));
+  //console.log("CollectedDate", collectedDates, "OriginDate", originDate);
+
+  //console.log("Comparison", originDate.getDate() !== parseInt(firstDate,10), originDate.getDate() !== parseInt(secondDate, 10));
+
+  if(collectedDates.includes(originDate)){
+    originDate= new Date(year, month+1, parseInt(firstDate, 10));
+  }else if(originDate.getDate() !== parseInt(firstDate,10) && originDate.getDate() !== parseInt(secondDate, 10)){
+    originDate= new Date(year, month+1, parseInt(firstDate, 10));
+  }
+
+  return parseInt(i,10) === 0 ? initialDate : originDate;
+
+};
+
 
 const createRequest = async (body, file, clientId) => {  
 
@@ -487,7 +613,6 @@ const generateContracts = async (customerid, split, quantity, company) => {
   }
 
 };
-
 
 module.exports = {
   getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
