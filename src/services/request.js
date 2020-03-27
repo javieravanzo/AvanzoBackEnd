@@ -78,21 +78,20 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
 
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
-    const dateRate = userRow[0].companyRate;
 
     //Interest
     const interestRow = await pool.query('SELECT interestValue FROM InterestRequest');
     const interest = parseFloat(interestRow[0].interestValue);
 
     //ManagementValue
-    const adminRow = await pool.query('SELECT managementPaymentValue FROM ManagementPayment');
+    const adminRow = await pool.query('SELECT * FROM ManagementPayment');
+
     const adminValue = adminRow[0].managementPaymentRate;   
 
     if(userRow){
       
       //Define value
       let datesList = await checkDateList(customerId, split, interest, adminValue, quantity);
-      //console.log("datesList", datesList);
       
       return {status: 200, data: datesList};
     }else{
@@ -113,7 +112,11 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     
     let today = new Date();
 
-    let todayNumber = parseInt(today.getDate(),10);
+    console.log("Today: ", today);
+
+    today.setDate(today.getDate());
+
+    let todayNumber = parseInt(today.getDate(), 10);
 
     //ReportDays
     let reportDays = userRow[0].companyReportDate.split(',');
@@ -121,44 +124,40 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     let initialDate = null;
 
     if(userRow[0].companyPaymentNumber > 1){
-      let result = todayNumber - parseInt(reportDays[0],10);
-      //console.log("Result", result);
+
       let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
       //console.log("DailyMonth", month);
-      if(result > 0){
-        initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);
-      }else{
+      if(todayNumber < parseInt(reportDays[0],10)){
         initialDate = new Date(today.getFullYear(), month, userRow[0].companySecondDate);
+      }else if(todayNumber > parseInt(reportDays[1],10)){
+        initialDate = new Date(today.getFullYear(), month, userRow[0].companySecondDate);
+      }else{
+        initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);
       }
     }else{
       let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
       initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);                  
     }
 
+    console.log("Inicial Date: ", initialDate);
+
     //NumberPayments
     let datesList = new Array();
     let new_date = {};
-    let originDate = initialDate;
     let cashValues = [];
-    let lastDate = null;
     let collectedDates = [];
     collectedDates.push(new Date(today));
-    //console.log("CollectedDates1", collectedDates);
     let asignedDate = null;
     let real_date = null;
 
     //Quantity
     let splitQuantity = Math.ceil(quantity / split);
 
-    console.log("Interest", interest);
-
     for (let i=0; i<split; i++){
       
       if(i !== 0){
         real_date = await returnDateList(initialDate, userRow[0].companyRate, userRow[0].companyFirstDate, userRow[0].companySecondDate, i, collectedDates);
         asignedDate = new Date(real_date);
-        //console.log("Real_date", real_date);
-        
       }else{
         real_date = initialDate;
         asignedDate = new Date(real_date);
@@ -174,7 +173,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
       others = {
         days: days_per_split,
         capital: splitQuantity + (quantity*interest*days_per_split),
-      };
+      };     
 
       new_date = {
         id: i,
@@ -183,7 +182,6 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
         date: new Date(real_date),
       };
       
-      //console.log("new_date", new_date);
       if(i === split-1){
         lastDate = real_date;
       }
@@ -193,16 +191,23 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     };
 
-    console.log("CollectedDates2", collectedDates);
+    let months = Math.ceil((collectedDates[split].getTime() - collectedDates[0].getTime()) / (1000 * 3600 * 24 * 30));
 
-    let months = Math.ceil((collectedDates[split-1].getTime() - collectedDates[0].getTime()) / (1000 * 3600 * 24));
+    let administrationValue = months * adminValue;
 
-    console.log("New Month", months);
-    //console.log("Initial Month", initialDate.getMonth());
+    console.log("Admin", administrationValue);
 
-    //console.log("Months", months);
+    let ivaValue = months * (0.19) * administrationValue;
 
-    console.log("Days", cashValues);
+    console.log("IVA", ivaValue);
+
+    for (let i=0; i<split; i++){
+    
+      console.log("DL", datesList[i]);
+      datesList[i].quantity = datesList[i].quantity + Math.ceil(administrationValue / split) + Math.ceil(ivaValue / split);
+      console.log("DL", datesList[i]);
+
+    };
 
     return datesList;
 
@@ -221,7 +226,7 @@ const returnDateList = async function(initialDate, companyRate, firstDate, secon
 
   let originDate = initialDate; 
 
-  originDate.setDate(originDate.getDate()+companyRate-1);
+  originDate.setDate(originDate.getDate()+companyRate);
 
   //console.log("FuncDate", originDate, "I", parseInt(i,10), parseInt(i,10) === 0);
 
@@ -235,8 +240,10 @@ const returnDateList = async function(initialDate, companyRate, firstDate, secon
   //console.log("Comparison", originDate.getDate() !== parseInt(firstDate,10), originDate.getDate() !== parseInt(secondDate, 10));
 
   if(collectedDates.includes(originDate)){
+    console.log("Entro");
     originDate= new Date(year, month+1, parseInt(firstDate, 10));
   }else if(originDate.getDate() !== parseInt(firstDate,10) && originDate.getDate() !== parseInt(secondDate, 10)){
+    console.log("Entro con: ", originDate, "Día: ", originDate.getDate(), "Fechas son: " + firstDate + " - " + secondDate );
     originDate= new Date(year, month+1, parseInt(firstDate, 10));
   }
 
