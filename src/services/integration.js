@@ -8,17 +8,23 @@ const {my_secret_key, base_URL} = require('../config/global');
 //Services
 const integrationRegister = async (identificationId, client, user, auth) => {
   
+  let customerQuery;
+
   try{
     //console.log("U", identificationId, user.email, client.phoneNumber);    
-    const userRow = await pool.query('SELECT C.idClient, C.identificationId, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.identificationId = ?', [identificationId]);
-    //console.log("Row", userRow);
-    if(userRow.length !== 0){
+    let checkUserRow = await pool.query('SELECT C.idClient, C.identificationId, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.identificationId = ?', [identificationId]);
+    //console.log("Row", checkUserRow[0]);
+    customerQuery = checkUserRow;
+    
+    if(customerQuery.length !== 0){
 
       const newUser = user;
       newUser.registeredBy = 1;
       newUser.registeredDate = new Date();
 
-      const updateUser = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, userRow[0].idUser]);
+      console.log("Row2", customerQuery[0].idUser);
+
+      const updateUser = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, customerQuery[0].idUser]);
 
       const newClient = client;
 

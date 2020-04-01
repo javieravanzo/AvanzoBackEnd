@@ -20,8 +20,8 @@ const makeRegistration = async (req, res, next) => {
 
   //Logic
   //const client = {lastName: lastname, identificationId: identificationid, phoneNumber: phonenumber, expeditionDate: expeditiondate, birthDate: birthdate};
-  const client = {lastName, identificationId, expeditionDate, birthDate, phoneNumber};
-  const user = {name, email};
+  const client = { identificationId, expeditionDate, birthDate, phoneNumber};
+  const user = {name, email, lastName};
   const auth = {email};
   //client.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
   //client.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
@@ -30,6 +30,7 @@ const makeRegistration = async (req, res, next) => {
     const result = await integrationRegister(identificationId, client, user, auth);
     res.status(result.status).json({data: result.data, message: result.message});      
   }catch(e) {
+    console.log(e);
     res.status(500).json({message:"No es posible realizar el registro en este momento."});
   };
 
@@ -39,7 +40,6 @@ const checkPhone = async (req, res, next) => {
 
   //Variables
   const {phonenumber} = req.headers;
-
 
   //Validate input
   const errors = validationResult(req); 

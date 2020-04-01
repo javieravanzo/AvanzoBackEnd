@@ -31,6 +31,7 @@ function getUserId(req){
     const bearer = bearerHeader.split(" ")[1];
     //Set the token
     const decoded = jwt.decode(bearer);
+
     return (decoded.userRow[0].idUser);  
 
 };
@@ -44,6 +45,7 @@ function getAdminId(req){
     const bearer = bearerHeader.split(" ")[1];
     //Set the token
     const decoded = jwt.decode(bearer);
+
     return (decoded.userRow[0].Administrator_idAdministrator);  
 
 };

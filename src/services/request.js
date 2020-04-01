@@ -91,9 +91,9 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
     if(userRow){
       
       //Define value
-      let datesList = await checkDateList(customerId, split, interest, adminValue, quantity);
+      let info = await checkDateList(customerId, split, interest, adminValue, quantity);
       
-      return {status: 200, data: datesList};
+      return {status: 200, data: info};
     }else{
       return {status: 500, message: "Error interno del servidor1."};
     }
@@ -149,6 +149,8 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     collectedDates.push(new Date(today));
     let asignedDate = null;
     let real_date = null;
+    let totalQuantity = 0;
+    let totalInterest = 0;
 
     //Quantity
     let splitQuantity = Math.ceil(quantity / split);
@@ -178,9 +180,13 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
       new_date = {
         id: i,
         name: "Descuento No. " + (i+1),
-        quantity: splitQuantity + (quantity*interest*days_per_split),
+        //quantity: splitQuantity + (quantity*interest*days_per_split),
         date: new Date(real_date),
       };
+
+      totalInterest = Math.ceil(totalInterest) + Math.ceil(quantity*interest*days_per_split);
+
+      totalQuantity = (totalQuantity + splitQuantity + (quantity*interest*days_per_split));
       
       if(i === split-1){
         lastDate = real_date;
@@ -201,15 +207,23 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     console.log("IVA", ivaValue);
 
+    let quantitySplited = Math.ceil(totalQuantity / split);
+
     for (let i=0; i<split; i++){
     
       console.log("DL", datesList[i]);
-      datesList[i].quantity = datesList[i].quantity + Math.ceil(administrationValue / split) + Math.ceil(ivaValue / split);
+      datesList[i].quantity = quantitySplited + Math.ceil(administrationValue / split) + Math.ceil(ivaValue / split);
       console.log("DL", datesList[i]);
 
     };
 
-    return datesList;
+    let subTotal = parseInt(quantity, 10) + Math.ceil(totalInterest) + parseInt(administrationValue, 10);
+
+    let totalValue = parseInt(quantity, 10) + Math.ceil(totalInterest) + parseInt(administrationValue, 10) + parseInt(ivaValue, 10);
+
+    let info = { datesList, totalInterest, administrationValue, subTotal, ivaValue, totalValue};
+
+    return info;
 
   }catch(e){
 
@@ -240,10 +254,10 @@ const returnDateList = async function(initialDate, companyRate, firstDate, secon
   //console.log("Comparison", originDate.getDate() !== parseInt(firstDate,10), originDate.getDate() !== parseInt(secondDate, 10));
 
   if(collectedDates.includes(originDate)){
-    console.log("Entro");
+    //console.log("Entro");
     originDate= new Date(year, month+1, parseInt(firstDate, 10));
   }else if(originDate.getDate() !== parseInt(firstDate,10) && originDate.getDate() !== parseInt(secondDate, 10)){
-    console.log("Entro con: ", originDate, "Día: ", originDate.getDate(), "Fechas son: " + firstDate + " - " + secondDate );
+    //console.log("Entro con: ", originDate, "Día: ", originDate.getDate(), "Fechas son: " + firstDate + " - " + secondDate );
     originDate= new Date(year, month+1, parseInt(firstDate, 10));
   }
 
@@ -346,7 +360,7 @@ const createRequest = async (body, file, clientId) => {
 const getAllRequests = async (clientId) => {
   
   try{ 
-    console.log("ClientId", clientId);
+    //console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
