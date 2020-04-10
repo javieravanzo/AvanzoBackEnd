@@ -41,7 +41,7 @@ const createCompanies = async (req, userId) => {
 
         //console.log("CRD", cycle);
 
-        let reports =  cycle.companyReportDates;
+        let reports =  cycle.companyReportDate;
         let reportArray = reports.split(',');
         
         reportArray.sort();

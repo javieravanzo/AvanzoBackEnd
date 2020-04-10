@@ -10,12 +10,9 @@ INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, regis
 
 INSERT INTO Client (identificationId, documentType, phoneNumber, Company_idCompany, registeredBy, registeredDate, platformState, createdDate, ClientDocuments_idClientDocuments, CompanySalaries_idCompanySalaries) values (1564576532, 1, "3156453722", "11", "1", "2020-04-08 13:07:42.491", "true", "2020-04-08 13:07:42.491", "6", "13");
 
-SELECT * FROM Client;
-
-
-
+/*SELECT * FROM Client;
 SELECT * FROM User;
-SELECT * FROM NewClient;
+SELECT * FROM NewClient;*/
 
 
 /* Main Administrator */
