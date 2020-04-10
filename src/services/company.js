@@ -39,9 +39,9 @@ const createCompanies = async (req, userId) => {
           paymentArray = cycle.companyFirstDate;
         }
 
-        //console.log("CRD", cycle);
+        console.log("CRD", cycle);
 
-        let reports =  cycle.companyReportDate;
+        let reports =  cycle.companyReportDates;
         let reportArray = reports.split(',');
         
         reportArray.sort();
