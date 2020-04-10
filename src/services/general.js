@@ -21,7 +21,7 @@ const login = async (email, password) => {
             if(userRow.length > 0){
                 //console.log("UC", parseInt(userRow[0].isConfirmed, 10) === 1);
                 if(parseInt(userRow[0].isConfirmed, 10) === 1){
-                    const userAuth = { idAuth: userQuery.idAuth, expiresOn: userQuery.expiresOn, registeredDate: new Date() };
+                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date() };
                     const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };      
                     const validPassword = await helpers.matchPassword(password, userQuery.password);
                     //console.log("VP",validPassword);
@@ -47,6 +47,9 @@ const login = async (email, password) => {
             return {status: 400, message: "El email no existe en nuestros registros."};
         }
   } catch(e) {
+
+    console.log("E", e);
+
     throw e;
   }
 };

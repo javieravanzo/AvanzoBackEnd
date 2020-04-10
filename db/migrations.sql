@@ -8,6 +8,16 @@ INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate)
 INSERT INTO Administrator (identificationId, adminType) values ("1032488727", "superAdmin");
 INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", "Orjuela", false, false, NOW(), 1, NOW(), 1, null, null, 1);
 
+INSERT INTO Client (identificationId, documentType, phoneNumber, Company_idCompany, registeredBy, registeredDate, platformState, createdDate, ClientDocuments_idClientDocuments, CompanySalaries_idCompanySalaries) values (1564576532, 1, "3156453722", "11", "1", "2020-04-08 13:07:42.491", "true", "2020-04-08 13:07:42.491", "6", "13");
+
+SELECT * FROM Client;
+
+
+
+SELECT * FROM User;
+SELECT * FROM NewClient;
+
+
 /* Main Administrator */
 INSERT INTO Administrator (identificationId, adminType) values ("1011222333", "admin");
 INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Laura", "Sarmiento", false, false, NOW(), 1, NOW(), 2, null, null, 2);
@@ -22,27 +32,39 @@ INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) value
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Finalizada", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Devolución bancaria", NOW(), 1, NOW());
 
-/* Interest */
+INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Interest", 0, 0.069, NOW(), NOW());
+
+INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Management", 12000, 0, 1, NOW());
+
+INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("IVA", 0, 0.19, 1, NOW());
+
+/* Interest 
 INSERT INTO InterestRequest (interestValue, registeredBy, registeredDate) values ('0.04', 1, NOW());
 
-/* Management Payment */
-INSERT INTO ManagementPayment (managementpaymentValue, registeredBy, registeredDate) values ('0.03', 1, NOW());
+INSERT INTO Indicators (indicatorValue, indicatorRate, registeredBy, registeredDate) values (
 
-/* Documents Types */
-INSERT INTO DocumentTypes (typeName) values ('Cédula'), ('Pasaporte');
+/* Management Payment 
+INSERT INTO ManagementPayment (managementpaymentValue, registeredBy, registeredDate) values ('0.03', 1, NOW());*/
+
+/* Documents Types 
+INSERT INTO DocumentTypes (typeName) values ('Cédula'), ('Pasaporte'); */
 
 /* Bank */
-INSERT INTO Bank (bankName) values ("Banco Caja Social");
-INSERT INTO Bank (bankName) values ("Banco Davivienda");
-INSERT INTO Bank (bankName) values ("Banco de Bogotá");
-INSERT INTO Bank (bankName) values ("Banco AV Villas");
-INSERT INTO Bank (bankName) values ("Banco Popular");
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Caja Social", "A", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Davivienda", "B", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco de Bogotá", "C", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco AV Villas", "D", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Popular", "E", false, false);
 
-/* Bank Account Type */
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Nequi", "F", false, true);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Daviplata", "G", false, true);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("RappiPay", "H", false, true);
+
+/* Bank Account Type 
 INSERT INTO AccountTypes (accountTypeName) values ("Cuenta Corriente");
-INSERT INTO AccountTypes (accountTypeName) values ("Cuenta de ahorros");
+INSERT INTO AccountTypes (accountTypeName) values ("Cuenta de ahorros"); */
 
-/* Wallets */
+/* Wallets
 INSERT INTO Wallet (walletName) values ("Nequi");
 INSERT INTO Wallet (walletName) values ("DaviPlata");
-INSERT INTO Wallet (walletName) values ("RappiPay");
+INSERT INTO Wallet (walletName) values ("RappiPay");  */

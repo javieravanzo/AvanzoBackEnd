@@ -16,17 +16,52 @@ const createCompanies = async (req, userId) => {
     company.registeredDate = new Date();
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
-    console.log("CE", consultEmail.length > 0);
+    //console.log("CE", consultEmail.length > 0);
     if(consultEmail.length === 0){
+
       const companyRow = await pool.query('INSERT INTO Company SET ?', [company]);
+      console.log("0", companyRow);
+      
       //CompanySalaries
       for (let i in companySalaries){
-        const cycle = companySalaries[i];
-        cycle.companyRateName = cycle.companyRate;
-        cycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
-        cycle.companyRate = cycle.companyRate === "Mensual" ? 30 : 15;
-        cycle.companySecondDate = cycle.companySecondDate !== undefined ? cycle.companySecondDate : null;
-        const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [cycle]);
+
+        let cycle = companySalaries[i];
+        let newCycle = {};
+        let paymentArray = "";
+
+        if( cycle.companyRate === "Quincenal"){       
+          if(parseInt(cycle.companySecondDate,10) >= parseInt(cycle.companyFirstDate, 10)){
+            paymentArray = cycle.companyFirstDate + ',' + cycle.companySecondDate;
+          }else{
+            paymentArray = cycle.companySecondDate + ',' + cycle.companyFirstDate;
+          }
+        }else{
+          paymentArray = cycle.companyFirstDate;
+        }
+
+        //console.log("CRD", cycle);
+
+        let reports =  cycle.companyReportDates;
+        let reportArray = reports.split(',');
+        
+        reportArray.sort();
+
+        console.log("ReportArray", reportArray);
+
+        let newArray = reportArray.toString();
+
+        console.log("ReportArray", newArray);
+
+        newCycle.companyRateName = cycle.companyRate;
+        newCycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
+        newCycle.companyRate = cycle.companyRate === "Mensual" ? 30 : 15;
+        newCycle.companyPaymentDates = paymentArray;
+        newCycle.companyReportDates = newArray;
+
+        console.log("Cycle", newCycle);
+
+        const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [newCycle]);
+        console.log("1", companySalaryRow);
 
         const newLinks = {
           Company_idCompany: companyRow.insertId,
@@ -34,6 +69,7 @@ const createCompanies = async (req, userId) => {
         };
 
         const companyLink = await pool.query('INSERT INTO Company_has_CompanySalaries SET ?', [newLinks]);
+        console.log("2", companyLink);
       }
 
       //CompanyMembers
@@ -50,21 +86,21 @@ const createCompanies = async (req, userId) => {
       //Auth
       const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date(), createdDate: new Date()};
       newAuth.password = await helpers.encryptPassword(password);
-      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]); 
 
       return {status: 200, message: {message: "La empresa ha sido creada de manera exitosa."}};
+
     }else{
       
       return {status: 500, message: {message: "El NIT o el correo electrónico que suministraste ya ha sido registrado en la plataforma."}};
     }
   }catch(e){
-    console.log("Stack", e.message);
+    console.log("Stack", e);
     throw e;
     //return {status: 500, message: "Error interno de l servidor."};
   }    
 };
 
-//Services
 const updateCompanies = async (req, userId) => {
   
   //NewObject
@@ -138,7 +174,7 @@ const getAllCompaniesForUser = async ( ) => {
 const getCompanyWithSalaries = async (companyId) => {
 
   try{
-    const companyRow = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyPaymentNumber, CS.companyRate, CS.companyReportDate, CS.companyFirstDate, CS.companySecondDate FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CS.idCompanySalaries = CHS.CompanySalaries_idCompanySalaries) WHERE (CHS.Company_idCompany = ?)', [companyId]);
+    const companyRow = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyPaymentNumber, CS.companyRate, CS.companyReportDates, CS.companyFirstDate, CS.companySecondDate FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CS.idCompanySalaries = CHS.CompanySalaries_idCompanySalaries) WHERE (CHS.Company_idCompany = ?)', [companyId]);
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);

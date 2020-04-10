@@ -53,21 +53,22 @@ const compile = async function(templateName, data){
 const getOutLaysData = async () => {
 
   try {
-    const bankRow = await pool.query('SELECT * FROM Bank');
-    const accountTypeRow = await pool.query('SELECT * FROM AccountTypes');
-    const walletRow = await pool.query('SELECT * FROM Wallet');
+    const bankRow = await pool.query('SELECT * FROM Bank where isWallet = ?', false);
+    //const accountTypeRow = await pool.query('SELECT * FROM AccountTypes');
+    const walletRow = await pool.query('SELECT * FROM Bank where isWallet = ?', true);
     if(walletRow){
       return {status: 200, message: "", 
                 data: {
                     walletInfo: walletRow,
                     bankInfo: bankRow,
-                    bankTypeAccountInfo: accountTypeRow,
+                    //bankTypeAccountInfo: accountTypeRow,
                   }
               };
     }else{
         return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e) {
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 };
@@ -77,30 +78,144 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
   try {
 
     //Dates
-    const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyFirstDate, COMSAL.companySecondDate FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
+    const userRow =  await pool.query('SELECT COMSAL.companyRate, COMSAL.companyPaymentDates FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
 
     //Interest
-    const interestRow = await pool.query('SELECT interestValue FROM InterestRequest');
-    const interest = parseFloat(interestRow[0].interestValue);
+    const interestRow = await pool.query('SELECT * FROM Indicators where indicatorName = ?', "Interest" );
+    
+    const interest = parseFloat(interestRow[0].indicatorRate);
 
     //ManagementValue
-    const adminRow = await pool.query('SELECT * FROM ManagementPayment');
+    const adminRow = await pool.query('SELECT * FROM Indicators where indicatorName = ?', "Management");
 
-    const adminValue = adminRow[0].managementPaymentRate;   
+    const adminValue = adminRow[0].indicatorValue;   
 
     if(userRow){
       
       //Define value
-      let info = await checkDateList(customerId, split, interest, adminValue, quantity);
-      
-      return {status: 200, data: info};
+      let result = await checkDateList(customerId, split, interest, adminValue, quantity);
+    
+      return {status: 200, data: result};
     }else{
       return {status: 500, message: "Error interno del servidor1."};
     }
-  } catch(e) {
-      console.log(e);
-      return {status: 500, message: "Error interno del servidor2."};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor2."};
   }
+};
+
+const newDateList = async function(userRow){
+  
+  try{
+
+    //Dates
+    //const userRow =  await pool.query('SELECT COMSAL.* FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
+    
+    //let playmentSplited = userRow[0].companyPaymentDates.split(',');
+
+    let paymentArray = userRow[0].companyPaymentDates.split(',');
+
+
+    //console.log("UR", userRow[0].companyPaymentNumber, userRow[0].companyPaymentNumber === 1, userRow[0].companyFirstDate, userRow[0].companySecondDate);
+
+    /*if(parseInt(userRow[0].companyPaymentNumber,10) === 2){
+      paymentArray.push(playmentSplited[0].companyFirstDate);
+      paymentArray.push(userRow[0].companySecondDate);
+    }else if(parseInt(userRow[0].companyPaymentNumber, 10) === 1){
+      paymentArray.push(userRow[0].companyFirstDate);
+    }*/
+
+    //console.log("Payment", paymentArray);
+
+    let today = new Date();
+
+    //console.log("Today: ", today);
+
+    today.setDate(today.getDate());
+
+    //console.log("Today: ", today);
+
+    let todayNumber = parseInt(today.getDate(), 10);
+
+    //ReportDays
+    let reportDays = userRow[0].companyReportDates.split(',');
+
+    let reportDate = -1;
+
+    for (let i = 0; i < reportDays.length ; i++){
+
+      //console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
+
+      if( i === 0 && todayNumber < reportDays[i]){
+
+        reportDate = parseInt(reportDays[0], 10);
+        break;
+
+      }else if ( todayNumber >= reportDays[i] && todayNumber < reportDays[i+1] ){
+
+        reportDate = parseInt(reportDays[i+1], 10);
+        break;
+        
+      }else{
+
+        //console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
+
+        if( i === reportDays.length-1 && todayNumber >= reportDays[i] ){
+
+          reportDate = parseInt(reportDays[0], 10);
+          break;
+
+        }
+
+      }
+
+    }
+
+    //console.log("ReportDate", parseInt(reportDate, 10));
+
+    //console.log("PaymentArray", paymentArray);
+
+    let paymentDate  = -1;
+
+    for (let j = 0; j < paymentArray.length; j++ ){
+
+      //console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
+
+      if( reportDate < paymentArray[j] ){
+
+        paymentDate = parseInt(paymentArray[j], 10);
+        break;
+      
+      }else{
+
+        if( j === paymentArray.length-1 && reportDate >= paymentArray[j] ){
+
+          paymentDate = parseInt(paymentArray[0], 10);
+          break;
+
+        }
+
+      }
+
+    };
+
+    let month = todayNumber < parseInt(paymentDate,10) ? today.getMonth() : today.getMonth()+1;
+
+    let initialDate = new Date(today.getFullYear(), month, parseInt(paymentDate,10));
+
+    //console.log("initialDate", initialDate);
+
+    let data = {initialDate, paymentArray}
+
+    return data;
+
+  }catch(e){
+
+    console.log("E", e);
+
+  }
+
 };
 
 const checkDateList = async function(customerId, split, interest, adminValue, quantity){
@@ -108,38 +223,17 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
   try {
 
     //Dates
-    const userRow =  await pool.query('SELECT COMSAL.* FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
+    const userRow =  await pool.query('SELECT COMSAL.* FROM Client CLI JOIN User USR JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient and CLI.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);   
     
+    //console.log("UserRow", userRow);
+
     let today = new Date();
 
-    console.log("Today: ", today);
+    //let new_info = await newDateList(customerId);
+    let variables = await newDateList(userRow);
 
-    today.setDate(today.getDate());
-
-    let todayNumber = parseInt(today.getDate(), 10);
-
-    //ReportDays
-    let reportDays = userRow[0].companyReportDate.split(',');
-
-    let initialDate = null;
-
-    if(userRow[0].companyPaymentNumber > 1){
-
-      let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
-      //console.log("DailyMonth", month);
-      if(todayNumber < parseInt(reportDays[0],10)){
-        initialDate = new Date(today.getFullYear(), month, userRow[0].companySecondDate);
-      }else if(todayNumber > parseInt(reportDays[1],10)){
-        initialDate = new Date(today.getFullYear(), month, userRow[0].companySecondDate);
-      }else{
-        initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);
-      }
-    }else{
-      let month = todayNumber + userRow[0].companyRate > 31 ? today.getMonth()+1 : today.getMonth();
-      initialDate = new Date(today.getFullYear(), month, userRow[0].companyFirstDate);                  
-    }
-
-    console.log("Inicial Date: ", initialDate);
+    let initialDate = variables.initialDate;
+    let paymentArray = variables.paymentArray;
 
     //NumberPayments
     let datesList = new Array();
@@ -155,22 +249,19 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     //Quantity
     let splitQuantity = Math.ceil(quantity / split);
 
-    for (let i=0; i<split; i++){
-      
-      if(i !== 0){
-        real_date = await returnDateList(initialDate, userRow[0].companyRate, userRow[0].companyFirstDate, userRow[0].companySecondDate, i, collectedDates);
-        asignedDate = new Date(real_date);
-      }else{
-        real_date = initialDate;
-        asignedDate = new Date(real_date);
+    let arrayDates = await returnDateList(initialDate, paymentArray, split, today, userRow[0].companyPaymentNumber);
+
+    //console.log("ArrayDates", arrayDates);
+
+    for (let i=0; i<split; i++){  
+
+      let days_per_split;
+
+      if(arrayDates[i+1].getTime() !== undefined){
+
+        days_per_split = Math.ceil((arrayDates[i+1].getTime() - arrayDates[i].getTime()) / (1000 * 3600 * 24));
+
       }
-      
-      collectedDates.push(asignedDate);
-      asignedDate = null;      
-
-      //console.log("Resta", new Date(real_date), originDate);
-
-      let days_per_split = Math.ceil((collectedDates[i+1].getTime() - collectedDates[i].getTime()) / (1000 * 3600 * 24));
 
       others = {
         days: days_per_split,
@@ -181,7 +272,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
         id: i,
         name: "Descuento No. " + (i+1),
         //quantity: splitQuantity + (quantity*interest*days_per_split),
-        date: new Date(real_date),
+        date: arrayDates[i+1],
       };
 
       totalInterest = Math.ceil(totalInterest) + Math.ceil(quantity*interest*days_per_split);
@@ -197,23 +288,21 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     };
 
-    let months = Math.ceil((collectedDates[split].getTime() - collectedDates[0].getTime()) / (1000 * 3600 * 24 * 30));
+    let months = Math.ceil((arrayDates[split].getTime() - arrayDates[0].getTime()) / (1000 * 3600 * 24 * 30));
 
     let administrationValue = months * adminValue;
 
-    console.log("Admin", administrationValue);
+    //console.log("Admin", administrationValue);
 
     let ivaValue = months * (0.19) * administrationValue;
 
-    console.log("IVA", ivaValue);
+    //console.log("IVA", ivaValue);
 
     let quantitySplited = Math.ceil(totalQuantity / split);
 
     for (let i=0; i<split; i++){
     
-      console.log("DL", datesList[i]);
       datesList[i].quantity = quantitySplited + Math.ceil(administrationValue / split) + Math.ceil(ivaValue / split);
-      console.log("DL", datesList[i]);
 
     };
 
@@ -234,37 +323,60 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
 };
 
-const returnDateList = async function(initialDate, companyRate, firstDate, secondDate, i, collectedDates){
+const returnDateList = async function(initialDate, paymentArray, split, today, companyPaymentNumber){
 
   //console.log(initialDate, companyRate, firstDate, secondDate, i);
+  //console.log("ID", initialDate);
+  
+  let counter = 0;
 
-  let originDate = initialDate; 
+  let newDate = initialDate;
 
-  originDate.setDate(originDate.getDate()+companyRate);
+  let daysArray = [];
 
-  //console.log("FuncDate", originDate, "I", parseInt(i,10), parseInt(i,10) === 0);
+  daysArray.push(new Date (today)); 
+  
+  while(counter < split){  
 
-  let month = originDate.getMonth();
-  let year = originDate.getFullYear();
-  //console.log("Year", year, "Month", month);
-    
-  //originDate = new Date(year, month, parseInt(secondDate, 10));
-  //console.log("CollectedDate", collectedDates, "OriginDate", originDate);
+    let arrayDate = null;
 
-  //console.log("Comparison", originDate.getDate() !== parseInt(firstDate,10), originDate.getDate() !== parseInt(secondDate, 10));
+    //console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
 
-  if(collectedDates.includes(originDate)){
-    //console.log("Entro");
-    originDate= new Date(year, month+1, parseInt(firstDate, 10));
-  }else if(originDate.getDate() !== parseInt(firstDate,10) && originDate.getDate() !== parseInt(secondDate, 10)){
-    //console.log("Entro con: ", originDate, "Día: ", originDate.getDate(), "Fechas son: " + firstDate + " - " + secondDate );
-    originDate= new Date(year, month+1, parseInt(firstDate, 10));
+    if(companyPaymentNumber > 1){
+
+      if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10) || parseInt(newDate.getDate(), 10) === parseInt(paymentArray[1], 10)){
+
+        arrayDate = newDate;
+
+        daysArray.push( new Date (arrayDate) ); 
+
+        counter++;
+
+      }
+
+    }else{
+
+      if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10)){
+
+        arrayDate = newDate;
+
+        daysArray.push( new Date (arrayDate) ); 
+
+        counter++;
+
+      }
+
+    }
+
+    newDate.setDate(newDate.getDate()+1);
+
   }
 
-  return parseInt(i,10) === 0 ? initialDate : originDate;
+  //console.log("daysArray", daysArray);
+
+  return daysArray;
 
 };
-
 
 const createRequest = async (body, file, clientId) => {  
 

@@ -1,8 +1,5 @@
 DELETE FROM User;
 DELETE FROM Company;
-
-
-
 DELETE FROM Account;
 DELETE FROM Administrator;
 DELETE FROM Auth;

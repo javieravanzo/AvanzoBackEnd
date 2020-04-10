@@ -2,12 +2,12 @@ const my_secret_key = 'LSL882BOPQ(/&%(&T(YUuhg7iU&G()t&98O/t890oizxcj7756HAS8g&/
 
 const base_URL = "http://backend.avanzocreditos.com:4000";
 
-const base_URL_test = "http://localhost:4000";
+//const base_URL = "http://localhost:4000";
 
 const front_URL = "http://cliente.avanzocreditos.com";
 
 const front_URL_test = "http://localhost:3000";
 
 module.exports = {
-  my_secret_key, base_URL, front_URL, front_URL_test, base_URL_test
+  my_secret_key, base_URL, front_URL, front_URL_test
 }

@@ -8,7 +8,7 @@ const multer = require('multer');
 const { verifyToken } = require('../../controllers/validator');
 const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
-        getAllCustomerToApprove, approveCustomer, updateCustomer, changeCustomerStatus,
+        getAllCustomerToApprove, getDateListToCustomer, approveCustomer, updateCustomer, changeCustomerStatus,
         makePayment} = require('../../controllers/customer');
  
 //Initialize
@@ -104,6 +104,9 @@ router.get('/Transactions/GetTransactionsByUserId',
 
 router.get('/Customer/GetAllToApprove',
 [verifyToken], getAllCustomerToApprove);
+
+router.get('/Customer/GetDateListToCustomer',
+[verifyToken], getDateListToCustomer);
 
 router.put('/Customer/ApproveorReject',
 [verifyToken], approveCustomer);

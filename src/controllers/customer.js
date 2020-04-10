@@ -7,7 +7,7 @@ const Excel = require('xlsx');
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
         getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers, 
-        makePayments } = require('../services/customer');
+        makePayments, getDatesListToCustomer } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -248,6 +248,27 @@ const getAllCustomerToApprove = async (req, res, next) => {
 
 };
 
+
+const getDateListToCustomer = async (req, res, next) => {
+    
+    //Get the user id
+    const {companyid} = req.headers;
+
+    try {
+        const result = await getDatesListToCustomer(companyid);
+        if(result){
+            res.status(result.status).json(result.data);
+        }else{
+            res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+        }
+              
+    }catch(e) {
+        res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+    };
+
+};
+
+
 const getTransactionsByUserId = async (req, res, next) => {
     
     //Get the user id
@@ -260,6 +281,7 @@ const getTransactionsByUserId = async (req, res, next) => {
         }else{
             res.status(500).json({message:"No es posible realizar la consulta de transacciones en este momento."}); 
         }
+        
               
     }catch(e) {
         res.status(500).json({message:"No es posible realizar la consulta de transacciones en este momento."}); 
@@ -273,9 +295,12 @@ const approveCustomer = async (req, res, next) => {
 
         //Get the user id
         const adminId = getAdminId(req);
-        const {clientid, approve, observation} = req.headers;
-        console.log("CI", clientid);
-        const result = await approveCustomers(clientid, approve, adminId, observation);
+        const {clientid, approve, cycleid} = req.headers;
+
+        const result = await approveCustomers(clientid, approve, adminId, parseInt(cycleid, 10));
+        
+        //const result = {status: 200};
+        
         if(result.status === 200){
             res.status(result.status).json(result.message);
         }else{
@@ -340,5 +365,5 @@ const makePayment = async (req, res, next) => {
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
-  approveCustomer, changeCustomerStatus, updateCustomer, makePayment
+  approveCustomer, changeCustomerStatus, updateCustomer, makePayment, getDateListToCustomer
 };

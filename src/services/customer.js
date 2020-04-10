@@ -47,8 +47,13 @@ const getRequestsData = async (userId) => {
   try {
       const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
       const companyInfo = await pool.query('SELECT maximumSplit FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
-      const interest = await pool.query('SELECT interestValue FROM InterestRequest');
-      const adminFee = await pool.query('SELECT managementPaymentRate FROM ManagementPayment');
+      
+      //Interest
+      const interest = await pool.query('SELECT indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
+      
+      //ManagementValue
+      const adminFee = await pool.query('SELECT indicatorValue FROM Indicators where indicatorName = ?', "Management" );
+      
       if(userRow){
         return {status: 200, message: "", 
                 data: {
@@ -69,6 +74,7 @@ const getRequestsData = async (userId) => {
         return {status: 500, message: "Error interno del servidor."};
       }
   }catch(e) {
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 };
@@ -289,10 +295,34 @@ const getAllCustomerWithCompanies = async () =>{
 const getCustomerToApprove = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT N.idNewClient, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
+    const clientRow =  await pool.query('SELECT N.idNewClient, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, CO.idCompany, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
     
+    //const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries) where (CHS.Company_idCompany = ?)', clientRow[0].idCompany);
+
     if(clientRow){
       return {status: 200, data: clientRow};
+    }else{
+      return {status: 500, message: "Error interno del servidor."};
+    }
+  }catch(e) {
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
+const getDatesListToCustomer = async (companyid) =>{
+  
+  try {
+
+    console.log("CI", companyid);
+  
+    const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries) where (CHS.Company_idCompany = ?)', companyid);
+
+    console.log("cycles", cycles);
+
+    if(cycles){
+      return {status: 200, data: cycles};
     }else{
       return {status: 500, message: "Error interno del servidor."};
     }
@@ -320,15 +350,18 @@ const getTransactionsByUsersId = async (userId) => {
 };
 
 //Pendiente traer IDENTIFICATION ID
-const approveCustomers = async (clientId, approve, adminId, observation, identificationId) => {
+const approveCustomers = async (clientid, approve, adminId, cycleId) => {
   
   try{   
     
     if(approve === "true"){
-      //console.log("CI", clientId);
-      const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientId]);
       
-      const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientId]);
+      //console.log("CI", clientid, approve, cycleId);
+      
+      const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientid]);
+      
+      const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
+      
       //DocumentClients
       const filesPath = {
         documentId: newClient[0].file1,
@@ -341,15 +374,19 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
       //New Client
       const client = {
         identificationId: newClient[0].identificationId,
-        documentType: "Cédula",
+        documentType: 1,
         phoneNumber: newClient[0].phoneNumber,
         Company_idCompany: newClient[0].Company_idCompany,
         registeredBy: 1,
         registeredDate: new Date(),
+        rejectState: false,
         platformState:  true,
         createdDate: new Date(),
         ClientDocuments_idClientDocuments: fileQuery.insertId,
+        CompanySalaries_idCompanySalaries: cycleId
       };
+
+      console.log("Client", client);
       
       const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
       
@@ -396,7 +433,11 @@ const approveCustomers = async (clientId, approve, adminId, observation, identif
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       //console.log(url.toString());
       
+      //Production
       let contractFile = await compileContract("../files/contracts/contratoAvanzo.pdf");
+
+      //Development
+      //let contractFile = await compileContract("./files/contracts/contratoAvanzo.pdf");
 
       //Mailer
       sgMail.setApiKey('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');
@@ -537,5 +578,5 @@ const makePayments = async(clientid, quantity) => {
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
-  approveCustomers, changeCustomersStatus, updateCustomers, makePayments
+  approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer
 }
