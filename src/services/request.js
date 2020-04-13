@@ -448,7 +448,7 @@ const createRequest = async (body, file, clientId) => {
           //newRequest.Observations_idObservations = observationInsert.insertId;
           
           //PreRequestDates - Request
-          const preRequestDates = {firstDate: new Date(), firstQuantity: 282341};
+          const preRequestDates = {dateList: "[]", totalQuantity: parseInt(quantity,10)+parseInt(interest,10)+parseInt(administration, 10), totalAmount: parseInt(quantity,10), totalInterest: parseInt(interest,10), totalAdmin: parseInt(administration, 10), totalIva: 0, totalOtherValues: 0};
           const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
           //console.log("PRD", preRequestDatesRow);
           newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;
