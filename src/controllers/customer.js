@@ -248,7 +248,6 @@ const getAllCustomerToApprove = async (req, res, next) => {
 
 };
 
-
 const getDateListToCustomer = async (req, res, next) => {
     
     //Get the user id

@@ -174,7 +174,7 @@ const getAllCompaniesForUser = async ( ) => {
 const getCompanyWithSalaries = async (companyId) => {
 
   try{
-    const companyRow = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyPaymentNumber, CS.companyRate, CS.companyReportDates, CS.companyFirstDate, CS.companySecondDate FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CS.idCompanySalaries = CHS.CompanySalaries_idCompanySalaries) WHERE (CHS.Company_idCompany = ?)', [companyId]);
+    const companyRow = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyPaymentNumber, CS.companyRate, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CS.idCompanySalaries = CHS.CompanySalaries_idCompanySalaries) WHERE (CHS.Company_idCompany = ?)', [companyId]);
     return {status: 200, data: companyRow};
   }catch(e){
     console.log(e);

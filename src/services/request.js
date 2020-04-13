@@ -401,12 +401,16 @@ const createRequest = async (body, file, clientId) => {
           var dest = '../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
           //Development
           //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
+          
           mkdirp.sync(dest);
           const content = await compile('contract', {identificationId: userRow[0].identificationId, lastName: userRow[0].lastName, name: userRow[0].name});
+          
+          
           //Production
           const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
           //Development
           //const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
+          
             if(err){
               return {status: 500, message: {message: "Error interno del servidor."}};
             }
@@ -731,6 +735,8 @@ const generateContracts = async (customerid, split, quantity, company) => {
     var dest = '../files/contracts/'+userRow[0].identificationId+'-'+company+'/';
     mkdirp.sync(dest);
     const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
+    
+    
     //Production
     const result = await pdf.create(content, {}).toFile('../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf', (err) => {
       if(err){

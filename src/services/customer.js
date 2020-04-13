@@ -113,10 +113,10 @@ const createCustomer = async (body, user, company, adminId) => {
  
   //NewClient
   const {identificationId, lastName, documentType, phoneNumber, fixedNumber, birthDate, expeditionDate, 
-         contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany} = body;
+         contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany, companyPayment} = body;
   
   const newClient = {identificationId, documentType, phoneNumber, fixedNumber, contractType, salary,
-     entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate};
+     entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate };
 
   //newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
   //newClient.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
@@ -124,6 +124,7 @@ const createCustomer = async (body, user, company, adminId) => {
   newClient.registeredBy = adminId;
   newClient.registeredDate = new Date();
   newClient.Company_idCompany = idCompany;
+  newClient.CompanySalaries_idCompanySalaries = companyPayment;
 
   try{
 
@@ -158,6 +159,7 @@ const createCustomer = async (body, user, company, adminId) => {
 
     return {status: 200, message: "El cliente ha sido registrado exitosamente."};
   }catch(e){
+    console.log("E", e);
     return {status: 500, message: "Error interno del servidor. Por favor, intente más tarde."};
 
   }    
@@ -295,7 +297,7 @@ const getAllCustomerWithCompanies = async () =>{
 const getCustomerToApprove = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT N.idNewClient, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, CO.idCompany, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
+    const clientRow =  await pool.query('SELECT N.idNewClient, N.phoneNumber, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, CO.idCompany, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
     
     //const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries) where (CHS.Company_idCompany = ?)', clientRow[0].idCompany);
 
