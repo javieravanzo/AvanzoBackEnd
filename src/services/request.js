@@ -391,7 +391,7 @@ const createRequest = async (body, file, clientId) => {
      
         //Account - Request
         const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
-        //console.log("UR", userRow[0]);
+        console.log("UR", userRow[0]);
         
         //console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
@@ -448,7 +448,7 @@ const createRequest = async (body, file, clientId) => {
           //newRequest.Observations_idObservations = observationInsert.insertId;
           
           //PreRequestDates - Request
-          const preRequestDates = {datesList: "[]", totalQuantity: parseInt(quantity,10)+parseInt(interest,10)+parseInt(administration, 10), totalAmount: parseInt(quantity,10), totalInterest: parseInt(interest,10), totalAdmin: parseInt(administration, 10), totalIva: 0, totalOtherValues: 0};
+          const preRequestDates = {datesList: "[]", totalQuantity: parseInt(quantity,10), totalAmount: parseInt(quantity,10), totalInterest: 0, totalAdmin: 0, totalIva: 0, totalOtherValues: 0};
           const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
           //console.log("PRD", preRequestDatesRow);
           newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;
