@@ -1,5 +1,6 @@
 DELETE FROM User;
 DELETE FROM Company;
+DELETE FROM Company where idCompany = 15;
 DELETE FROM Account;
 DELETE FROM Administrator;
 DELETE FROM Auth;

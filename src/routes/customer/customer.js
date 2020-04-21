@@ -9,7 +9,7 @@ const { verifyToken } = require('../../controllers/validator');
 const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
         getAllCustomerToApprove, getDateListToCustomer, approveCustomer, updateCustomer, changeCustomerStatus,
-        makePayment} = require('../../controllers/customer');
+        makePayment, deleteUsers} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -110,6 +110,8 @@ router.get('/Customer/GetDateListToCustomer',
 
 router.put('/Customer/ApproveorReject',
 [verifyToken], approveCustomer);
+
+router.put('/Customer/Delete', [verifyToken], deleteUsers);
 
 router.post('/Customer/MakePayment', [verifyToken], makePayment);
 

@@ -7,7 +7,7 @@ const Excel = require('xlsx');
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
         getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers, 
-        makePayments, getDatesListToCustomer } = require('../services/customer');
+        makePayments, getDatesListToCustomer, deleteUser } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -338,6 +338,32 @@ const changeCustomerStatus = async (req, res, next) => {
 
 };
 
+const deleteUsers = async (req, res, next) => {
+    
+    try {
+
+        //Get the user id
+        const adminId = getAdminId(req);
+        const {clientid} = req.headers;
+
+        //console.log("CI", clientid, "S", status);
+        const result = await deleteUser(clientid);
+        if(result.status === 200){
+            res.status(result.status).json(result.message);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+
+    } catch(e) {
+        console.log(e);
+        res.status(500).json("No es posible eliminar el usuario en este momento.");
+    };
+
+};
+
+
+
 const makePayment = async (req, res, next) => {
     
     try {
@@ -364,5 +390,6 @@ const makePayment = async (req, res, next) => {
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
-  approveCustomer, changeCustomerStatus, updateCustomer, makePayment, getDateListToCustomer
+  approveCustomer, changeCustomerStatus, updateCustomer, makePayment, getDateListToCustomer,
+  deleteUsers
 };

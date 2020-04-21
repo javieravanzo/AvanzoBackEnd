@@ -9,7 +9,9 @@ var fs = require('fs');
 //Imports
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
-        generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected } = require('../services/request');
+        generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
+        getAllPendingRHRequest
+      } = require('../services/request');
 
 //Get the client with token
 function getClientId(req){
@@ -285,6 +287,38 @@ const getRequestToOutLay = async (req, res, next) => {
 
 };
 
+const getRejectedRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllRejectedRequest();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };   
+
+};
+
+const getPendingRRHHRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllPendingRHRequest();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };   
+
+};
+
 const generateContract = async (req, res, next) => {
 
   //Validate input
@@ -317,5 +351,5 @@ const generateContract = async (req, res, next) => {
 module.exports = {
   getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getAllRequestByCompany,
   approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
-  getAllRequestWasRejectedC, getAllRequestWasOutlayedC
+  getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest
 };

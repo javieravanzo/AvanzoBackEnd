@@ -16,15 +16,15 @@ const compileContract = async function(filePath){
 //Services
 const getInitialsData = async (userId) => {
 
-  console.log("UI", userId);
+  //console.log("UI", userId);
 
   try {
       const userRow = await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
-      console.log("UR", userRow);
+      //console.log("UR", userRow);
       const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ? ORDER BY createdDate DESC LIMIT 3', [userRow[0].idAccount]);
-      console.log("UT", transactions);
+      //console.log("UT", transactions);
       const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.idRequestState < ?) where REQUEST.Account_idAccount = ?', [5, userRow[0].idAccount]);
-      console.log("URE", request);
+      //console.log("URE", request);
       if(userRow){
         return {status: 200, message: "", 
                 data: {
@@ -49,10 +49,14 @@ const getRequestsData = async (userId) => {
       const companyInfo = await pool.query('SELECT maximumSplit FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
       
       //Interest
-      const interest = await pool.query('SELECT indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
+      //const interest = await pool.query('SELECT indicatorName, indicatorValue, indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
       
+      /*for (let i = 0; i<indicators.length; i++){
+        if(indicators[i].indicatorName)
+      }¨*/
+
       //ManagementValue
-      const adminFee = await pool.query('SELECT indicatorValue FROM Indicators where indicatorName = ?', "Management" );
+      //const adminFee = await pool.query('SELECT indicatorValue FROM Indicators where indicatorName = ?', "Management" );
       
       if(userRow){
         return {status: 200, message: "", 
@@ -61,8 +65,8 @@ const getRequestsData = async (userId) => {
                   maximumAmount: userRow[0].maximumAmount,
                   maximumSplit: companyInfo[0].maximumSplit,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
-                  interestValue: interest[0].interestValue,
-                  adminValue: adminFee[0].managementPaymentRate,
+                  //interestValue: interest[0].interestValue,
+                  //adminValue: adminFee[0].managementPaymentRate,
                   otherCollectionValue: 0,
                   phoneNumber: userRow[0].phoneNumber,
                   accountNumber: userRow[0].accountNumber,
@@ -186,8 +190,11 @@ const updateCustomers = async (body, user, adminId) => {
     newUser.registeredDate = new Date();
     const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
 
+    const consultAccumulated = await pool.query('SELECT accumulatedQuantity FROM Account where idAccount = ?', [idAccount]);
+
     //Create an account
     const newAccount = {maximumAmount: maximumAmount,
+                        partialCapacity: maximumAmount - parseInt(consultAccumulated[0].accumulatedQuantity),
                         montlyFee: montlyFee, 
                         registeredBy: adminId,
                         registeredDate: new Date()};
@@ -281,7 +288,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () =>{
   
   try {
-    const clientRow =  await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany)');
+    const clientRow =  await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.isDeleted = ?', [false]);
     if(clientRow){
       return {status: 200, data: clientRow};
     }else{
@@ -317,11 +324,11 @@ const getDatesListToCustomer = async (companyid) =>{
   
   try {
 
-    console.log("CI", companyid);
+    //console.log("CI", companyid);
   
     const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries) where (CHS.Company_idCompany = ?)', companyid);
 
-    console.log("cycles", cycles);
+    //console.log("cycles", cycles);
 
     if(cycles){
       return {status: 200, data: cycles};
@@ -357,7 +364,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
   try{   
     
     if(approve === "true"){
-      
+
       //console.log("CI", clientid, approve, cycleId);
       
       const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientid]);
@@ -382,13 +389,14 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         registeredBy: 1,
         registeredDate: new Date(),
         rejectState: false,
+        isDeleted: false,
         platformState:  true,
         createdDate: new Date(),
         ClientDocuments_idClientDocuments: fileQuery.insertId,
         CompanySalaries_idCompanySalaries: cycleId
       };
 
-      console.log("Client", client);
+      //console.log("Client", client);
       
       const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
       
@@ -538,6 +546,20 @@ const changeCustomersStatus = async (clientid, active) => {
 
 };
 
+const deleteUser = async (clientid) => {
+
+  //console.log("CI", clientid, active);
+  
+  try{   
+    const clientQuery = await pool.query('UPDATE Client SET isDeleted = ? where idClient = ?', [true, clientid]);
+    return {status: 200, message: {message: "El usuario ha sido eliminado exitosamente."}};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 const makePayments = async(clientid, quantity) => {
 
   try{   
@@ -580,5 +602,6 @@ const makePayments = async(clientid, quantity) => {
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
-  approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer
+  approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer,
+  deleteUser
 }

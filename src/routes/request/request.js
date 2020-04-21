@@ -38,7 +38,8 @@ const router = express.Router();
 const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
-        generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC } = require('../../controllers/request');
+        generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC,
+        getRejectedRequest, getPendingRRHHRequest } = require('../../controllers/request');
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
@@ -67,12 +68,16 @@ router.get('/Request/GetToApproveByAdmin', [verifyToken], getRequestsToApprove);
 
 router.get('/Request/GetAllToOutLayByAdmin', [verifyToken], getRequestToOutLay);
 
-router.get('/Documents/GenerateContract',
-[
+router.get('/Request/GetAllRejected', [verifyToken], getRejectedRequest);
+
+router.get('/Request/GetAllPendingRRHH', [verifyToken], getPendingRRHHRequest);
+
+router.get('/Documents/GenerateContract', [
   header('split', 'La cantidad de cuotas es inválida.').exists().isInt().not().isEmpty(),
   header('quantity', 'El monto es inválido.').exists().isInt().not().isEmpty()
 ],
 [verifyToken], generateContract);
+
 
 //Export
 module.exports = router;

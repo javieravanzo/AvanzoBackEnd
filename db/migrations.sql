@@ -1,14 +1,15 @@
 /* Roles */
-INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (100, 'Administrator', NOW(), 1, NOW());
+/*INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (100, 'Administrator', NOW(), 1, NOW());
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (80, 'Manager', NOW(), 1, NOW());
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (50, 'Company', NOW(), 1, NOW());
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (10, 'User', NOW(), 1, NOW());
 
-/* Main Administrator */
+/* Main Administrator 
 INSERT INTO Administrator (identificationId, adminType) values ("1032488727", "superAdmin");
 INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "ccorjuelavela@gmail.com", "Cristian", "Orjuela", false, false, NOW(), 1, NOW(), 1, null, null, 1);
 
 INSERT INTO Client (identificationId, documentType, phoneNumber, Company_idCompany, registeredBy, registeredDate, platformState, createdDate, ClientDocuments_idClientDocuments, CompanySalaries_idCompanySalaries) values (1564576532, 1, "3156453722", "11", "1", "2020-04-08 13:07:42.491", "true", "2020-04-08 13:07:42.491", "6", "13");
+
 
 /*SELECT * FROM Client;
 SELECT * FROM User;
@@ -29,7 +30,7 @@ INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) value
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Finalizada", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Devolución bancaria", NOW(), 1, NOW());
 
-INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Interest", 0, 0.069, NOW(), NOW());
+INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Interest", 0, 0.00069, NOW(), NOW());
 
 INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Management", 12000, 0, 1, NOW());
 

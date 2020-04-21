@@ -563,6 +563,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       }else{
         response = "rechazada";
         requeststate = getStateIdFromName(stateRow, "Rechazada");
+        sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada");
         //Update account values
         const rejectAccount = {partialCapacity: clientEmail[0].partialCapacity + requestQuery[0].quantity, accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
         const rejectAccountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [rejectAccount, requestQuery[0].Account_idAccount]);
@@ -639,6 +640,53 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
 
         await sgMail.send(info);
       
+      }else if(sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada")){
+        
+        console.log("Text", text, "Correo");
+
+        //Mailer
+        sgMail.setApiKey('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');
+
+        let output = `<div>
+                <div class="header-confirmation">
+                  <h2 class="confirmation-title">
+                    Avanzo
+                  </h2>
+                  <h4 class="confirmation-subtitle">
+                    Créditos al instante
+                  </h4>
+                </div>
+            
+                <hr/>
+                
+                <div class="greet-confirmation">
+                  <h3 class="greet-title">
+                    Hola, apreciado/a.
+                  </h3>
+                  <br/>
+                  
+                  <h3>
+                    Tu solicitud ha sido rechazada - ${text}.
+                  </h3>
+                </div>
+
+                <div class="footer-confirmation">
+                  <h3 class="footer-title">
+                    Gracias por confiar en nosotros.
+                  </h3>
+                </div>
+                                    
+              </div>`;
+
+        let info = {
+            from: 'operaciones@avanzo.co', // sender address
+            to: clientEmail[0].email, // list of receivers
+            subject: 'Avanzo (Desembolsos al instante) - Rechazo de solicitud  No. '  + requestid, // Subject line
+            text: 'Hola', // plain text body
+            html: output // html body
+        };
+
+        await sgMail.send(info);
       }
 
       return {status: 200, message: {message: "La solicitud ha sido " + response + " satisfactoriamente."}};
@@ -725,6 +773,47 @@ const getRequestsToOutLay = async (userId) => {
 
 };
 
+const getAllRejectedRequest = async () => {
+
+  try{
+    
+    //Consult state
+    const stateRow = await pool.query('SELECT * FROM RequestState');
+    let requeststate = getStateIdFromName(stateRow, "Rechazada");
+    console.log("RS", requeststate);
+
+    //Select rows
+    const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+    
+    return {status: 200, data: requestRow};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: {message: "No es posible traer las solicitudes rechazadas."}};
+  }
+
+};
+
+
+const getAllPendingRHRequest = async () => {
+
+  try{
+    
+    //Consult state
+    const stateRow = await pool.query('SELECT * FROM RequestState');
+    let requeststate = getStateIdFromName(stateRow, "Evaluada");
+    console.log("RS", requeststate);
+
+    //Select rows
+    const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+    
+    return {status: 200, data: requestRow};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: {message: "No es posible traer las solicitudes rechazadas."}};
+  }
+
+};
+
 const generateContracts = async (customerid, split, quantity, company) => {
 
   try{
@@ -756,5 +845,6 @@ const generateContracts = async (customerid, split, quantity, company) => {
 module.exports = {
   getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
   getAllRequestsWasOutlayed, approveOrRejectRequest, getRequestStatesList, getAllRequestsByCompany,
-  getRequestsToOutLay, getAllRequestsWasRejected, generateContracts
+  getRequestsToOutLay, getAllRequestsWasRejected, generateContracts, getAllRejectedRequest,
+  getAllPendingRHRequest
 }
