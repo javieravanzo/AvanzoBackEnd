@@ -15,7 +15,7 @@ const login = async (email, password) => {
         const consultEmail = await pool.query('SELECT * FROM User U where U.email = ?', [email]);
         //console.log("CE", consultEmail);
         if (consultEmail[0]){
-            const userRow = await pool.query('SELECT * FROM User U JOIN Auth A JOIN Client C ON (A.User_idUser = U.idUser and U.Client_idClient = C.idClient) where U.email = ? and C.isDeleted = ?', [email, false]);
+            const userRow = await pool.query('SELECT * FROM User U JOIN Auth A ON (A.User_idUser = U.idUser) where U.email = ?', [email]);
             //console.log("userRow", userRow[0]);
             const userQuery = userRow[0];  
             if(userRow.length > 0){
