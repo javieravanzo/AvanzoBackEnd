@@ -104,6 +104,7 @@ const decode_base64 = async (base64str , filename) => {
 
   //Production
   fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
+  
   //Development
   //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
     if(error){
@@ -120,12 +121,16 @@ const createNewRequest = async (req, res, next) => {
   const clientId = getClientId(req);
   //console.log("CI", req.body.file);
   //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
+  //console.log("RF", req.files);
+  //Guardar archivos
+  const files = {paymentSupport: path.normalize(req.files.paymentSupport[0].path).replace("../files/documents/",""), 
+                 workingSupport: path.normalize(req.files.workingSupport[0].path).replace("../files/documents/","")};
   
   try {
     //Decode
     decode_base64(req.body.file, "nueva_imagen.PNG");
     //Request
-    const result = await createRequest(req.body, req.file, clientId);
+    const result = await createRequest(req.body, req.file, clientId, files);
     if(result.status === 200){
         res.status(result.status).json(result.message);
     }else{

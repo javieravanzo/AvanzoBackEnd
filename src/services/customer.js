@@ -45,8 +45,8 @@ const getInitialsData = async (userId) => {
 const getRequestsData = async (userId) => {
 
   try {
-      const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
-      const companyInfo = await pool.query('SELECT maximumSplit FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
+      const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.identificationId, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
+      const companyInfo = await pool.query('SELECT maximumSplit, workingSupport, paymentSupport FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
       
       //Interest
       //const interest = await pool.query('SELECT indicatorName, indicatorValue, indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
@@ -64,11 +64,15 @@ const getRequestsData = async (userId) => {
                   partialCapacity: userRow[0].partialCapacity,
                   maximumAmount: userRow[0].maximumAmount,
                   maximumSplit: companyInfo[0].maximumSplit,
+                  workingSupport: companyInfo[0].workingSupport,
+                  paymentSupport: companyInfo[0].paymentSupport,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
                   //interestValue: interest[0].interestValue,
                   //adminValue: adminFee[0].managementPaymentRate,
                   otherCollectionValue: 0,
                   phoneNumber: userRow[0].phoneNumber,
+                  idCompany: userRow[0].Company_idCompany,
+                  identificationId: userRow[0].identificationId,
                   accountNumber: userRow[0].accountNumber,
                   accountBank: userRow[0].accountBank,
                   accountType: userRow[0].accountType,

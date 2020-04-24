@@ -1,38 +1,49 @@
 //Requires
 const express = require('express');
-const { body, header,  } = require('express-validator');
 const multer = require('multer');
+const mkdirp = require('mkdirp');
+const { body, header,  } = require('express-validator');
 
+//Initialize
+const router = express.Router();
 
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
-    callback(null, '../files/');
+    
+    //Production
+    var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.idCompany+'/';
+    mkdirp.sync(dest);
+    callback(null, dest);
+
+    //Development
+    //var dest = './files/documents/'+req.body.identificationId+'-'+req.body.idCompany+'/';
+    //mkdirp.sync(dest);
+    //callback(null, dest);
+    
   },
   filename: function(req, file, callback){
-    callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+    callback(null, file.fieldname + ".pdf");
   }
 });
 
 //Apply the files filter
-const fileFilter = (req, file, callback) => {
+/*const fileFilter = (req, file, callback) => {
   if(file.mimetype === 'application/pdf' ){
     callback(null, true);
   }else{
     callback(null, false);
   }
-};
+};*/
 
 const uploads = multer({
   storage: storage,
   limits: {
     fileSize: 1024 * 1024 * 5
   }
-  //fileFilter: fileFilter
 });
 
-//Initialize
-const router = express.Router();
+
 
 //Controllers
 const { verifyToken, checkFile } = require('../../controllers/validator');
@@ -50,7 +61,11 @@ router.get('/Request/GetOultayDatesList',[
 ],
 [verifyToken], getOultayDatesList);
 
-router.post('/Request/Create', uploads.single('file'), [verifyToken], createNewRequest);
+router.post('/Request/Create', uploads.fields([
+  { name: 'file', maxCount: 1 },
+  { name: 'paymentSupport', maxCount: 1},
+  { name: 'workingSupport', maxCount: 1},
+]), [verifyToken], createNewRequest);
 
 router.get('/Request/GetAll', [verifyToken], getAllRequest);
 

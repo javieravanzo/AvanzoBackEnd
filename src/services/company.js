@@ -7,12 +7,12 @@ const createCompanies = async (req, userId) => {
   
   //NewObject
   const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, 
-         companySalaries, companyMembers, email, password} = req.body;
+         paymentSupport, workingSupport, companySalaries, companyMembers, email, password} = req.body;
 
   try{   
     
     //Company
-    const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources};
+    const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, paymentSupport, workingSupport};
     company.registeredDate = new Date();
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);

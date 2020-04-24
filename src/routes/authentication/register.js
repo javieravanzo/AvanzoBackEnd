@@ -1,27 +1,26 @@
 //Requires
 const express = require('express');
-const { body, check } = require('express-validator');
 const multer = require('multer');
 const mkdirp = require('mkdirp');
+const { body, check } = require('express-validator');
 
 //Initialize
 const router = express.Router();
-
-//Controllers
-const { registerClient, registerAdmin, preRegister } = require('../../controllers/register');
 
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
     
-    //--Production
+    //Production
     var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
     mkdirp.sync(dest);
     callback(null, dest);
-    //--Development
-    //var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
+
+    //Development
+    //var dest = './files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
     //mkdirp.sync(dest);
     //callback(null, dest);
+
   },
   filename: function(req, file, callback){
     callback(null, file.fieldname + ".pdf");
@@ -35,6 +34,10 @@ const uploads = multer({
     fileSize: 1024 * 1024 * 5
   }
 });
+
+//Controllers
+const { registerClient, registerAdmin, preRegister } = require('../../controllers/register');
+
 
 //Routes
 router.post('/Account/Register', [

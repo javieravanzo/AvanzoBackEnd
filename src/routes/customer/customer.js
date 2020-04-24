@@ -20,6 +20,7 @@ const storageAdmin = multer.diskStorage({
   destination: function(req, file, callback){
     //Production
     callback(null, '../files/admin/reads');
+    
     //Development
     //callback(null, './files/admin/reads');    
   },

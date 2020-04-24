@@ -40,8 +40,10 @@ const compile = async function(templateName, data){
 
   //Production
   const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  
   //Development
   //const filePath = path.join(process.cwd(), './files/templates', `${templateName}.hbs`);
+  
   const html = await fs.readFile(filePath, 'utf-8');
   let template = hbs.compile(html);
   let  result = template(data);
@@ -378,27 +380,35 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
 };
 
-const createRequest = async (body, file, clientId) => {  
+const createRequest = async (body, file, clientId, files) => {  
 
   try{
 
     const { quantity, split, moyen, accountType, accountNumber, interest, administration, isBank } = body;
 
-    const approvedClient = await pool.query('SELECT platformState, Company_idCompany FROM Client where idClient = ?', clientId);
+    const approvedClient = await pool.query('SELECT platformState, ClientDocuments_idClientDocuments, Company_idCompany FROM Client where idClient = ?', clientId);
     //console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1){
      
         //Account - Request
         const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
-        console.log("UR", userRow[0]);
+        //console.log("UR", userRow[0]);
         
         //console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
 
+          console.log("Files", files);
+          
+          console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
+
+          //Update paymentSupport and workingSupport
+          const updateNewClient = await pool.query('UPDATE ClientDocuments SET ? where idClientDocuments = ?', [files, approvedClient[0].ClientDocuments_idClientDocuments]);
+
           //Generate contract
           //Production
           var dest = '../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
+          
           //Development
           //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
           
@@ -408,6 +418,7 @@ const createRequest = async (body, file, clientId) => {
           
           //Production
           const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
+          
           //Development
           //const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
           
@@ -820,6 +831,7 @@ const generateContracts = async (customerid, split, quantity, company) => {
 
     //Account - Request
     const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, CLIENT.lastName FROM Client CLIENT JOIN Account ACCOUNT ON (ACCOUNT.Client_idClient = CLIENT.idClient ) where CLIENT.idClient = ?', [customerid]);
+    
     //Production
     var dest = '../files/contracts/'+userRow[0].identificationId+'-'+company+'/';
     mkdirp.sync(dest);
