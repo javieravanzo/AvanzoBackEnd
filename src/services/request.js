@@ -403,7 +403,7 @@ const createRequest = async (body, file, clientId, files) => {
           console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
 
           //Update paymentSupport and workingSupport
-          const updateNewClient = await pool.query('UPDATE ClientDocuments SET ? where idClientDocuments = ?', [files, approvedClient[0].ClientDocuments_idClientDocuments]);
+          const updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
 
           //Generate contract
           //Production
