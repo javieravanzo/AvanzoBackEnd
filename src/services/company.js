@@ -184,6 +184,18 @@ const getCompanyWithSalaries = async (companyId) => {
 
 };
 
+const updateCompanySalary = async (companyRow) => {
+
+  try{
+    const companySalary = await pool.query('UPDATE CompanySalaries SET ? where idCompanySalaries = ?', [companyRow, companyRow.idCompanySalaries]);
+    return {status: 200, message: "El ciclo de pago ha sido modificado."};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 const activateCompanies = async (companyId, active) => {
 
   try{   
@@ -202,5 +214,6 @@ const activateCompanies = async (companyId, active) => {
 };
 
 module.exports = {
-  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries, activateCompanies
+  createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries,
+  activateCompanies, updateCompanySalary
 };

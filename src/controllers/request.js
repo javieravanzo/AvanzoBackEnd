@@ -98,6 +98,9 @@ const getOultayDatesList = async (req, res, next) => {
 };
 
 const decode_base64 = async (base64str , filename) => {
+
+  var image = new Image();
+  image.src = base64str;
  
   var base64DataReplaced = await base64str.replace('/^data:image\/png;base64,/', "");
   var buf = Buffer.from(base64DataReplaced,'base64');
@@ -106,7 +109,7 @@ const decode_base64 = async (base64str , filename) => {
   fs.writeFile(path.join('../files/','/images/',filename), buf, function(error){
   
   //Development
-  //fs.writeFile(path.join('./files/','/images/',filename), buf, function(error){
+  //fs.writeFile(path.join('./files/','/images/', 'imagen3.png'), image, function(error){
     if(error){
       return {status: 500, message: "Error con el archivo de firma."}
     }else{
@@ -114,7 +117,24 @@ const decode_base64 = async (base64str , filename) => {
     }
   });
 
+};
+
+function dataURLtoFile(dataurl, filename) {
+ 
+  var arr = dataurl.split(','),
+      mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), 
+      n = bstr.length, 
+      u8arr = new Uint8Array(n);
+      
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  
+  return new File([u8arr], filename, {type:mime});
 }
+
+
 
 const createNewRequest = async (req, res, next) => {
 
@@ -128,7 +148,12 @@ const createNewRequest = async (req, res, next) => {
   
   try {
     //Decode
-    decode_base64(req.body.file, "nueva_imagen.PNG");
+    //decode_base64(req.body.file);
+
+    //Usage example:
+    //var file = dataURLtoFile(req.body.file, 'hello.png');
+    //console.log("FileT", file);
+
     //Request
     const result = await createRequest(req.body, req.file, clientId, files);
     if(result.status === 200){
@@ -194,6 +219,7 @@ const getAllRequestWasRejectedC = async (req, res, next) => {
     }
     next();
   } catch(e) {
+    console.log(e);
     res.status(500).json("No es posible obtener la información en este momento.");
   };
 };

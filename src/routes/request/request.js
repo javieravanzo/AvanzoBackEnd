@@ -2,6 +2,7 @@
 const express = require('express');
 const multer = require('multer');
 const mkdirp = require('mkdirp');
+var path = require('path');
 const { body, header,  } = require('express-validator');
 
 //Initialize
@@ -13,17 +14,18 @@ const storage = multer.diskStorage({
     
     //Production
     var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.idCompany+'/';
-    mkdirp.sync(dest);
-    callback(null, dest);
-
+    
     //Development
     //var dest = './files/documents/'+req.body.identificationId+'-'+req.body.idCompany+'/';
-    //mkdirp.sync(dest);
-    //callback(null, dest);
+
+    mkdirp.sync(dest);
+    callback(null, dest);
     
   },
   filename: function(req, file, callback){
-    callback(null, file.fieldname + ".pdf");
+    //console.log("File", file);
+    let name = file.fieldname;
+    callback(null, name + path.extname(file.originalname));
   }
 });
 
@@ -62,7 +64,7 @@ router.get('/Request/GetOultayDatesList',[
 [verifyToken], getOultayDatesList);
 
 router.post('/Request/Create', uploads.fields([
-  { name: 'file', maxCount: 1 },
+  { name: 'file', maxCount: 1},
   { name: 'paymentSupport', maxCount: 1},
   { name: 'workingSupport', maxCount: 1},
 ]), [verifyToken], createNewRequest);

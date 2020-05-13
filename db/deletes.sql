@@ -14,6 +14,7 @@ DELETE FROM Documents;
 DELETE FROM NewClient;
 DELETE FROM OutlayBank;
 DELETE FROM Payment;
+DELETE FROM PreRequestDates;
 DELETE FROM RequestOutLay;
 DELETE FROM RequestState;
 DELETE FROM Request;

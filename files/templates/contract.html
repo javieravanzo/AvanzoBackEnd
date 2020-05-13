@@ -1,11 +1,37 @@
 <style type="text/css">
   .header-title {
     text-align: center;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .body-title{
+    text-align: justify;
+    margin-left: 70px;
+    margin-right: 70px;
+    line-height: 100%;
   }
   .body-content{
     text-align: justify;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 70px;
+    margin-right: 70px;
+    margin-bottom: 40px;
+  }
+  .payment-title {
+    text-align: justify;
+    font-weight: bold;
+    margin-left: 70px;
+    margin-right: 70px;
+  }
+  .signature-image{
+    margin-left: 0px;
+    margin-right: 70px;
+    width: 45%;
+  }
+  .footer-confirmation{
+    text-align: justify;
+    font-weight: bold;
+    margin-left: 70px;
+    margin-right: 70px;
   }
 </style>
 
@@ -13,32 +39,153 @@
   <head>
     <meta chraset="UTF-8">
       <title>
-        Contrato de libranza
+        AUTORIZACIÓN DE DESCUENTO
       </title>
   </head>
   <body>
     <div>
       <div class="header-title">
         <h2 class="confirmation-title">
-          Contrato de libranza
+          AUTORIZACIÓN DE DESCUENTO
         </h2>
+      </div>
+      <div class="body-title">
+        <h3 class="confirmation-title">
+          REF: CRÉDITO AVANZO No. {{idRequest}}
+        </h3>
+        <h3 class="confirmation-title">
+          VALOR DEL CREDITO: ${{quantity}}
+        </h3>
       </div>
       <br/>
       <div class="body-content">
         <h4 class="body-text">
-          Entre los suscritos a saber, por una parte MAX JEFFERSON LÓPEZ BELTRÁN, ciudadano colombiano, mayor de edad, identificado con la cédula de ciudadanía número 1.023.914.453 de la ciudad de
-          Bogotá D.C., actuando en nombre y representación legal de la sociedad VICTORIA INVERSIONES S.A.S, debidamente registrada ante la Cámara de Comercio de Bogotá, identificada con el NIT
-          número 901116431 – 9, quien en adelante se denominará “El EMPLEADOR”; y por la otra parte {{user.name}}, ciudadano colombiano, mayor de edad, identificado con cédula de
-          ciudadanía número {{user.identificationId}}, actuando en nombre propio, quien en adelante se denominará “El TRABAJADOR”, y de manera conjunta LAS PARTES,
-          hemos acordado celebrar el presente CONTRATO LABORAL A TÉRMINO INDEFINIDO, el cual se regirá por las siguientes.
+          El(la) abajo firmante identificado(a) como aparece al pie la firma en mi calidad de funcionario con plena capacidad para el efecto, autorizo
+          irrevocablemente a la pagaduría de la empresa {{company}} identificada con NIT {{nit}}, para que deduzca de mi salario ordinario,
+          y/o compensaciones laborales a mi nombre, los valores correspondientes al pago de la obligación por mi adquirida con VICTORIA
+          INVERSIONES S.A.S. (AVANZO) entidad identificada con NIT 901116431-9, y/o quien represente sus derechos de acuerdo con los
+          siguientes montos _______________________(${{quantity}}) de pesos colombianos en _____________ ({{split}}) cuotas
+          mensuales, cada una por un valor de _______________ (${{splitQuantity}}) pesos colombianos.
         </h4>
       </div>
 
-      <br/>
+      <div class="body-content">
+        <h4 class="body-text">
+          Dichas deducciones deberán ser giradas a VICTORIA INVERSIONES S.A.S. con NIT 901116431-9 y/o
+          quien represente sus derechos, al número de cuenta de ahorro (  ) / cuenta corriente (  ) 
+          No. ____________ del Banco ______________, a más tardar el día ________ de cada mes a partir
+          del mes de ________________ del año _____ hasta completar el pago total de la obligación. 
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          En el evento de causarse intereses de mora autorizo también la retención y entrega a VICTORIA
+          INVERSIONES S.A.S. y/o quien represente sus derechos, de los montos correspondiente hasta por
+          el valor de los mismos, según lo certifique dicha sociedad. Autorizo igualmente entregar a VICTORIA
+          INVERSIONES S.A.S. y/o quien represente sus derechos el valor de las cuotas que deban pagársele
+          durante el tiempo que permanezca en vacaciones, licencias e incapacidades, descontándolas del
+          monto que se cause a mi favor. 
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          En el caso de que llegare a producirse mi desvinculación laboral de la empresa durante el plazo
+          de la obligación, autorizo irrevocablemente al pagador de esta entidad, para que deduzca de mi
+          salario, bonificaciones, honorarios, comisiones, mesada mensual u otras remuneraciones existentes
+          a mi favor los montos que resulten necesarios para cubrir el saldo de cualquier rubro adeudado a
+          VICTORIA INVERSIONES S.A.S. y/o quien represente sus derechos, esto soportado en el código sustantivo
+          del Trabajo y en la Ley 1527 de 2012. 
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          Si ocurriera un cambio de empleador, autorizo a mi actual empleador a informar de dicha situación
+          a VICTORIA INVERSIONES S.A.S. para dar cumplimiento al Art. 7° de la Ley 1527 de 2012. En caso de
+          que la empresa a la cual me encuentro vinculado(a) por cualquier motivo no descuente y/o no pague
+          oportunamente la(s) cuota(s) a VICTORIA INVERSIONES S.A.S. y/o quien represente sus derechos, no
+          quedaré exonerado de la responsabilidad de pagar el crédito en la oportunidad acordada y los
+          eventuales intereses de mora.
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          Si por cualquier causa VICTORIA INVERSIONES S.A.S. realiza a mi nombre un desembolso duplicado y/o
+          por una suma mayor a la solicitada y aprobada, autorizo a mi actual empleador o al pagador de la
+          entidad para que el excedente recibido sea descontado de mi salario, bonificaciones, honorarios,
+          comisiones, mesada mensual u otras remuneraciones existentes a mi favor hasta cubrir el valor total
+          desembolsado, que voluntariamente no devolviese a VICTORIA INVERSIONES S.A.S. previa solicitud por
+          escrito. 
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          En el evento en que el Empleador, incumpla las obligaciones y autorizaciones aquí consagradas, se
+          hará solidariamente responsable por el pago de la obligación adquirida por mi como beneficiario(a)
+          del crédito de acuerdo al parágrafo 1° del Art. 6° de la Ley 1527 de 2012.  
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          Así mismo el empleador se compromete a que como empleado(a) no reciba menos de cincuenta por ciento
+          (50%) del neto de mi salario o pensión, después de los descuentos de Ley.  
+        </h4>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          Manifiesto que el presente documento presta mérito ejecutivo, por contener una obligación expresa,
+          clara y exigible a mi cargo, en consecuencia, VICTORIA INVERSIONES S.A.S. podrá exigir su cumplimiento
+          por la vía judicial.   
+        </h4>
+      </div>
+
+      <div class="payment-title">
+        <h2 class="confirmation-title">
+          Instructivo de pago:
+        </h2>
+      </div>
+
+      <div class="body-content">
+        <h4 class="body-text">
+          <ol>
+            <li>
+              En caso de Liquidación definitiva de salarios, aportes y/o compensaciones se debe proceder de la
+              siguiente manera:  a) Comuníquese al teléfono XXXXXXXX o correo electrónico XXXXXXXXXX de VICTORIA
+              INVERSIONES S.A.S., donde le informarán el saldo total de la deuda y los canales de pago dispuestos
+              para su cancelación. b) Retenga dicho saldo de mi salario, bonificaciones, honorarios, comisiones u
+              otras remuneraciones. c) El saldo retenido debe ser pagado a través de los canales de pago dispuestos
+              por VICTORIA INVERSIONES S.A.S, especificando el número de cedula del trabajador y el No. de la
+              obligación que se está cancelando (No. de Crédito AVANZO referido en este documento). d) Una vez
+              realizado el descuento de la liquidación definitiva y de presentarse saldo pendiente por cancelar de
+              mi crédito autorizo a VICTORIA INVERSIONES S.A.S. a realizar el cambio de fuente de pago de mi
+              obligación PERSONAL.
+            </li>
+            <li>
+              La deducción de nómina se suspenderá cuando como empleado presente paz y salvo de la deuda expedido
+              por VICTORIA INVERSIONES S.A.S.
+            </li>
+          </ol>
+        </h4>
+      </div>
+          
+      </br>
+      
       
       <div class="footer-confirmation">
         <h4 class="footer-title">
-          Atentamente, {{user.name}}.
+          <img alt="signature" class="signature-image" src='../documents/51867439-20/file.png'>
+          </br>
+          FIRMA
+          </br>
+          NOMBRE Y APELLIDOS (COMPLETOS): {{name}} {{lastName}}
+          </br>
+          C.C. No. {{identificationId}} de ____________          
         </h4>
       </div>
 

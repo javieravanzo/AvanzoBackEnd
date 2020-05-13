@@ -30,6 +30,17 @@ function getStateIdFromName (row, name){
   
 };
 
+function format(d) {
+  console.log("D", d)
+  var formatter = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  });
+
+  return formatter.format(d);
+};
+
 hbs.registerHelper('dateFormat', function(value, format){
 
   return moment(value).format(format);
@@ -46,7 +57,9 @@ const compile = async function(templateName, data){
   
   const html = await fs.readFile(filePath, 'utf-8');
   let template = hbs.compile(html);
-  let  result = template(data);
+  
+  let result = template(data);
+
   return result;
 
 };
@@ -294,11 +307,12 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let administrationValue = months * adminValue;
 
-    //console.log("Admin", administrationValue);
+    console.log("administrationValue", administrationValue);
+    console.log("Months", months);
 
-    let ivaValue = months * (0.19) * administrationValue;
+    let ivaValue = (0.19) * administrationValue;
 
-    //console.log("IVA", ivaValue);
+    console.log("IVA", ivaValue);
 
     let quantitySplited = Math.ceil(totalQuantity / split);
 
@@ -384,9 +398,10 @@ const createRequest = async (body, file, clientId, files) => {
 
   try{
 
-    const { quantity, split, moyen, accountType, accountNumber, interest, administration, isBank } = body;
+    const { quantity, split, moyen, accountType, accountNumber, interest, administration, isBank,
+            fileString, loanData } = body;
 
-    const approvedClient = await pool.query('SELECT platformState, ClientDocuments_idClientDocuments, Company_idCompany FROM Client where idClient = ?', clientId);
+    const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
     //console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1){
@@ -398,34 +413,12 @@ const createRequest = async (body, file, clientId, files) => {
         //console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
 
-          console.log("Files", files);
+          //console.log("Files", files);
           
-          console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
+          //console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
 
           //Update paymentSupport and workingSupport
           const updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
-
-          //Generate contract
-          //Production
-          var dest = '../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
-          
-          //Development
-          //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
-          
-          mkdirp.sync(dest);
-          const content = await compile('contract', {identificationId: userRow[0].identificationId, lastName: userRow[0].lastName, name: userRow[0].name});
-          
-          
-          //Production
-          const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
-          
-          //Development
-          //const result = await pdf.create(content, {}).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf', (err) => {
-          
-            if(err){
-              return {status: 500, message: {message: "Error interno del servidor."}};
-            }
-          });
 
           //Update client info
           let newClient = {};
@@ -448,7 +441,6 @@ const createRequest = async (body, file, clientId, files) => {
           newRequest.approveHumanResources = true;
           newRequest.createdDate = new Date();
           newRequest.registeredBy = 1;
-          newRequest.filePath = '/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/contrato-colaboración.pdf';
           newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
           newRequest.observation = "";
 
@@ -468,7 +460,62 @@ const createRequest = async (body, file, clientId, files) => {
           newRequest.Account_idAccount = userRow[0].idAccount;
           //Request
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
-          //console.log("REQ", request);
+          //console.log("REQ ID", request.insertId);
+
+          let filePath = '/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf';
+
+          const updatePath = await pool.query('UPDATE Request SET filePath = ? where idRequest = ?', [filePath, request.insertId]);
+
+          //Generate contract
+          //Production
+          var dest = '../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
+          
+          //Development
+          //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
+          
+          console.log("DL", loanData);
+
+          let userData = {
+            identificationId: userRow[0].identificationId,
+            lastName: userRow[0].lastName,
+            name: userRow[0].name,
+            quantity: format(quantity),
+            split: split,
+            idRequest: request.insertId,
+            image_path: '../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/file.png',
+            fileString: fileString,
+            idCompany: approvedClient[0].Company_idCompany,
+            company: approvedClient[0].companyName,
+            splitQuantity: format(loanData),
+          };
+
+          //console.log("UserData", userData);
+
+          mkdirp.sync(dest);
+          const content = await compile('contract', userData);
+          
+          //Pdf config
+          var config = {
+            border: {
+              "top": "60px",            // default is 0, units: mm, cm, in, px
+              "right": "10px",
+              "bottom": "50px",
+              "left": "10px"
+            },
+
+            format: "A4", 
+          };
+
+          //Production
+          const result = await pdf.create(content, config).toFile('../files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf', (err) => {
+
+          //Development
+          //const result = await pdf.create(content, config).toFile('./files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf', (err) => {
+          
+            if(err){
+              return {status: 500, message: {message: "Error interno del servidor."}};
+            }
+          });
 
           return {status: 200, message: {message: "El solicitud ha sido creada exitosamente."}};
         }else{
@@ -510,11 +557,11 @@ const getAllRequestsWasOutlayed = async (clientId) => {
   } 
 };
 
-const getAllRequestsWasRejected = async (clientId) => {
+const getAllRequestWasRejected = async (clientId) => {
   
   try{ 
     //console.log("ClientId", clientId);
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
@@ -794,7 +841,7 @@ const getAllRejectedRequest = async () => {
     console.log("RS", requeststate);
 
     //Select rows
-    const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+    const  requestRow =  await pool.query('SELECT R.idRequest, R.observation, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
     
     return {status: 200, data: requestRow};
   }catch(e){
@@ -803,7 +850,6 @@ const getAllRejectedRequest = async () => {
   }
 
 };
-
 
 const getAllPendingRHRequest = async () => {
 
@@ -857,6 +903,6 @@ const generateContracts = async (customerid, split, quantity, company) => {
 module.exports = {
   getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
   getAllRequestsWasOutlayed, approveOrRejectRequest, getRequestStatesList, getAllRequestsByCompany,
-  getRequestsToOutLay, getAllRequestsWasRejected, generateContracts, getAllRejectedRequest,
+  getRequestsToOutLay, getAllRequestWasRejected, generateContracts, getAllRejectedRequest,
   getAllPendingRHRequest
 }

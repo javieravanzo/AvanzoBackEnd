@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 //Imports
 const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies,
-        getCompanyWithSalaries, activateCompanies } = require('../services/company');
+        getCompanyWithSalaries, activateCompanies, updateCompanySalary } = require('../services/company');
 
 //Functions
 //Get the user with token
@@ -145,6 +145,22 @@ const getCompanyWithSalary = async (req, res, next) => {
 
 };
 
+const updateSalaries = async (req, res, next) => {
+  
+  try {
+    const result = await updateCompanySalary(req.body);
+    if(result.status === 200){
+        res.status(result.status).json({message: result.message});
+    }else{
+        res.status(result.status).json({message: result.message});
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible actualizar el ciclo de pago.");
+  }
+
+};
+
 const activateCompany = async (req, res, next) => {
     
   try {
@@ -170,6 +186,7 @@ const activateCompany = async (req, res, next) => {
 
 
 module.exports = {
-  createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary, activateCompany
+  createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary,
+  activateCompany, updateSalaries
 };
 
