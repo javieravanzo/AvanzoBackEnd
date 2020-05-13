@@ -142,9 +142,14 @@ const createNewRequest = async (req, res, next) => {
   //console.log("CI", req.body.file);
   //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
   //console.log("RF", req.files);
+  let files = null;
   //Guardar archivos
-  const files = {paymentSupport: path.normalize(req.files.paymentSupport[0].path).replace("../files/documents/",""), 
+  if(req.files.paymentSupport !== undefined){
+    files = {paymentSupport: path.normalize(req.files.paymentSupport[0].path).replace("../files/documents/",""), 
                  workingSupport: path.normalize(req.files.workingSupport[0].path).replace("../files/documents/","")};
+  }else{
+    files = null;
+  }
   
   try {
     //Decode

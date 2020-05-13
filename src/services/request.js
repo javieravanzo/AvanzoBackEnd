@@ -416,10 +416,12 @@ const createRequest = async (body, file, clientId, files) => {
           //console.log("Files", files);
           
           //console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
-
+          let updateNewClient = null;
           //Update paymentSupport and workingSupport
-          const updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
-
+          if (files !== null){
+            updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
+          }
+          
           //Update client info
           let newClient = {};
           if(isBank === "true"){
