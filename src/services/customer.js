@@ -520,7 +520,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
 
     }else{
 
-      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [2, clientId]);
+      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [2, clientid]);
       
       return {status: 200, message: "El usuario ha sido rechazado exitosamente."};
     }
