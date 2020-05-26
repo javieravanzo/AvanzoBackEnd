@@ -7,7 +7,7 @@ const Excel = require('xlsx');
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
         getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers, 
-        makePayments, getDatesListToCustomer, deleteUser } = require('../services/customer');
+        makePayments, getDatesListToCustomer, deleteUser, getCustomerAccountDetail } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -47,6 +47,20 @@ function getAdminId(req){
     const decoded = jwt.decode(bearer);
 
     return (decoded.userRow[0].Administrator_idAdministrator);  
+
+};
+
+//Get the client with token
+function getClientId(req){
+
+    //Get the clientId
+    const bearerHeader = req.headers['authorization'];
+    //Get the real token
+    const bearer = bearerHeader.split(" ")[1];
+    //Set the token
+    const decoded = jwt.decode(bearer);
+
+    return (decoded.userRow[0].Client_idClient);  
 
 };
 
@@ -267,7 +281,6 @@ const getDateListToCustomer = async (req, res, next) => {
 
 };
 
-
 const getTransactionsByUserId = async (req, res, next) => {
     
     //Get the user id
@@ -362,8 +375,6 @@ const deleteUsers = async (req, res, next) => {
 
 };
 
-
-
 const makePayment = async (req, res, next) => {
     
     try {
@@ -387,9 +398,30 @@ const makePayment = async (req, res, next) => {
 
 };
 
+const getAccountDetail = async (req, res, next) => {
+
+    try {
+
+        //Get the user id
+        const clientid = getClientId(req);
+       
+        const result = await getCustomerAccountDetail(clientid);
+        if(result.status === 200){
+            res.status(result.status).json(result.data);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+    } catch(e) {
+        console.log(e);
+        res.status(500).json("No es posible realizar traer la información de la cuenta en este momento.");
+    };
+
+};
+
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
   approveCustomer, changeCustomerStatus, updateCustomer, makePayment, getDateListToCustomer,
-  deleteUsers
+  deleteUsers, getAccountDetail
 };

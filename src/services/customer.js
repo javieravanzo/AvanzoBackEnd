@@ -603,9 +603,21 @@ const makePayments = async(clientid, quantity) => {
 
 };
 
+const getCustomerAccountDetail = async(clientid) => {
+
+  try{   
+    const clientRow =  await pool.query('SELECT U.name, U.lastName, U.email, U.createdDate, C.identificationId, C.phoneNumber, A.maximumAmount, A.montlyFee, A.partialCapacity, A.totalCapital, A.totalInterest, A.totalFeeAdministration, A.totalOtherCollection, A.totalRemainder, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.idClient = ?', [clientid]);
+    return {status: 200, data: clientRow[0]};
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
   approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer,
-  deleteUser
+  deleteUser, getCustomerAccountDetail
 }

@@ -41,6 +41,14 @@ function format(d) {
   return formatter.format(d);
 };
 
+var getDaysInMonth = function(month,year) {
+  // Here January is 1 based
+  //Day 0 is the last day in the previous month
+  //return new Date(year, month, 0).getDate();
+  // Here January is 0 based
+  return new Date(year, month+1, 0).getDate();
+};
+
 hbs.registerHelper('dateFormat', function(value, format){
 
   return moment(value).format(format);
@@ -109,7 +117,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
       
       //Define value
       let result = await checkDateList(customerId, split, interest, adminValue, quantity);
-    
+
       return {status: 200, data: result};
     }else{
       return {status: 500, message: "Error interno del servidor1."};
@@ -187,9 +195,9 @@ const newDateList = async function(userRow){
 
     }
 
-    //console.log("ReportDate", parseInt(reportDate, 10));
+    console.log("ReportDate", parseInt(reportDate, 10));
 
-    //console.log("PaymentArray", paymentArray);
+    console.log("PaymentArray", paymentArray);
 
     let paymentDate  = -1;
 
@@ -219,7 +227,7 @@ const newDateList = async function(userRow){
 
     let initialDate = new Date(today.getFullYear(), month, parseInt(paymentDate,10));
 
-    //console.log("initialDate", initialDate);
+    console.log("initialDate", initialDate);
 
     let data = {initialDate, paymentArray}
 
@@ -240,7 +248,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.* FROM Client CLI JOIN User USR JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient and CLI.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);   
     
-    //console.log("UserRow", userRow);
+    console.log("Salaries", userRow);
 
     let today = new Date();
 
@@ -266,7 +274,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let arrayDates = await returnDateList(initialDate, paymentArray, split, today, userRow[0].companyPaymentNumber);
 
-    //console.log("ArrayDates", arrayDates);
+    console.log("ArrayDates", arrayDates);
 
     for (let i=0; i<split; i++){  
 
@@ -307,12 +315,12 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let administrationValue = months * adminValue;
 
-    console.log("administrationValue", administrationValue);
-    console.log("Months", months);
+    //console.log("administrationValue", administrationValue);
+    //console.log("Months", months);
 
     let ivaValue = (0.19) * administrationValue;
 
-    console.log("IVA", ivaValue);
+    //console.log("IVA", ivaValue);
 
     let quantitySplited = Math.ceil(totalQuantity / split);
 
@@ -348,13 +356,25 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   let newDate = initialDate;
 
+  let monthsDate = new Date(initialDate);
+  
+  //console.log("Date", monthsDate);
+
+  //console.log("MonthNumber", parseInt( monthsDate.getMonth(), 10));
+
   let daysArray = [];
 
-  daysArray.push(new Date (today)); 
+  let months = 1;
+
+  daysArray.push(new Date (initialDate)); 
+
+  console.log("DatesArray", daysArray);
   
   while(counter < split){  
 
     let arrayDate = null;
+
+    let monthDays = 0;
 
     //console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
 
@@ -368,10 +388,26 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
         counter++;
 
+      }else{
+        
+        if(parseInt(paymentArray[1], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
+
+          console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[1], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+
+          arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
+
+          daysArray.push(  new Date (arrayDate)); 
+
+          counter++;
+
+        }
+
       }
 
     }else{
 
+      //console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+      //console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
       if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10)){
 
         arrayDate = newDate;
@@ -380,11 +416,26 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
         counter++;
 
+      }else{
+
+        if(parseInt(paymentArray[0], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
+
+          console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+
+          arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
+
+          daysArray.push(  new Date (arrayDate)); 
+
+          counter++;
+
+        }
+
       }
 
     }
 
     newDate.setDate(newDate.getDate()+1);
+    monthDays += 1;
 
   }
 
@@ -464,7 +515,7 @@ const createRequest = async (body, file, clientId, files) => {
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
           //console.log("REQ ID", request.insertId);
 
-          let filePath = '/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf';
+          let filePath = userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf';
 
           const updatePath = await pool.query('UPDATE Request SET filePath = ? where idRequest = ?', [filePath, request.insertId]);
 
@@ -789,7 +840,7 @@ const getAllRequestsToApprove = async (userId) => {
       requeststate.push(getStateIdFromName(stateRow, "Evaluada"));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada RR.HH."));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Admon."));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
       return {status: 200, data: requestRow};    
     }else if(userId.role === 3 ){
       //Change the approval/reject state for company
