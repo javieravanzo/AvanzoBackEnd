@@ -105,7 +105,9 @@ const updateCompanies = async (req, userId) => {
   
   //NewObject
   const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, 
-         email, idCompany, idUser} = req.body;
+         email, idCompany, idUser, changeSplit, changeAmount} = req.body;
+
+  console.log("Split", maximumSplit);
 
   try{
     
@@ -120,8 +122,25 @@ const updateCompanies = async (req, userId) => {
     //company.CompanySalaries_idCompanySalaries = companySalaryRow.insertId;
     const companyRow = await pool.query('UPDATE Company SET ? where idCompany = ?', [company, idCompany]);
 
-    //CompanyMembers
-    /*for (let i in companyMembers){
+    //Update - Company Users - Fee
+    const companyUsersSplit = null;
+    
+    if(changeSplit){
+    
+     const companyUsersSplit = await pool.query('UPDATE Account INNER JOIN Client ON (Account.Client_idClient = Client.idCLient) SET montlyFee = ? where Client.Company_idCompany = ?', [ maximumSplit, idCompany])
+    
+    }
+
+    //Update - CompanyUsers - Amount
+    const companyUsersAmount = null;
+
+    if(changeAmount){
+
+      const companyUsersAmount = await pool.query('UPDATE Account INNER JOIN Client ON (Account.Client_idClient = Client.idCLient) SET maximumAmount = ? where Client.Company_idCompany = ?', [ defaultAmount, idCompany])
+  
+    }
+
+     /*for (let i in companyMembers){
       const member = companyMembers[i];
       member.Company_idCompany = companyRow.insertId; 
       const memberRow = await pool.query('INSERT INTO CompanyMembers SET ?', [member]);

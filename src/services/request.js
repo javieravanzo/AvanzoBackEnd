@@ -482,7 +482,7 @@ const createRequest = async (body, file, clientId, files) => {
 
           //Update account value
           const newQuantity = parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10);
-          const newAccount = { partialCapacity: (parseInt(userRow[0].partialCapacity, 10) - parseInt(quantity, 10)), accumulatedQuantity: newQuantity };
+          const newAccount = { accumulatedQuantity: newQuantity };
           const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientId]);
 
           //New Request
@@ -570,7 +570,7 @@ const createRequest = async (body, file, clientId, files) => {
             }
           });
 
-          return {status: 200, message: {message: "El solicitud ha sido creada exitosamente."}};
+          return {status: 200, message: {message: "La solicitud #"+request.insertId+" ha sido creada exitosamente."}};
         }else{
           return {status: 404, message: {message: "El usuario no tiene cupo disponible para realizar la solicitud."}};
         }
@@ -676,7 +676,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         requeststate = getStateIdFromName(stateRow, "Rechazada");
         sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada");
         //Update account values
-        const rejectAccount = {partialCapacity: clientEmail[0].partialCapacity + requestQuery[0].quantity, accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
+        const rejectAccount = { accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
         const rejectAccountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [rejectAccount, requestQuery[0].Account_idAccount]);
       }
     }else{

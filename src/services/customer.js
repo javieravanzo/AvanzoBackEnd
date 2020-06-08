@@ -45,8 +45,8 @@ const getInitialsData = async (userId) => {
 const getRequestsData = async (userId) => {
 
   try {
-      const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.identificationId, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
-      const companyInfo = await pool.query('SELECT maximumSplit, workingSupport, paymentSupport FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
+      const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.identificationId, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.montlyFee, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
+      const companyInfo = await pool.query('SELECT workingSupport, paymentSupport FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
       
       //Interest
       //const interest = await pool.query('SELECT indicatorName, indicatorValue, indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
@@ -63,7 +63,7 @@ const getRequestsData = async (userId) => {
                 data: {
                   partialCapacity: userRow[0].partialCapacity,
                   maximumAmount: userRow[0].maximumAmount,
-                  maximumSplit: companyInfo[0].maximumSplit,
+                  maximumSplit: userRow[0].montlyFee,
                   workingSupport: companyInfo[0].workingSupport,
                   paymentSupport: companyInfo[0].paymentSupport,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
@@ -152,7 +152,6 @@ const createCustomer = async (body, user, company, adminId) => {
     //Create an account
     const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C JOIN Client CL ON (C.idCompany = CL.Company_idCompany) where CL.idClient = ?', [clientQuery.insertId]);
     const newAccount = {maximumAmount: companyQuery[0].defaultAmount,
-                        partialCapacity: companyQuery[0].defaultAmount,
                         documentsUploaded: false,
                         montlyFee: 0,
                         totalInterest: 0,
@@ -198,7 +197,6 @@ const updateCustomers = async (body, user, adminId) => {
 
     //Create an account
     const newAccount = {maximumAmount: maximumAmount,
-                        partialCapacity: maximumAmount - parseInt(consultAccumulated[0].accumulatedQuantity),
                         montlyFee: montlyFee, 
                         registeredBy: adminId,
                         registeredDate: new Date()};
@@ -261,7 +259,6 @@ const createMultipleCustomers = async (customersData, adminId) => {
         //Create the account
         const newAccount = {
           maximumAmount: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo,10) : parseInt(companyQuery[0].defaultAmount, 10),
-          partialCapacity: customersData[i].CantidadMaximaPrestamo !== " " ? parseInt(customersData[i].CantidadMaximaPrestamo, 10) : parseInt(companyQuery[0].defaultAmount, 10),
           documentsUploaded: false,
           montlyFee: customersData[i].CantidadMaximaCuotas !== " " ? parseInt(customersData[i].CantidadMaximaCuotas, 10) : parseInt(companyQuery[0].maximumSplit, 10),
           totalInterest: 0,
@@ -422,7 +419,6 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       //Create an account
       const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
       const newAccount = {maximumAmount: companyQuery[0].defaultAmount,
-                         partialCapacity: companyQuery[0].defaultAmount,
                          documentsUploaded: true,
                          montlyFee: companyQuery[0].maximumSplit,
                          totalInterest: 0, totalFeeAdministration: 0,
@@ -573,11 +569,11 @@ const makePayments = async(clientid, quantity) => {
 
     //console.log("PC", userRow[0].maximumAmount, "AQ", userRow[0].accumulatedQuantity, "Q", quantity);
 
-    const newPartialCapacity = (parseInt(userRow[0].maximumAmount, 10) - parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10));
+    //const newPartialCapacity = (parseInt(userRow[0].maximumAmount, 10) - parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10));
     //console.log("NPC", newPartialCapacity);
     const newAccumulatedQuantity = (parseInt(userRow[0].accumulatedQuantity, 10) - parseInt(quantity, 10));
     //console.log("NPC", newAccumulatedQuantity);
-    const newAccount = { partialCapacity: newPartialCapacity, accumulatedQuantity: newAccumulatedQuantity };
+    const newAccount = { accumulatedQuantity: newAccumulatedQuantity };
 
     //console.log("newAccount", newAccount);
 
