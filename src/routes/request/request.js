@@ -52,7 +52,7 @@ const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC,
-        getRejectedRequest, getPendingRRHHRequest } = require('../../controllers/request');
+        getRejectedRequest, getPendingRRHHRequest, generateCodes } = require('../../controllers/request');
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
@@ -95,6 +95,7 @@ router.get('/Documents/GenerateContract', [
 ],
 [verifyToken], generateContract);
 
+router.get('/Request/GenerateCodes', [verifyToken], generateCodes);
 
 //Export
 module.exports = router;

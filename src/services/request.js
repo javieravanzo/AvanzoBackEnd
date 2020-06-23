@@ -710,41 +710,19 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         //Mailer
         sgMail.setApiKey('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');
 
-        let output = `<div>
-                <div class="header-confirmation">
-                  <h2 class="confirmation-title">
-                    Avanzo
-                  </h2>
-                  <h4 class="confirmation-subtitle">
-                    Créditos al instante
-                  </h4>
-                </div>
-            
-                <hr/>
-                
-                <div class="greet-confirmation">
-                  <h3 class="greet-title">
-                    Hola, apreciado/a.
-                  </h3>
-                  <br/>
-                  
-                  <h3>
-                    Tu solicitud ha sido aprobada exitosamente. Tu dinero ya está en camino.
-                  </h3>
-                </div>
-
-                <div class="footer-confirmation">
-                  <h3 class="footer-title">
-                    Gracias por confiar en nosotros.
-                  </h3>
-                </div>
-                                    
-              </div>`;
+        let userData = {
+          email: consultEmail[0].email,
+          url: front_URL,
+          base_URL_test: base_URL + "/approved.png",
+          footer: base_URL + "/footer.png",
+        };
+  
+        let output = await compile('approveRequest', userData);
 
         let info = {
             from: 'operaciones@avanzo.co', // sender address
             to: clientEmail[0].email, // list of receivers
-            subject: 'Avanzo (Desembolsos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
+            subject: 'Avanzo (Créditos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
             text: 'Hola', // plain text body
             html: output // html body
         };
@@ -758,42 +736,20 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         //Mailer
         sgMail.setApiKey('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');
 
-        let output = `<div>
-                <div class="header-confirmation">
-                  <h2 class="confirmation-title">
-                    Avanzo
-                  </h2>
-                  <h4 class="confirmation-subtitle">
-                    Créditos al instante
-                  </h4>
-                </div>
-            
-                <hr/>
-                
-                <div class="greet-confirmation">
-                  <h3 class="greet-title">
-                    Hola, apreciado/a.
-                  </h3>
-                  <br/>
-                  
-                  <h3>
-                    Tu solicitud ha sido rechazada - ${text}.
-                  </h3>
-                </div>
-
-                <div class="footer-confirmation">
-                  <h3 class="footer-title">
-                    Gracias por confiar en nosotros.
-                  </h3>
-                </div>
-                                    
-              </div>`;
+        let userData = {
+          email: consultEmail[0].email,
+          url: front_URL,
+          base_URL_test: base_URL + "/rejected.png",
+          footer: base_URL + "/footer.png",
+        };
+  
+        let output = await compile('rejectedRequest', userData);
 
         let info = {
             from: 'operaciones@avanzo.co', // sender address
             to: clientEmail[0].email, // list of receivers
-            subject: 'Avanzo (Desembolsos al instante) - Rechazo de solicitud  No. '  + requestid, // Subject line
-            text: 'Hola', // plain text body
+            subject: 'Avanzo (Créditos al instante) - Rechazo de solicitud  No. '  + requestid, // Subject line
+            text: 'Avanzo', // plain text body
             html: output // html body
         };
 
@@ -953,9 +909,53 @@ const generateContracts = async (customerid, split, quantity, company) => {
 
 };
 
+const generateRequestCodes = async (clientId, phoneNumber, email) => {
+
+  try{
+
+    if(phoneNumber !== null && phoneNumber !== "" && email !== null && email !== ""){
+
+      //CheckQuery
+      const userRow =  await pool.query('SELECT C.idClient, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);      
+
+      console.log("UserRow", userRow);
+
+      if(userRow.length > 0){
+        
+        if(parseInt(userRow[0].idUser, 10) === parseInt(clientId)){
+        
+          return {status: 200, data: "Coincide."}
+  
+        }else{
+  
+          return {status: 404, message: "Los datos ingresados no coinciden con el registro actual."};
+        
+        }
+
+      }else{
+
+        return {status: 404, message: "Los datos ingresados no coinciden con el registro actual."};
+
+      }
+
+     
+
+    }else{
+
+      return {status: 404, message: "Los datos ingresados no son válidos."};
+
+    }
+
+  }catch(e){
+    console.log(e);
+  }
+
+};
+
+
 module.exports = {
   getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
   getAllRequestsWasOutlayed, approveOrRejectRequest, getRequestStatesList, getAllRequestsByCompany,
   getRequestsToOutLay, getAllRequestWasRejected, generateContracts, getAllRejectedRequest,
-  getAllPendingRHRequest
+  getAllPendingRHRequest, generateRequestCodes
 }

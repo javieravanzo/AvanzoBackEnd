@@ -87,7 +87,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
       let info = {
           from: 'operaciones@avanzo.co', // sender address
           to: user.email, // list of receivers
-          subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
+          subject: 'Avanzo (Créditos al instante) - Confirmación de cuenta', // Subject line
           text: 'Hello world?', // plain text body
           html: output // html body
       };
@@ -321,7 +321,7 @@ const registerAdmins = async (admin, user, auth) => {
               let info = {
                   from: 'operaciones@avanzo.co', // sender address
                   to: user.email, // list of receivers
-                  subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
+                  subject: 'Avanzo (Créditos al instante) - Confirmación de cuenta', // Subject line
                   text: 'Hello world?', // plain text body
                   html: output // html body
               };

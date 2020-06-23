@@ -147,7 +147,7 @@ const resetPassword = async (email) => {
             let info = {
                 from: 'operaciones@avanzo.co', // sender address
                 to: email, // list of receivers
-                subject: 'Avanzo (Desembolsos al instante) - Restablecer contraseña', // Subject line
+                subject: 'Avanzo (Créditos al instante) - Restablecer contraseña', // Subject line
                 text: 'Hola', // plain text body
                 html: output // html body
             };

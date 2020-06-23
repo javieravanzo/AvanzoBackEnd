@@ -2,15 +2,35 @@
 //Requires
 const pool = require('../config/database.js');
 const jwt = require('jsonwebtoken');
-const {my_secret_key, base_URL} = require('../config/global');
+const {my_secret_key, base_URL, front_URL, base_URL_test} = require('../config/global');
 const sgMail = require('@sendgrid/mail');
 const path = require('path');
 const fs = require('fs-extra');
+const hbs = require('handlebars');
 
 //Functions
 const compileContract = async function(filePath){
   const pdf = await fs.readFileSync(filePath).toString("base64");
   return pdf;
+};
+
+const compile = async function(templateName, data){
+
+  //Production
+  const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  
+  //Development
+  //const filePath = path.join(process.cwd(), './files/templates', `${templateName}.hbs`);
+  
+  const html = await fs.readFile(filePath, 'utf-8');
+  //console.log("HTML Puro", html);
+  let template = hbs.compile(html);
+  //console.log("HTML Compilado", template);
+  let result = template(data);
+  //console.log("HTML Con estilos", result);
+
+  return result;
+
 };
 
 //Services
@@ -442,7 +462,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '30m' });       
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       //console.log(url.toString());
-      
+   
       //Production
       let contractFile = await compileContract("../files/contracts/contratoAvanzo.pdf");
 
@@ -451,52 +471,22 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
 
       //Mailer
       sgMail.setApiKey('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');
+      
+      let userData = {
+        email: consultEmail[0].email,
+        name: consultEmail[0].name,
+        url: front_URL,
+        base_URL_test: base_URL + "/confirmation.png",
+        footer: base_URL + "/footer.png",
+      };
 
-      let output = `<div>
-              <div class="header-confirmation">
-                <h2 class="confirmation-title">
-                  Avanzo
-                </h2>
-                <h4 class="confirmation-subtitle">
-                  Créditos al instante
-                </h4>
-              </div>
-          
-              <hr/>
-              
-              <div class="greet-confirmation">
-                <h3 class="greet-title">
-                  Hola, apreciado/a ${consultEmail[0].name}.
-                </h3>
-                <br/>
-                
-                <h3>
-                  Gracias por registrarte en nuestra plataforma. Aquí te ofrecemos diferentes soluciones para tu vida.
-                </h3>
-              </div>
-          
-              <div class="body-confirmation">
-                <h3 class="body-title">
-                  Te informamos que tu usuario ha sido aprobado para interactuar en la plataforma. 
-                </h3>
-                <h3>
-                 Para continuar con el proceso, por favor realiza la confirmación de tu cuenta, haciendo clic <a href="${base_URL+ `/Account/Confirm/${jwtoken}`}">aquí</a>.
-                </h3>
-              </div>
-          
-              <div class="footer-confirmation">
-                <h3 class="footer-title">
-                  Gracias por confiar en nosotros.
-                </h3>
-              </div>
-          
-            </div>`;
+      let output = await compile('accountConfirmation', userData);
 
       let info = {
           from: 'operaciones@avanzo.co', // sender address
-          to: consultEmail[0].email, // list of receivers
-          subject: 'Avanzo (Desembolsos al instante) - Confirmación de cuenta', // Subject line
-          text: 'Hola', // plain text body
+          to: userData.email, // list of receivers
+          subject: 'Avanzo (Créditos al instante) - Confirmación de cuenta', // Subject line
+          text: 'Avanzo', // plain text body
           html: output, // html body,
           attachments: [
             {

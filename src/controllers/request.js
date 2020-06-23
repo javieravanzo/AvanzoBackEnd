@@ -10,7 +10,7 @@ var fs = require('fs');
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
         generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
-        getAllPendingRHRequest
+        getAllPendingRHRequest, generateRequestCodes
       } = require('../services/request');
 
 //Get the client with token
@@ -132,9 +132,7 @@ function dataURLtoFile(dataurl, filename) {
   }
   
   return new File([u8arr], filename, {type:mime});
-}
-
-
+};
 
 const createNewRequest = async (req, res, next) => {
 
@@ -384,8 +382,29 @@ const generateContract = async (req, res, next) => {
 
 };
 
+const generateCodes = async (req, res, next) => {
+
+  const {clientid, phonenumber, email} = req.headers;
+
+  console.log(clientid, phonenumber, email);
+
+  try {
+    const result = await generateRequestCodes(clientid, phonenumber, email);
+    if(result.status === 200){
+      res.status(result.status).json(result.message);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };
+
+};
+
 module.exports = {
   getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getAllRequestByCompany,
   approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
-  getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest
+  getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest,
+  generateCodes
 };
