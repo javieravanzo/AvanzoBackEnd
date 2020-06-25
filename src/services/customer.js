@@ -478,9 +478,21 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         url: front_URL,
         base_URL_test: base_URL + "/confirmation.png",
         footer: base_URL + "/footer.png",
+        link: url,
       };
 
+      /*let userData = {
+        email: 'ccorjuelav@unal.edu.co',
+        name: 'Cristian',
+        url: front_URL,
+        base_URL_test: base_URL + "/confirmation.png",
+        footer: base_URL + "/footer.png",
+        link: "http://www.google.com",
+      };*/
+
       let output = await compile('accountConfirmation', userData);
+
+      //console.log("Output", output);
 
       let info = {
           from: 'operaciones@avanzo.co', // sender address
