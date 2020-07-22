@@ -8,6 +8,8 @@ const front_URL = "http://cliente.avanzocreditos.com";
 
 const front_URL_test = "http://localhost:3000";
 
+const email_api_key = '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';
+
 module.exports = {
-  my_secret_key, base_URL, base_URL_test, front_URL, front_URL_test
+  my_secret_key, email_api_key, base_URL, base_URL_test, front_URL, front_URL_test
 }

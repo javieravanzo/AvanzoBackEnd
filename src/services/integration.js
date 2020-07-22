@@ -22,7 +22,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       newUser.registeredBy = 1;
       newUser.registeredDate = new Date();
 
-      console.log("Row2", customerQuery[0].idUser);
+      //console.log("Row2", customerQuery[0].idUser);
 
       const updateUser = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, customerQuery[0].idUser]);
 

@@ -172,7 +172,7 @@ const getCompanies = async (req, userId) => {
   }catch(e){
     console.log(e);
     //throw e;
-    return {status: 500, message: "Error interno de l servidor."};
+    return {status: 500, data: [], message: "Error interno del servidor."};
   }  
 
 };
@@ -185,7 +185,7 @@ const getAllCompaniesForUser = async ( ) => {
   }catch(e){
     console.log(e);
     //throw e;
-    return {status: 500, message: "Error interno de l servidor."};
+    return {status: 500, data: [], message: "Error interno del servidor."};
   }  
 
 };

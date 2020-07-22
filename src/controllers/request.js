@@ -2,7 +2,6 @@
 //Requires
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-var buffer = require('buffer');
 var path = require('path');
 var fs = require('fs');
 
@@ -10,7 +9,7 @@ var fs = require('fs');
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
         generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
-        getAllPendingRHRequest, generateRequestCodes
+        getAllPendingRHRequest, generateRequestCodes, checkNewCodes
       } = require('../services/request');
 
 //Get the client with token
@@ -42,6 +41,7 @@ function getUserId(req){
 
 };
 
+//Get the company with token
 function getCompanyId(req){
 
   //Get the clientId
@@ -386,10 +386,31 @@ const generateCodes = async (req, res, next) => {
 
   const {clientid, phonenumber, email} = req.headers;
 
-  console.log(clientid, phonenumber, email);
+  //console.log(clientid, phonenumber, email);
 
   try {
     const result = await generateRequestCodes(clientid, phonenumber, email);
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };
+
+};
+
+const checkCodes = async (req, res, next) => {
+
+  const {userid, phonecode, emailcode} = req.headers;
+  console.log("Headers", userid, phonecode, emailcode);
+
+  let clientId = getClientId(req);
+  
+  try {
+    const result = await checkNewCodes(clientId, userid, phonecode, emailcode);
     if(result.status === 200){
       res.status(result.status).json(result.message);
     }else{
@@ -406,5 +427,5 @@ module.exports = {
   getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getAllRequestByCompany,
   approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
   getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest,
-  generateCodes
+  generateCodes, checkCodes
 };

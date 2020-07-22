@@ -1,17 +1,20 @@
 //Requires
 const math = require('math');
-const pool = require('../config/database.js');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
 const moment = require('moment');
 const path = require('path');
 const sgMail = require('@sendgrid/mail');
-const {base_URL} = require('../config/global');
 const mkdirp = require('mkdirp');
 const pdf = require('html-pdf');
-const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const bytesFormat = require('biguint-format');
 
-//const { checkDateList } = require('./loan');
+//Imports
+const {base_URL, email_api_key, front_URL} = require('../config/global');
+const pool = require('../config/database.js');
+const helpers = require('../lib/helpers');
+const mailer = require('../lib/mailer/requestMailer.js');
 
 //Functions
 function getStateIdFromName (row, name){
@@ -31,7 +34,6 @@ function getStateIdFromName (row, name){
 };
 
 function format(d) {
-  console.log("D", d)
   var formatter = new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
@@ -91,7 +93,7 @@ const getOutLaysData = async () => {
         return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e) {
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 };
@@ -123,7 +125,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
       return {status: 500, message: "Error interno del servidor1."};
     }
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor2."};
   }
 };
@@ -140,7 +142,7 @@ const newDateList = async function(userRow){
     let paymentArray = userRow[0].companyPaymentDates.split(',');
 
 
-    //console.log("UR", userRow[0].companyPaymentNumber, userRow[0].companyPaymentNumber === 1, userRow[0].companyFirstDate, userRow[0].companySecondDate);
+    ////console.log("UR", userRow[0].companyPaymentNumber, userRow[0].companyPaymentNumber === 1, userRow[0].companyFirstDate, userRow[0].companySecondDate);
 
     /*if(parseInt(userRow[0].companyPaymentNumber,10) === 2){
       paymentArray.push(playmentSplited[0].companyFirstDate);
@@ -149,15 +151,15 @@ const newDateList = async function(userRow){
       paymentArray.push(userRow[0].companyFirstDate);
     }*/
 
-    //console.log("Payment", paymentArray);
+    ////console.log("Payment", paymentArray);
 
     let today = new Date();
 
-    //console.log("Today: ", today);
+    ////console.log("Today: ", today);
 
     today.setDate(today.getDate());
 
-    //console.log("Today: ", today);
+    ////console.log("Today: ", today);
 
     let todayNumber = parseInt(today.getDate(), 10);
 
@@ -168,7 +170,7 @@ const newDateList = async function(userRow){
 
     for (let i = 0; i < reportDays.length ; i++){
 
-      //console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
+      ////console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
 
       if( i === 0 && todayNumber < reportDays[i]){
 
@@ -182,7 +184,7 @@ const newDateList = async function(userRow){
         
       }else{
 
-        //console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
+        ////console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
 
         if( i === reportDays.length-1 && todayNumber >= reportDays[i] ){
 
@@ -195,15 +197,15 @@ const newDateList = async function(userRow){
 
     }
 
-    console.log("ReportDate", parseInt(reportDate, 10));
+    ////console.log("ReportDate", parseInt(reportDate, 10));
 
-    console.log("PaymentArray", paymentArray);
+    ////console.log("PaymentArray", paymentArray);
 
     let paymentDate  = -1;
 
     for (let j = 0; j < paymentArray.length; j++ ){
 
-      //console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
+      ////console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
 
       if( reportDate < paymentArray[j] ){
 
@@ -227,7 +229,7 @@ const newDateList = async function(userRow){
 
     let initialDate = new Date(today.getFullYear(), month, parseInt(paymentDate,10));
 
-    console.log("initialDate", initialDate);
+    ////console.log("initialDate", initialDate);
 
     let data = {initialDate, paymentArray}
 
@@ -235,7 +237,7 @@ const newDateList = async function(userRow){
 
   }catch(e){
 
-    console.log("E", e);
+    //console.log("E", e);
 
   }
 
@@ -248,7 +250,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.* FROM Client CLI JOIN User USR JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient and CLI.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);   
     
-    console.log("Salaries", userRow);
+    ////console.log("Salaries", userRow);
 
     let today = new Date();
 
@@ -274,7 +276,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let arrayDates = await returnDateList(initialDate, paymentArray, split, today, userRow[0].companyPaymentNumber);
 
-    console.log("ArrayDates", arrayDates);
+    ////console.log("ArrayDates", arrayDates);
 
     for (let i=0; i<split; i++){  
 
@@ -315,12 +317,12 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let administrationValue = months * adminValue;
 
-    //console.log("administrationValue", administrationValue);
-    //console.log("Months", months);
+    ////console.log("administrationValue", administrationValue);
+    ////console.log("Months", months);
 
     let ivaValue = (0.19) * administrationValue;
 
-    //console.log("IVA", ivaValue);
+    ////console.log("IVA", ivaValue);
 
     let quantitySplited = Math.ceil(totalQuantity / split);
 
@@ -340,7 +342,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
   }catch(e){
 
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
 
   }
@@ -349,8 +351,8 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
 const returnDateList = async function(initialDate, paymentArray, split, today, companyPaymentNumber){
 
-  //console.log(initialDate, companyRate, firstDate, secondDate, i);
-  //console.log("ID", initialDate);
+  ////console.log(initialDate, companyRate, firstDate, secondDate, i);
+  ////console.log("ID", initialDate);
   
   let counter = 0;
 
@@ -358,9 +360,9 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   let monthsDate = new Date(initialDate);
   
-  //console.log("Date", monthsDate);
+  ////console.log("Date", monthsDate);
 
-  //console.log("MonthNumber", parseInt( monthsDate.getMonth(), 10));
+  ////console.log("MonthNumber", parseInt( monthsDate.getMonth(), 10));
 
   let daysArray = [];
 
@@ -368,7 +370,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   daysArray.push(new Date (initialDate)); 
 
-  console.log("DatesArray", daysArray);
+  ////console.log("DatesArray", daysArray);
   
   while(counter < split){  
 
@@ -376,7 +378,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
     let monthDays = 0;
 
-    //console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
+    ////console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
 
     if(companyPaymentNumber > 1){
 
@@ -392,7 +394,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
         
         if(parseInt(paymentArray[1], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
 
-          console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[1], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+          ////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[1], 10), "Current Day", parseInt(newDate.getDate(), 10) );
 
           arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
@@ -406,8 +408,8 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
     }else{
 
-      //console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
-      //console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
+      ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+      ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
       if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10)){
 
         arrayDate = newDate;
@@ -420,7 +422,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
         if(parseInt(paymentArray[0], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
 
-          console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+          ////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
 
           arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
@@ -439,7 +441,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   }
 
-  //console.log("daysArray", daysArray);
+  ////console.log("daysArray", daysArray);
 
   return daysArray;
 
@@ -453,20 +455,20 @@ const createRequest = async (body, file, clientId, files) => {
             fileString, loanData } = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
-    //console.log("AC", approvedClient);
+    ////console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1){
      
         //Account - Request
         const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
-        //console.log("UR", userRow[0]);
+        ////console.log("UR", userRow[0]);
         
-        //console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
+        ////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
 
-          //console.log("Files", files);
+          ////console.log("Files", files);
           
-          //console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
+          ////console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
           let updateNewClient = null;
           //Update paymentSupport and workingSupport
           if (files !== null){
@@ -500,20 +502,21 @@ const createRequest = async (body, file, clientId, files) => {
           //Obsevations - Request
           //const observation = {observationContent: ""};
           //const observationInsert = await pool.query('INSERT INTO Observations SET ?', [observation]);
-          //console.log("OI", observationInsert);
+          ////console.log("OI", observationInsert);
           //newRequest.Observations_idObservations = observationInsert.insertId;
           
           //PreRequestDates - Request
           const preRequestDates = {datesList: "[]", totalQuantity: parseInt(quantity,10), totalAmount: parseInt(quantity,10), totalInterest: 0, totalAdmin: 0, totalIva: 0, totalOtherValues: 0};
           const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
-          //console.log("PRD", preRequestDatesRow);
-          newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;
-          
-          //console.log("URW", userRow);
+          newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;         
           newRequest.Account_idAccount = userRow[0].idAccount;
+          
           //Request
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
-          //console.log("REQ ID", request.insertId);
+          ////console.log("REQ ID", request.insertId);
+
+          //ConsultCodes
+          const codes = await pool.query('SELECT numberEmailCode, numberPhoneCode, receiveTime FROM Codes where Client_idClient = ?', [clientId]);
 
           let filePath = userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorización-descuento-'+request.insertId+'.pdf';
 
@@ -526,7 +529,7 @@ const createRequest = async (body, file, clientId, files) => {
           //Development
           //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
           
-          console.log("DL", loanData);
+          ////console.log("DL", loanData);
 
           let userData = {
             identificationId: userRow[0].identificationId,
@@ -540,9 +543,13 @@ const createRequest = async (body, file, clientId, files) => {
             idCompany: approvedClient[0].Company_idCompany,
             company: approvedClient[0].companyName,
             splitQuantity: format(loanData),
+            emailCode: codes[0].numberEmailCode,
+            phoneCode: codes[0].numberPhoneCode,
+            emailCodeDate: codes[0].receiveTime.toLocaleDateString('es-CO', {}),
+            phoneCodeDate: codes[0].receiveTime.toLocaleDateString('es-CO', {}),
           };
 
-          //console.log("UserData", userData);
+          ////console.log("UserData", userData);
 
           mkdirp.sync(dest);
           const content = await compile('contract', userData);
@@ -570,7 +577,7 @@ const createRequest = async (body, file, clientId, files) => {
             }
           });
 
-          return {status: 200, message: {message: "La solicitud #"+request.insertId+" ha sido creada exitosamente."}};
+          return {status: 200, message: {message: "Tu solicitud #"+request.insertId+" ha sido creada con éxito. Pronto nos pondremos en contacto contigo."}};
         }else{
           return {status: 404, message: {message: "El usuario no tiene cupo disponible para realizar la solicitud."}};
         }
@@ -579,7 +586,7 @@ const createRequest = async (body, file, clientId, files) => {
       return {status: 404, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 };
@@ -587,12 +594,12 @@ const createRequest = async (body, file, clientId, files) => {
 const getAllRequests = async (clientId) => {
   
   try{ 
-    //console.log("ClientId", clientId);
+    ////console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -600,12 +607,12 @@ const getAllRequests = async (clientId) => {
 const getAllRequestsWasOutlayed = async (clientId) => {
   
   try{ 
-    //console.log("ClientId", clientId);
+    ////console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -613,12 +620,12 @@ const getAllRequestsWasOutlayed = async (clientId) => {
 const getAllRequestWasRejected = async (clientId) => {
   
   try{ 
-    //console.log("ClientId", clientId);
+    ////console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -684,10 +691,10 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     }  
 
     const request = {registeredDate: new Date(), observation: text, registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null };
-    //console.log("R", request);
+    ////console.log("R", request);
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
-      //console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
+      ////console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
       if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Admon.")){
 
         //Transactions
@@ -708,10 +715,10 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         const accountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [account, requestQuery[0].Account_idAccount]);
 
         //Mailer
-        sgMail.setApiKey('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');
+        sgMail.setApiKey(email_api_key);
 
         let userData = {
-          email: consultEmail[0].email,
+          email: clientEmail[0].email,
           url: front_URL,
           base_URL_test: base_URL + "/approved.png",
           footer: base_URL + "/footer.png",
@@ -723,7 +730,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
             from: 'operaciones@avanzo.co', // sender address
             to: clientEmail[0].email, // list of receivers
             subject: 'Avanzo (Créditos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
-            text: 'Hola', // plain text body
+            text: 'Avanzo Créditos', // plain text body
             html: output // html body
         };
 
@@ -731,10 +738,10 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       
       }else if(sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada")){
         
-        console.log("Text", text, "Correo");
+        ////console.log("Text", text, "Correo");
 
         //Mailer
-        sgMail.setApiKey('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');
+        sgMail.setApiKey(email_api_key);
 
         let userData = {
           email: consultEmail[0].email,
@@ -761,7 +768,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 
@@ -808,7 +815,7 @@ const getAllRequestsToApprove = async (userId) => {
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};
     }
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes para aprobar."}};
   }
 
@@ -834,7 +841,7 @@ const getRequestsToOutLay = async (userId) => {
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};
     }
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes para aprobar."}};
   }
 
@@ -847,14 +854,14 @@ const getAllRejectedRequest = async () => {
     //Consult state
     const stateRow = await pool.query('SELECT * FROM RequestState');
     let requeststate = getStateIdFromName(stateRow, "Rechazada");
-    console.log("RS", requeststate);
+    ////console.log("RS", requeststate);
 
     //Select rows
     const  requestRow =  await pool.query('SELECT R.idRequest, R.observation, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
     
     return {status: 200, data: requestRow};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes rechazadas."}};
   }
 
@@ -867,14 +874,14 @@ const getAllPendingRHRequest = async () => {
     //Consult state
     const stateRow = await pool.query('SELECT * FROM RequestState');
     let requeststate = getStateIdFromName(stateRow, "Evaluada");
-    console.log("RS", requeststate);
+    ////console.log("RS", requeststate);
 
     //Select rows
     const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
     
     return {status: 200, data: requestRow};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes rechazadas."}};
   }
 
@@ -891,12 +898,11 @@ const generateContracts = async (customerid, split, quantity, company) => {
     var dest = '../files/contracts/'+userRow[0].identificationId+'-'+company+'/';
     mkdirp.sync(dest);
     const content = await compile('contract', {identificationId: userRow[0].identificationId, name: userRow[0].lastName});
-    
-    
+       
     //Production
     const result = await pdf.create(content, {}).toFile('../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf', (err) => {
       if(err){
-        //console.log("Entro2");
+        ////console.log("Entro2");
         return {status: 500, data: "false"};
       }
       return 200;
@@ -904,7 +910,7 @@ const generateContracts = async (customerid, split, quantity, company) => {
     return {status: 200, data: "true"};
     
   }catch(e){
-    console.log(e);
+    //console.log(e);
   }
 
 };
@@ -916,29 +922,96 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
     if(phoneNumber !== null && phoneNumber !== "" && email !== null && email !== ""){
 
       //CheckQuery
-      const userRow =  await pool.query('SELECT C.idClient, U.idUser FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);      
+      const userRow =  await pool.query('SELECT C.idClient, U.idUser, U.email FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);      
 
-      console.log("UserRow", userRow);
+      ////console.log("UserRow", userRow);
 
       if(userRow.length > 0){
         
         if(parseInt(userRow[0].idUser, 10) === parseInt(clientId)){
         
-          return {status: 200, data: "Coincide."}
+          let x = crypto.randomBytes(1);
+
+          ////console.log("Formato", bytesFormat(x, 'dec'));
+
+          let emailCode = Math.floor(100000 + Math.random() * 900000);
+          
+          //console.log("EC", emailCode);
+
+          let phoneCode = Math.floor(100000 + Math.random() * 900000);
+
+          //console.log("PC", phoneCode);
+
+          //Encrypt Codes
+          let newEmailCode = await helpers.encryptPassword(emailCode.toString());
+
+          ////console.log("EcryptedPhone", newPhoneCode);
+
+          let newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
+
+          ////console.log("EcryptedPhone", newPhoneCode);
+
+          let objectCode = {
+            numberEmailCode: emailCode.toString(),
+            numberPhoneCode: phoneCode.toString(),
+            emailCode: newEmailCode,
+            phoneCode: newPhoneCode,
+            Client_idClient: userRow[0].idClient,
+            sendTime: new Date(),
+          };
+
+          const checkClient = await pool.query('SELECT idCodes FROM Codes where Client_idClient', [userRow[0].idClient]);
+
+          ////console.log("CC", checkClient);
+
+          if (checkClient.length > 0){
+
+            const updateCodes = await pool.query('UPDATE Codes SET ? where Client_idClient = ?', [objectCode, userRow[0].idClient]);
+          
+          }else{
+          
+            const insertCodes = await pool.query('INSERT INTO Codes SET ?', [objectCode]);
+          
+          }
+
+          ////console.log("InsertCodes", insertCodes);
+
+          //Mailer
+          sgMail.setApiKey(email_api_key);
+
+          let userData = {
+            email: userRow[0].email,
+            url: front_URL,
+            emailCode: emailCode,
+            base_URL_test: base_URL + "/confirmation.png",
+            footer: base_URL + "/footer.png",
+          };
+    
+          let output = await compile('transactionCode', userData);
+
+          let info = {
+              from: 'operaciones@avanzo.co', // sender address
+              to: userRow[0].email, // list of receivers
+              subject: 'Avanzo (Créditos al instante) - Código de validación', // Subject line
+              text: 'Avanzo', // plain text body
+              html: output // html body
+          };
+
+          await sgMail.send(info);                
+
+          return {status: 200, message: "Los códigos han sido enviados"};
   
         }else{
   
-          return {status: 404, message: "Los datos ingresados no coinciden con el registro actual."};
+          return {status: 404, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
         
         }
 
       }else{
 
-        return {status: 404, message: "Los datos ingresados no coinciden con el registro actual."};
+        return {status: 404, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
 
       }
-
-     
 
     }else{
 
@@ -953,9 +1026,70 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
 };
 
 
+const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
+
+  try{
+
+    if(phonecode !== null && phonecode !== "" && emailcode !== null && emailcode !== ""){
+
+      //CheckQuery
+      const userRow =  await pool.query('SELECT C.idClient, CO.idCodes, CO.emailCode, CO.phoneCode FROM Codes CO JOIN Client C ON (CO.Client_idClient = C.idClient) where C.idClient', [clientId]);      
+
+      ////console.log("Cyphers", userRow);
+
+      if(userRow.length > 0){
+
+        //console.log("PhoneCode", phonecode.toString());
+
+        //console.log("Encrypted", await helpers.encryptPassword(phonecode.toString()));
+        
+        //console.log("DBCode", userRow[0].phoneCode);
+
+        ////console.log("EmailCode", emailcode.toString());
+        
+        let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
+
+        let validEmailCode = await helpers.matchPassword(emailcode.toString(), userRow[0].emailCode);
+               
+        //console.log("validPhoneCode", validPhoneCode);
+
+        //console.log("validEmailCode", validEmailCode);
+
+        let updateCodes = {
+          receiveTime: new Date(),
+          receiveIP: "192.123.2.12"   
+        };
+
+        const updateDates = await pool.query('UPDATE Codes SET ? WHERE Client_idClient = ?', [updateCodes, clientId]);            
+        ////console.log("UpdateDates", updateDates);
+
+        if(validPhoneCode && validEmailCode){
+          return {status: 200, message: "Los códigos son auténticos"};
+        }else{
+          return {status: 404, message: "Los códigos ingresados no coinciden con el registro."};
+        } 
+  
+      }else{
+
+        return {status: 404, message: "Los códigos ingresados no coinciden con el registro."};
+      
+      }
+
+    }else{
+
+      return {status: 404, message: "Los códigos ingresados no son números válidos."};
+
+    }
+  
+  }catch(e){
+    //console.log(e);
+  }
+
+};
+
 module.exports = {
   getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
   getAllRequestsWasOutlayed, approveOrRejectRequest, getRequestStatesList, getAllRequestsByCompany,
   getRequestsToOutLay, getAllRequestWasRejected, generateContracts, getAllRejectedRequest,
-  getAllPendingRHRequest, generateRequestCodes
-}
+  getAllPendingRHRequest, generateRequestCodes, checkNewCodes
+};

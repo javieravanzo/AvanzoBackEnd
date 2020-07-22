@@ -52,7 +52,7 @@ const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC,
-        getRejectedRequest, getPendingRRHHRequest, generateCodes } = require('../../controllers/request');
+        getRejectedRequest, getPendingRRHHRequest, generateCodes, checkCodes } = require('../../controllers/request');
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
@@ -64,7 +64,6 @@ router.get('/Request/GetOultayDatesList',[
 [verifyToken], getOultayDatesList);
 
 router.post('/Request/Create', uploads.fields([
-  { name: 'file', maxCount: 1},
   { name: 'paymentSupport', maxCount: 1},
   { name: 'workingSupport', maxCount: 1},
 ]), [verifyToken], createNewRequest);
@@ -96,6 +95,8 @@ router.get('/Documents/GenerateContract', [
 [verifyToken], generateContract);
 
 router.get('/Request/GenerateCodes', [verifyToken], generateCodes);
+
+router.get('/Request/ValidateCodes', [verifyToken], checkCodes);
 
 //Export
 module.exports = router;
