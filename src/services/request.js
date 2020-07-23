@@ -707,7 +707,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
         
         //RequestOutLay
-        const outlay = {outLayDate: new Date(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date(), wasComputed: "false", Request_idRequest: requestid};
+        const outlay = {datesList: new Date().toString(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date(), wasComputed: "false", Request_idRequest: requestid};
         const outlayQuery = await pool.query('INSERT INTO RequestOutLay SET ?', [outlay]);
 
         //Update account values
@@ -744,7 +744,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         sgMail.setApiKey(email_api_key);
 
         let userData = {
-          email: consultEmail[0].email,
+          email: clientEmail[0].email,
           url: front_URL,
           base_URL_test: base_URL + "/rejected.png",
           footer: base_URL + "/footer.png",
@@ -768,7 +768,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e){
-    //console.log(e);
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 
