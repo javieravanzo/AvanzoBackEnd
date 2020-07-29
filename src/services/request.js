@@ -121,126 +121,16 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
       let result = await checkDateList(customerId, split, interest, adminValue, quantity);
 
       return {status: 200, data: result};
+
     }else{
+
       return {status: 500, message: "Error interno del servidor1."};
+    
     }
   }catch(e){
     //console.log(e);
     return {status: 500, message: "Error interno del servidor2."};
   }
-};
-
-const newDateList = async function(userRow){
-  
-  try{
-
-    //Dates
-    //const userRow =  await pool.query('SELECT COMSAL.* FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
-    
-    //let playmentSplited = userRow[0].companyPaymentDates.split(',');
-
-    let paymentArray = userRow[0].companyPaymentDates.split(',');
-
-
-    ////console.log("UR", userRow[0].companyPaymentNumber, userRow[0].companyPaymentNumber === 1, userRow[0].companyFirstDate, userRow[0].companySecondDate);
-
-    /*if(parseInt(userRow[0].companyPaymentNumber,10) === 2){
-      paymentArray.push(playmentSplited[0].companyFirstDate);
-      paymentArray.push(userRow[0].companySecondDate);
-    }else if(parseInt(userRow[0].companyPaymentNumber, 10) === 1){
-      paymentArray.push(userRow[0].companyFirstDate);
-    }*/
-
-    ////console.log("Payment", paymentArray);
-
-    let today = new Date();
-
-    ////console.log("Today: ", today);
-
-    today.setDate(today.getDate());
-
-    ////console.log("Today: ", today);
-
-    let todayNumber = parseInt(today.getDate(), 10);
-
-    //ReportDays
-    let reportDays = userRow[0].companyReportDates.split(',');
-
-    let reportDate = -1;
-
-    for (let i = 0; i < reportDays.length ; i++){
-
-      ////console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
-
-      if( i === 0 && todayNumber < reportDays[i]){
-
-        reportDate = parseInt(reportDays[0], 10);
-        break;
-
-      }else if ( todayNumber >= reportDays[i] && todayNumber < reportDays[i+1] ){
-
-        reportDate = parseInt(reportDays[i+1], 10);
-        break;
-        
-      }else{
-
-        ////console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
-
-        if( i === reportDays.length-1 && todayNumber >= reportDays[i] ){
-
-          reportDate = parseInt(reportDays[0], 10);
-          break;
-
-        }
-
-      }
-
-    }
-
-    ////console.log("ReportDate", parseInt(reportDate, 10));
-
-    ////console.log("PaymentArray", paymentArray);
-
-    let paymentDate  = -1;
-
-    for (let j = 0; j < paymentArray.length; j++ ){
-
-      ////console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
-
-      if( reportDate < paymentArray[j] ){
-
-        paymentDate = parseInt(paymentArray[j], 10);
-        break;
-      
-      }else{
-
-        if( j === paymentArray.length-1 && reportDate >= paymentArray[j] ){
-
-          paymentDate = parseInt(paymentArray[0], 10);
-          break;
-
-        }
-
-      }
-
-    };
-
-    let month = todayNumber < parseInt(paymentDate,10) ? today.getMonth() : today.getMonth()+1;
-
-    let initialDate = new Date(today.getFullYear(), month, parseInt(paymentDate,10));
-
-    ////console.log("initialDate", initialDate);
-
-    let data = {initialDate, paymentArray}
-
-    return data;
-
-  }catch(e){
-
-    //console.log("E", e);
-
-  }
-
 };
 
 const checkDateList = async function(customerId, split, interest, adminValue, quantity){
@@ -250,11 +140,8 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.* FROM Client CLI JOIN User USR JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient and CLI.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);   
     
-    ////console.log("Salaries", userRow);
-
     let today = new Date();
 
-    //let new_info = await newDateList(customerId);
     let variables = await newDateList(userRow);
 
     let initialDate = variables.initialDate;
@@ -264,9 +151,6 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     let datesList = new Array();
     let new_date = {};
     let cashValues = [];
-    let collectedDates = [];
-    collectedDates.push(new Date(today));
-    let asignedDate = null;
     let real_date = null;
     let totalQuantity = 0;
     let totalInterest = 0;
@@ -275,8 +159,6 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     let splitQuantity = Math.ceil(quantity / split);
 
     let arrayDates = await returnDateList(initialDate, paymentArray, split, today, userRow[0].companyPaymentNumber);
-
-    ////console.log("ArrayDates", arrayDates);
 
     for (let i=0; i<split; i++){  
 
@@ -293,6 +175,8 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
         capital: splitQuantity + (quantity*interest*days_per_split),
       };     
 
+      //console.log("Others", others);
+
       new_date = {
         id: i,
         name: "Descuento No. " + (i+1),
@@ -303,7 +187,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
       totalInterest = Math.ceil(totalInterest) + Math.ceil(quantity*interest*days_per_split);
 
       totalQuantity = (totalQuantity + splitQuantity + (quantity*interest*days_per_split));
-      
+
       if(i === split-1){
         lastDate = real_date;
       }
@@ -349,10 +233,98 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
 };
 
+const newDateList = async function(userRow){
+  
+  try{
+
+    //Dates
+    let paymentArray = userRow[0].companyPaymentDates.split(',');
+    
+    let today = new Date();
+
+    //2 -> Number of days AFTER the request
+    today.setDate(today.getDate()+2);
+
+    let todayNumber = parseInt(today.getDate(), 10);
+
+    //ReportDays
+    let reportDays = userRow[0].companyReportDates.split(',');
+
+    let reportDate = -1;
+
+    for (let i = 0; i < reportDays.length ; i++){
+
+      ////console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
+
+      if( i === 0 && todayNumber < reportDays[i]){
+
+        reportDate = parseInt(reportDays[0], 10);
+        break;
+
+      }else if ( todayNumber >= reportDays[i] && todayNumber < reportDays[i+1] ){
+
+        reportDate = parseInt(reportDays[i+1], 10);
+        break;
+        
+      }else{
+
+        ////console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
+
+        if( i === reportDays.length-1 && todayNumber >= reportDays[i] ){
+
+          reportDate = parseInt(reportDays[0], 10);
+          break;
+
+        }
+
+      }
+
+    }
+
+    let paymentDate  = -1;
+
+    for (let j = 0; j < paymentArray.length; j++ ){
+
+      ////console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
+
+      if( reportDate < paymentArray[j] ){
+
+        paymentDate = parseInt(paymentArray[j], 10);
+        break;
+      
+      }else{
+
+        if( j === paymentArray.length-1 && reportDate >= paymentArray[j] ){
+
+          paymentDate = parseInt(paymentArray[0], 10);
+          break;
+
+        }
+
+      }
+
+    };
+
+    let month = todayNumber < parseInt(paymentDate,10) ? today.getMonth() : today.getMonth()+1;
+
+    let initialDate = new Date(today.getFullYear(), month, parseInt(paymentDate,10));
+
+    let data = {initialDate, paymentArray}
+
+    return data;
+
+  }catch(e){
+
+    //console.log("E", e);
+
+  }
+
+};
+
 const returnDateList = async function(initialDate, paymentArray, split, today, companyPaymentNumber){
 
   ////console.log(initialDate, companyRate, firstDate, secondDate, i);
-  ////console.log("ID", initialDate);
+  //console.log("ID", initialDate);
   
   let counter = 0;
 
@@ -368,9 +340,12 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   let months = 1;
 
-  daysArray.push(new Date (initialDate)); 
+  let newToday = new Date();
 
-  ////console.log("DatesArray", daysArray);
+  //2 -> Number of days AFTER the request
+  newToday.setDate(newToday.getDate()+2);
+
+  daysArray.push(new Date (newToday)); 
   
   while(counter < split){  
 
@@ -407,9 +382,9 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
       }
 
     }else{
-
       ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
       ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
+
       if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10)){
 
         arrayDate = newDate;
@@ -422,7 +397,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
         if(parseInt(paymentArray[0], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
 
-          ////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+          //console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
 
           arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
@@ -441,7 +416,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   }
 
-  ////console.log("daysArray", daysArray);
+  //console.log("daysArray", daysArray);
 
   return daysArray;
 
@@ -451,7 +426,7 @@ const createRequest = async (body, file, clientId, files) => {
 
   try{
 
-    const { quantity, split, moyen, accountType, accountNumber, interest, administration, isBank,
+    const { quantity, split, moyen, accountType, accountNumber, interest, administration, iva, otherValues, totalValue, isBank,
             fileString, loanData } = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
@@ -466,10 +441,8 @@ const createRequest = async (body, file, clientId, files) => {
         ////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
 
-          ////console.log("Files", files);
-          
-          ////console.log("CD", approvedClient[0].ClientDocuments_idClientDocuments);
           let updateNewClient = null;
+
           //Update paymentSupport and workingSupport
           if (files !== null){
             updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
@@ -490,11 +463,17 @@ const createRequest = async (body, file, clientId, files) => {
           //New Request
           const requestState = await pool.query('SELECT * FROM RequestState');
           const newRequest = {quantity, split, account: moyen, accountNumber, accountType};
+         
           newRequest.administrationValue = administration;
+          newRequest.otherValues = otherValues;
+          newRequest.totalValue = totalValue;
+          newRequest.ivaValue = iva;
           newRequest.interestValue = interest;
+
           newRequest.creditNumber = math.ceil(math.random()*10000);
           newRequest.approveHumanResources = true;
           newRequest.createdDate = new Date();
+          newRequest.registeredDate = new Date();
           newRequest.registeredBy = 1;
           newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
           newRequest.observation = "";
@@ -531,6 +510,11 @@ const createRequest = async (body, file, clientId, files) => {
           
           ////console.log("DL", loanData);
 
+          let codeDates = codes[0].receiveTime.toLocaleDateString('es-CO', {}) + "-" + codes[0].receiveTime.getHours() + ":"  
+          + codes[0].receiveTime.getMinutes() + ":"  + codes[0].receiveTime.getSeconds();
+
+          console.log("CodeDates", codeDates);
+
           let userData = {
             identificationId: userRow[0].identificationId,
             lastName: userRow[0].lastName,
@@ -545,8 +529,8 @@ const createRequest = async (body, file, clientId, files) => {
             splitQuantity: format(loanData),
             emailCode: codes[0].numberEmailCode,
             phoneCode: codes[0].numberPhoneCode,
-            emailCodeDate: codes[0].receiveTime.toLocaleDateString('es-CO', {}),
-            phoneCodeDate: codes[0].receiveTime.toLocaleDateString('es-CO', {}),
+            emailCodeDate: codeDates,
+            phoneCodeDate: codeDates,
           };
 
           ////console.log("UserData", userData);
@@ -595,11 +579,11 @@ const getAllRequests = async (clientId) => {
   
   try{ 
     ////console.log("ClientId", clientId);
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    //console.log(e);
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -608,11 +592,11 @@ const getAllRequestsWasOutlayed = async (clientId) => {
   
   try{ 
     ////console.log("ClientId", clientId);
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 5]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    //console.log(e);
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -621,11 +605,11 @@ const getAllRequestWasRejected = async (clientId) => {
   
   try{ 
     ////console.log("ClientId", clientId);
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    //console.log(e);
+    console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -647,8 +631,10 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     //Change the approval/reject state
     const stateRow = await pool.query('SELECT * FROM RequestState');
 
-    const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
-    const clientEmail = await pool.query('SELECT U.email, A.partialCapacity, A.totalInterest, A.accumulatedQuantity, A.totalFeeAdministration, A.totalRemainder FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
+    const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, ivaValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
+    console.log("RQ", requestQuery);
+    
+    const clientEmail = await pool.query('SELECT U.email, A.partialCapacity, A.totalInterest, A.accumulatedQuantity, A.totalFeeAdministration, A.totalRemainder, A.totalIva, A.totalCapital FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
     let requeststate = -1;
     let sendApprovedEmail = -1;
     let response = "";
@@ -658,8 +644,6 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         if(userId.role === 1 ){
           response = "desembolsada";
           requeststate = getStateIdFromName(stateRow, "Desembolsada");
-          
-          
         }else if(userId.role === 2 ){
           let stateRequested = getStateIdFromName(stateRow, "Solicitada");
           let stateAnalysis = getStateIdFromName(stateRow, "Evaluada");
@@ -690,18 +674,54 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       return {status: 404, message: {message: "La solicitud no está registrada en nuestro sistema."}}
     }  
 
-    const request = {registeredDate: new Date(), observation: text, registeredBy: userId, RequestState_idRequestState: requeststate, bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null };
-    ////console.log("R", request);
+    const request = {registeredDate: new Date(), observation: text, registeredBy: userId.idUser, RequestState_idRequestState: requeststate, bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null };
+    console.log("R", request);
+    
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
       ////console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
       if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Admon.")){
 
         //Transactions
-        const quantityTransaction = {quantity: requestQuery[0].quantity, transactionType: "Préstamo", createdDate: new Date(), registeredBy: userId.idUser, registeredDate: new Date, Account_idAccount: requestQuery[0].Account_idAccount};
-        const administrationTransaction = {quantity: requestQuery[0].administrationValue, transactionType: "Cuota de administración", createdDate: new Date(), registeredBy: userId.idUser, registeredDate: new Date, Account_idAccount: requestQuery[0].Account_idAccount}
+        const quantityTransaction = {
+          quantity: requestQuery[0].quantity,
+          transactionType: "Préstamo",
+          createdDate: new Date(),
+          registeredBy: userId.idUser,
+          registeredDate: new Date,
+          Account_idAccount: requestQuery[0].Account_idAccount};
+
         const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [quantityTransaction]);
+
+        const administrationTransaction = {
+          quantity: requestQuery[0].administrationValue,
+          transactionType: "Cuota de administración",
+          createdDate: new Date(),
+          registeredBy: userId.idUser,
+          registeredDate: new Date,
+          Account_idAccount: requestQuery[0].Account_idAccount};
+        
         const administrationQuery = await pool.query('INSERT INTO Transaction SET ?', [administrationTransaction]);
+
+        const interestTransaction = {
+          quantity: requestQuery[0].interestValue,
+          transactionType: "Interés",
+          createdDate: new Date(),
+          registeredBy: userId.idUser,
+          registeredDate: new Date,
+          Account_idAccount: requestQuery[0].Account_idAccount};
+        
+        const interestQuery = await pool.query('INSERT INTO Transaction SET ?', [interestTransaction]);
+
+        const ivaTransaction = {
+          quantity: requestQuery[0].ivaValue,
+          transactionType: "IVA",
+          createdDate: new Date(),
+          registeredBy: userId.idUser,
+          registeredDate: new Date,
+          Account_idAccount: requestQuery[0].Account_idAccount};
+        
+        const ivaQuery = await pool.query('INSERT INTO Transaction SET ?', [ivaTransaction]);
         
         //Request
         const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
@@ -711,7 +731,12 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         const outlayQuery = await pool.query('INSERT INTO RequestOutLay SET ?', [outlay]);
 
         //Update account values
-        const account = {totalInterest: clientEmail[0].totalInterest + requestQuery[0].interestValue, totalFeeAdministration: clientEmail[0].totalFeeAdministration + requestQuery[0].administrationValue, totalRemainder: clientEmail[0].totalRemainder + requestQuery[0].quantity + requestQuery[0].administrationValue + requestQuery[0].interestValue };
+        const account = {
+          totalCapital: clientEmail[0].totalCapital + requestQuery[0].quantity,
+          totalInterest: clientEmail[0].totalInterest + requestQuery[0].interestValue,
+          totalFeeAdministration: clientEmail[0].totalFeeAdministration + requestQuery[0].administrationValue,
+          totalIva:  clientEmail[0].totalIva + requestQuery[0].ivaValue,
+          totalRemainder: clientEmail[0].totalRemainder + requestQuery[0].quantity + requestQuery[0].administrationValue + requestQuery[0].interestValue + requestQuery[0].ivaValue};
         const accountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [account, requestQuery[0].Account_idAccount]);
 
         //Mailer
@@ -803,7 +828,7 @@ const getAllRequestsToApprove = async (userId) => {
       requeststate.push(getStateIdFromName(stateRow, "Evaluada"));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada RR.HH."));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Admon."));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.othersValue, R.account, R.accountType, R.accountNumber, R.filePath, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
       return {status: 200, data: requestRow};    
     }else if(userId.role === 3 ){
       //Change the approval/reject state for company
@@ -930,26 +955,19 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
         
         if(parseInt(userRow[0].idUser, 10) === parseInt(clientId)){
         
-          let x = crypto.randomBytes(1);
-
-          ////console.log("Formato", bytesFormat(x, 'dec'));
-
-          let emailCode = Math.floor(100000 + Math.random() * 900000);
+          const emailCode = Math.floor(100000 + Math.random() * 900000);
           
-          //console.log("EC", emailCode);
+          //Encrypt Codes
+          const newEmailCode = await helpers.encryptPassword(emailCode.toString());
 
-          let phoneCode = Math.floor(100000 + Math.random() * 900000);
+          console.log("EC", emailCode);
 
-          //console.log("PC", phoneCode);
+          const phoneCode = Math.floor(100000 + Math.random() * 900000);
 
           //Encrypt Codes
-          let newEmailCode = await helpers.encryptPassword(emailCode.toString());
+          const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
-          ////console.log("EcryptedPhone", newPhoneCode);
-
-          let newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
-
-          ////console.log("EcryptedPhone", newPhoneCode);
+          console.log("PC", phoneCode);
 
           let objectCode = {
             numberEmailCode: emailCode.toString(),
@@ -960,9 +978,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             sendTime: new Date(),
           };
 
-          const checkClient = await pool.query('SELECT idCodes FROM Codes where Client_idClient', [userRow[0].idClient]);
-
-          ////console.log("CC", checkClient);
+          const checkClient = await pool.query('SELECT idCodes FROM Codes where Client_idClient = ?', [userRow[0].idClient]);
 
           if (checkClient.length > 0){
 
@@ -973,8 +989,6 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             const insertCodes = await pool.query('INSERT INTO Codes SET ?', [objectCode]);
           
           }
-
-          ////console.log("InsertCodes", insertCodes);
 
           //Mailer
           sgMail.setApiKey(email_api_key);
@@ -1025,7 +1039,6 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
 
 };
 
-
 const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
 
   try{
@@ -1033,27 +1046,13 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
     if(phonecode !== null && phonecode !== "" && emailcode !== null && emailcode !== ""){
 
       //CheckQuery
-      const userRow =  await pool.query('SELECT C.idClient, CO.idCodes, CO.emailCode, CO.phoneCode FROM Codes CO JOIN Client C ON (CO.Client_idClient = C.idClient) where C.idClient', [clientId]);      
-
-      ////console.log("Cyphers", userRow);
+      const userRow =  await pool.query('SELECT C.idClient, CO.idCodes, CO.emailCode, CO.phoneCode FROM Codes CO JOIN Client C ON (CO.Client_idClient = C.idClient) where C.idClient = ?', [clientId]);      
 
       if(userRow.length > 0){
 
-        //console.log("PhoneCode", phonecode.toString());
-
-        //console.log("Encrypted", await helpers.encryptPassword(phonecode.toString()));
-        
-        //console.log("DBCode", userRow[0].phoneCode);
-
-        ////console.log("EmailCode", emailcode.toString());
-        
-        let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
-
         let validEmailCode = await helpers.matchPassword(emailcode.toString(), userRow[0].emailCode);
-               
-        //console.log("validPhoneCode", validPhoneCode);
-
-        //console.log("validEmailCode", validEmailCode);
+    
+        let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
 
         let updateCodes = {
           receiveTime: new Date(),
@@ -1061,7 +1060,6 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
         };
 
         const updateDates = await pool.query('UPDATE Codes SET ? WHERE Client_idClient = ?', [updateCodes, clientId]);            
-        ////console.log("UpdateDates", updateDates);
 
         if(validPhoneCode && validEmailCode){
           return {status: 200, message: "Los códigos son auténticos"};

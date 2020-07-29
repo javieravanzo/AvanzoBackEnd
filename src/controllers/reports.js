@@ -22,6 +22,40 @@ function getAdminId(req){
 
 };
 
+function processQueryData(data){
+  
+  let newArray = [];
+
+  for (let i = 0; i<data.length; i++){
+
+    let newObject = data[i];
+
+    if( newObject['Tipo de Identificacion'] === 'Cédula' ){
+      newObject['Tipo de Identificacion'] = '1';
+    }else if( newObject['Tipo de Identificacion'] === 'Cédula de Extranjería' ){
+      newObject['Tipo de Identificacion'] = '2';
+    }else if( newObject['Tipo de Identificacion'] === 'Pasaporte' ){
+      newObject['Tipo de Identificacion'] = '5';
+    }
+
+    if( newObject['Tipo de Producto o Servicio'] === 'Cuenta corriente' ){
+      newObject['Tipo de Producto o Servicio'] = 'CC';
+    }else if( newObject['Tipo de Producto o Servicio'] === 'Cuenta de ahorros' ){
+      newObject['Tipo de Producto o Servicio'] = 'CA';
+    }else if( newObject['Tipo de Producto o Servicio'] === 'Tarjeta Prepago Maestro' ){
+      newObject['Tipo de Producto o Servicio'] = 'TP';
+    }
+
+    newObject['Referencia'] = newObject['Referencia'] + " " + newObject['Numero de Identificacion'];
+
+    newArray.push(newObject);
+    
+  }
+
+  //console.log("ResultArray", newArray);
+
+};
+
 //Extract report file
 const generateBankReport = async (req, res, next) => {
     
@@ -42,21 +76,9 @@ const generateBankReport = async (req, res, next) => {
 
     workbook.SheetNames.push("Hoja 1");
 
-    /*let sheetHeaders = [
-      ["Tipo de Identificacion",
-      "Numero de identificacion",
-      "Nombre",
-      "Apellido",
-      "Código del Banco",
-      "Tipo de Producto o Servicio",
-      "Numero del producto o servicio",
-      "Valor del Pago o de la Recarga",
-      "Referencia",
-      "Correo electronico",
-      "Descripcion o Detalle"]
-    ];*/
-
     const result = await generateBankReports();
+
+    const processData = processQueryData(result.data);
 
     let final_woorkbook = Excel.utils.json_to_sheet(result.data);
 
@@ -68,9 +90,9 @@ const generateBankReport = async (req, res, next) => {
     let month = date.getMonth();
     let year = date.getFullYear();
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/Archivo Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
+    let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
-    let url = "../files/writes/Archivo Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
+    let url = "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
     //console.log("Length", result.data.length);
 
     //console.log("Result", result);

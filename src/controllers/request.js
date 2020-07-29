@@ -255,6 +255,10 @@ const approveOrReject = async (req, res, next) => {
   const userId = getUserId(req);
   const {requestid, approve, transactioncode, text} = req.headers;
 
+  if(req.headers.transactionCode === undefined){
+    req.headers.transactionCode = null;
+  }
+
   try {
     const result = await approveOrRejectRequest(requestid, approve, userId, transactioncode, text);
     if(result.status === 200){
@@ -405,7 +409,6 @@ const generateCodes = async (req, res, next) => {
 const checkCodes = async (req, res, next) => {
 
   const {userid, phonecode, emailcode} = req.headers;
-  console.log("Headers", userid, phonecode, emailcode);
 
   let clientId = getClientId(req);
   

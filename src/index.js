@@ -11,6 +11,7 @@ app.set('port', process.env.PORT || 4000);
 //Middlewares
 app.use(express.static('../files/terms'));
 app.use(express.static('../files/images'));
+app.use(express.static('../files/writes'));
 app.use(express.static('../files/contracts'));
 app.use(express.static('../files/documents'));
 //app.use(express.static(__dirname + '../files')); 

@@ -12,6 +12,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
 
     const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.identificationId = ?', [identificationId]);
     //console.log("UserREGISTERRow", userRow);
+    
     if(JSON.stringify(userRow)  != '[]'){
         
       //New Client
@@ -88,7 +89,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
           from: 'operaciones@avanzo.co', // sender address
           to: user.email, // list of receivers
           subject: 'Avanzo (Créditos al instante) - Confirmación de cuenta', // Subject line
-          text: 'Hello world?', // plain text body
+          text: 'Avanzo', // plain text body
           html: output // html body
       };
 
