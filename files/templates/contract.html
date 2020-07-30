@@ -1,46 +1,46 @@
-<style type="text/css">
-  .header-title {
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 15px;
-  }
-  .body-title{
-    text-align: justify;
-    margin-left: 70px;
-    margin-right: 70px;
-    line-height: 100%;
-  }
-  .body-content{
-    text-align: justify;
-    margin-left: 70px;
-    margin-right: 70px;
-    margin-bottom: 40px;
-  }
-  .payment-title {
-    text-align: justify;
-    font-weight: bold;
-    margin-left: 70px;
-    margin-right: 70px;
-  }
-  .signature-image{
-    margin-left: 0px;
-    margin-right: 70px;
-    width: 45%;
-  }
-  .footer-confirmation{
-    text-align: justify;
-    font-weight: bold;
-    margin-left: 70px;
-    margin-right: 70px;
-  }
-</style>
-
 <html>
   <head>
     <meta chraset="UTF-8">
       <title>
         AUTORIZACIÓN DE DESCUENTO
       </title>
+    <style type="text/css">
+      .header-title {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 15px;
+      }
+      .body-title{
+        text-align: justify;
+        margin-left: 70px;
+        margin-right: 70px;
+        line-height: 100%;
+      }
+      .body-content{
+        text-align: justify;
+        font-size: 15px;
+        margin-left: 70px;
+        margin-right: 70px;
+        margin-bottom: 40px;
+      }
+      .payment-title {
+        text-align: justify;
+        font-weight: bold;
+        margin-left: 70px;
+        margin-right: 70px;
+      }
+      .signature-image{
+        margin-left: 0px;
+        margin-right: 70px;
+        width: 65%;
+      }
+      .footer-confirmation{
+        text-align: justify;
+        font-weight: bold;
+        margin-left: 70px;
+        margin-right: 70px;
+      }
+    </style>
   </head>
   <body>
     <div>
@@ -54,7 +54,7 @@
           REF: CRÉDITO AVANZO No. {{idRequest}}
         </h3>
         <h3 class="confirmation-title">
-          VALOR DEL CREDITO: ${{quantity}}
+          VALOR DEL CREDITO:  {{quantity}}
         </h3>
       </div>
       <br/>
@@ -64,8 +64,8 @@
           irrevocablemente a la pagaduría de la empresa {{company}} identificada con NIT {{nit}}, para que deduzca de mi salario ordinario,
           y/o compensaciones laborales a mi nombre, los valores correspondientes al pago de la obligación por mi adquirida con VICTORIA
           INVERSIONES S.A.S. (AVANZO) entidad identificada con NIT 901116431-9, y/o quien represente sus derechos de acuerdo con los
-          siguientes montos _______________________(${{quantity}}) de pesos colombianos en _____________ ({{split}}) cuotas
-          mensuales, cada una por un valor de _______________ (${{splitQuantity}}) pesos colombianos.
+          siguientes montos _______________________({{quantity}}) de pesos colombianos en _____________ ({{split}}) cuotas
+          mensuales, cada una por un valor de _______________ ({{splitQuantity}}) pesos colombianos.
         </h4>
       </div>
 
@@ -179,7 +179,16 @@
       
       <div class="footer-confirmation">
         <h4 class="footer-title">
-          <img alt="signature" class="signature-image" src='../documents/51867439-20/file.png'>
+          El documento fue firmado electrónicamente:
+          </br>
+          <u>
+            <li>
+              Código Correo: {{emailCode}} - Hora de Firma: {{emailCodeDate}} 
+            </li>
+            <li>
+              Código Celular: {{phoneCode}} - Hora de Firma: {{phoneCodeDate}}  
+            </li>
+          </u>
           </br>
           FIRMA
           </br>

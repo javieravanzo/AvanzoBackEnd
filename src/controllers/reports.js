@@ -92,7 +92,7 @@ const generateBankReport = async (req, res, next) => {
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
-    let url = "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
+    let url = "/Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
     //console.log("Length", result.data.length);
 
     //console.log("Result", result);
@@ -121,6 +121,7 @@ const generateBankReport = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
+    console.log("Error", e);
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 

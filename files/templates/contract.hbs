@@ -1,47 +1,46 @@
-<style type="text/css">
-  .header-title {
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 15px;
-  }
-  .body-title{
-    text-align: justify;
-    margin-left: 70px;
-    margin-right: 70px;
-    line-height: 100%;
-  }
-  .body-content{
-    text-align: justify;
-    font-size: 15px;
-    margin-left: 70px;
-    margin-right: 70px;
-    margin-bottom: 40px;
-  }
-  .payment-title {
-    text-align: justify;
-    font-weight: bold;
-    margin-left: 70px;
-    margin-right: 70px;
-  }
-  .signature-image{
-    margin-left: 0px;
-    margin-right: 70px;
-    width: 65%;
-  }
-  .footer-confirmation{
-    text-align: justify;
-    font-weight: bold;
-    margin-left: 70px;
-    margin-right: 70px;
-  }
-</style>
-
 <html>
   <head>
     <meta chraset="UTF-8">
       <title>
         AUTORIZACIÓN DE DESCUENTO
       </title>
+    <style type="text/css">
+      .header-title {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 15px;
+      }
+      .body-title{
+        text-align: justify;
+        margin-left: 70px;
+        margin-right: 70px;
+        line-height: 100%;
+      }
+      .body-content{
+        text-align: justify;
+        font-size: 15px;
+        margin-left: 70px;
+        margin-right: 70px;
+        margin-bottom: 40px;
+      }
+      .payment-title {
+        text-align: justify;
+        font-weight: bold;
+        margin-left: 70px;
+        margin-right: 70px;
+      }
+      .signature-image{
+        margin-left: 0px;
+        margin-right: 70px;
+        width: 65%;
+      }
+      .footer-confirmation{
+        text-align: justify;
+        font-weight: bold;
+        margin-left: 70px;
+        margin-right: 70px;
+      }
+    </style>
   </head>
   <body>
     <div>
@@ -174,13 +173,20 @@
           </ol>
         </h4>
       </div>
-          
-      </br>
-      
+               
       
       <div class="footer-confirmation">
         <h4 class="footer-title">
-          <img alt="signature" class="signature-image" src={{fileString}}>
+          El documento fue firmado electrónicamente:
+          </br>
+          <ul>
+            <li>
+              Código Correo: {{emailCode}} - Hora de Firma: {{emailCodeDate}} 
+            </li>
+            <li>
+              Código Celular: {{phoneCode}} - Hora de Firma: {{phoneCodeDate}}  
+            </li>
+          </ul>
           </br>
           FIRMA
           </br>

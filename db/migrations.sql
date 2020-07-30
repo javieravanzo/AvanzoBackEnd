@@ -48,15 +48,38 @@ INSERT INTO ManagementPayment (managementpaymentValue, registeredBy, registeredD
 INSERT INTO DocumentTypes (typeName) values ('Cédula'), ('Pasaporte'); */
 
 /* Bank */
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Caja Social", "A", false, false);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Davivienda", "B", false, false);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco de Bogotá", "C", false, false);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco AV Villas", "D", false, false);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Banco Popular", "E", false, false);
-
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Nequi", "F", false, true);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("Daviplata", "G", false, true);
-INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("RappiPay", "H", false, true);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO DE BOGOTÁ", "1", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO POPULAR", "2", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO CORPBANCA", "6", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCOLOMBIA", "7", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("CITIBANK", "9", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO GNB SUDAMERIS", "12", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BBVA COLOMBIA", "13", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("ITAÚ", "14", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO COLPATRIA", "19", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO DE OCCIDENTE", "23", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO CAJA SOCIAL", "32", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO AGRARIO", "40", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BNP PARIBAS", "42", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO DAVIVIENDA S.A.", "51", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO AV VILLAS", "52", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO PROCREDIT", "58", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO PICHINCHA S.A.", "60", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCOOMEVA", "61", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO FALABELLA S.A.", "62", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO FINANDINA S.A.", "63", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO MULTIBANK", "64", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO SANTANDER DE NEGOCIOS COLOMBIA S.A.", "65", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("COOPCENTRAL", "66", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("BANCO COMPARTIR", "67", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("CORFICOLOMBIANA", "90", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("FINANCIERA JURIDISCOOP", "121", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("COOPERATIVA FINANCIERA DE ANTIOQUIA", "283", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("COTRAFA COOPERATIVA FINANCIERA", "289", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("CONFIAR S.A.", "292", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("COLTEFINANCIERA", "370", false, false);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("DAVIPLATA", "51", false, true);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("NEQUI", "507", false, true);
 
 /* Bank Account Type 
 INSERT INTO AccountTypes (accountTypeName) values ("Cuenta Corriente");
