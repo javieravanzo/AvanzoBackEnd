@@ -126,12 +126,13 @@ const newPreregister = async (client, user, files, auth) => {
       const preClient = {
         name: user.name,
         lastName: user.lastName,
+        documentType: client.documentType,
         identificationId: client.identificationId,
         phoneNumber: client.phoneNumber,
         email: user.email,
         password: newPassword,
         file1: files.documentId,
-        file2: files.photo,
+        file2: null,
         file3: files.paymentReport,
         //status: 0 = Created, 1 = Approved, 2 = Rejected.
         status: 0,
@@ -140,6 +141,9 @@ const newPreregister = async (client, user, files, auth) => {
         registeredDate: new Date(),
         registeredBy: 0,
         Company_idCompany: client.Company_idCompany,
+        city: client.city, 
+        birthDate: client.birthDate,
+        CompanySalaries_idCompanySalaries: client.salary,
         Role_idRole: 4
       };
 
@@ -222,6 +226,7 @@ const newPreregister = async (client, user, files, auth) => {
         newUser.status = true;
         const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
 
+        
         //Insert into auth
         const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date(),
                           createdDate: new Date()};

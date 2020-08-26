@@ -59,8 +59,7 @@ const newLogin = async (req, res, next) => {
     res.status(500).json({message:"No es posible realizar el login en este momento."});
   } catch(e) {
     res.status(404).json({message:"Ingrese correctamente los datos, por favor."});
-  }
-
+  };
 
 };
 

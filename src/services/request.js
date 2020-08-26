@@ -679,7 +679,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
     if (updateRequest){
-      ////console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
+      console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Admon."));
       if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Admon.")){
 
         //Transactions
@@ -761,7 +761,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
 
         await sgMail.send(info);
       
-      }else if(sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada")){
+      }else if(sendApprovedEmail === getStateIdFromName(stateRow, "Rechazada")){
         
         ////console.log("Text", text, "Correo");
 

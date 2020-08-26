@@ -43,7 +43,9 @@ const registerClient = async (req, res, next) => {
 const preRegister = async (req, res, next) => {
   
   //Variables
-  const {name, lastName, identificationId, email, company, phoneNumber, password} = req.body;
+  const {name, lastName, identificationId, documentType, city, birthDate, salary, email, company, phoneNumber, password} = req.body;
+
+  //console.log("Body", documentType);
 
   //Validate input
   const errors = validationResult(req); 
@@ -55,11 +57,10 @@ const preRegister = async (req, res, next) => {
   }
 
   //Logic
-  const client = {identificationId, phoneNumber, Company_idCompany: company};
+  const client = {documentType, identificationId, city, birthDate, salary, phoneNumber, Company_idCompany: company};
   const user = {name, email, lastName};
   //console.log("RF", req.files);
-  const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""), 
-                 photo: path.normalize(req.files.photo[0].path).replace("../files/documents/",""),
+  const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""),
                  paymentReport: path.normalize(req.files.paymentReport[0].path).replace("../files/documents/","")};
   //console.log("files", files);
   const auth = {password};

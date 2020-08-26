@@ -27,6 +27,38 @@ const generateBankReports = async () => {
 
 };
 
+const readBankReport = async (readData, writeData) => {
+
+  try{
+    
+    for (let i in readData){
+
+      for (let j in writeData){
+
+        let completeName = writeData[j].Nombre + " " + writeData[j].Apellido;
+
+        console.log("CompletaName", completeName, readData[i].Titular);
+
+        if( completeName === readData[i].Titular){
+          console.log("Está adentro", completeName, readData[i].Titular, writeData[j]['Valor del Pago o de la recarga']);
+
+          if (writeData[j]['Valor del Pago o de la recarga'] === (readData[i].Valor).replace(/:/g, '$')){
+
+
+
+          }
+
+        }
+
+      }
+         
+    }  
+  }catch(e){
+    return {status: 404, message: "El archivo no ha sido leído correctamente."};
+  }
+
+};
+
 module.exports = {
-  generateBankReports
+  generateBankReports, readBankReport
 };

@@ -341,6 +341,23 @@ const getCustomerToApprove = async () =>{
 
 };
 
+const getCustomerCountToApprove = async () =>{
+  
+  try {
+    const clientRow =  await pool.query('SELECT count(N.idNewClient) as count FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
+    
+    if(clientRow){
+      return {status: 200, data: clientRow[0]};
+    }else{
+      return {status: 500, message: "Error interno del servidor."};
+    }
+  }catch(e) {
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
 const getDatesListToCustomer = async (companyid) =>{
   
   try {
@@ -395,7 +412,6 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       //DocumentClients
       const filesPath = {
         documentId: newClient[0].file1,
-        photo: newClient[0].file2,
         paymentReport: newClient[0].file3
       };
 
@@ -404,7 +420,10 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       //New Client
       const client = {
         identificationId: newClient[0].identificationId,
-        documentType: 1,
+        documentType: newClient[0].documentType,
+        birthDate: newClient[0].birthDate,
+        city: newClient[0].city,
+        salary: newClient[0].salary,
         phoneNumber: newClient[0].phoneNumber,
         Company_idCompany: newClient[0].Company_idCompany,
         registeredBy: 1,
@@ -414,7 +433,8 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         platformState:  true,
         createdDate: new Date(),
         ClientDocuments_idClientDocuments: fileQuery.insertId,
-        CompanySalaries_idCompanySalaries: cycleId
+        CompanySalaries_idCompanySalaries: cycleId,
+        
       };
 
       //console.log("Client", client);
@@ -617,5 +637,5 @@ module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers, 
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
   approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer,
-  deleteUser, getCustomerAccountDetail
+  deleteUser, getCustomerAccountDetail, getCustomerCountToApprove
 }

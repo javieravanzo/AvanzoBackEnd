@@ -6,8 +6,9 @@ const Excel = require('xlsx');
 //Imports
 const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
-        getCustomerToApprove, approveCustomers, changeCustomersStatus, updateCustomers, 
-        makePayments, getDatesListToCustomer, deleteUser, getCustomerAccountDetail } = require('../services/customer');
+        getCustomerToApprove, getCustomerCountToApprove, approveCustomers, changeCustomersStatus,
+        updateCustomers, makePayments, getDatesListToCustomer, deleteUser,
+        getCustomerAccountDetail } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -262,6 +263,27 @@ const getAllCustomerToApprove = async (req, res, next) => {
 
 };
 
+const getCountCustomerToApprove = async (req, res, next) => {
+    
+    //Get the user id
+    const adminId = getAdminId(req);
+
+    try {
+        const result = await getCustomerCountToApprove(adminId);
+        if(result){
+            res.status(result.status).json(result.data);
+        }else{
+            res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+        }
+              
+    }catch(e) {
+        res.status(500).json({message:"No es posible realizar la consulta de usuarios en este momento."}); 
+    };
+
+};
+
+
+
 const getDateListToCustomer = async (req, res, next) => {
     
     //Get the user id
@@ -422,6 +444,6 @@ const getAccountDetail = async (req, res, next) => {
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
-  approveCustomer, changeCustomerStatus, updateCustomer, makePayment, getDateListToCustomer,
-  deleteUsers, getAccountDetail
+  getCountCustomerToApprove, approveCustomer, changeCustomerStatus, updateCustomer, makePayment,
+  getDateListToCustomer, deleteUsers, getAccountDetail
 };

@@ -8,8 +8,9 @@ const multer = require('multer');
 const { verifyToken } = require('../../controllers/validator');
 const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCustomers,
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
-        getAllCustomerToApprove, getDateListToCustomer, approveCustomer, updateCustomer, changeCustomerStatus,
-        makePayment, deleteUsers, getAccountDetail} = require('../../controllers/customer');
+        getAllCustomerToApprove, getCountCustomerToApprove, getDateListToCustomer, approveCustomer,
+        updateCustomer, changeCustomerStatus, makePayment, deleteUsers,
+        getAccountDetail} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -21,9 +22,7 @@ const storageAdmin = multer.diskStorage({
     
     //Production
     callback(null, '../files/admin/reads');
-    
-    //Development
-    //callback(null, './files/admin/reads');    
+
   },
   filename: function(req, file, callback){
     callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
@@ -32,8 +31,6 @@ const storageAdmin = multer.diskStorage({
 
 const storageCustomer = multer.diskStorage({
   destination: function(req, file, callback){
-    
-
     callback(null, '../files/admin/reads');
   },
   filename: function(req, file, callback){
@@ -106,6 +103,9 @@ router.get('/Transactions/GetTransactionsByUserId',
 
 router.get('/Customer/GetAllToApprove',
 [verifyToken], getAllCustomerToApprove);
+
+router.get('/Customer/GetCountToApprove',
+[verifyToken], getCountCustomerToApprove);
 
 router.get('/Customer/GetDateListToCustomer',
 [verifyToken], getDateListToCustomer);

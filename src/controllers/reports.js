@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator');
 const Excel = require('xlsx');
 
 //Imports
-const { generateBankReports } = require('../services/reports');
+const { generateBankReports, readBankReport } = require('../services/reports');
 
 //Functions
 
@@ -127,6 +127,40 @@ const generateBankReport = async (req, res, next) => {
 
 };
 
+//Check both formats
+const receiveBankReport = async (req, res, next) => {
+    
+  try {
+  
+    //Get the user id
+    const adminId = getAdminId(req);
+
+    // Create a workbook, like a file.
+    var readWorkbook = Excel.readFile(req.files.read[0].path, {cellDates: true});
+    var writeWorkbook = Excel.readFile(req.files.write[0].path, {cellDates: true});
+
+    // Define the sheet of work.
+    var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
+    var writeSheet = writeWorkbook.Sheets[writeWorkbook.SheetNames[0]];
+
+    // Map the xlsx format to json.
+    var readData = Excel.utils.sheet_to_json(readSheet);
+    var writeData = Excel.utils.sheet_to_json(writeSheet);
+
+    try {
+      const result = await readBankReport(readData, writeData);
+      res.status(result.status).json({message: result.message});      
+    }catch(e) {
+        res.status(500).json({message:"No es posible realizar el registro en este momento."}); 
+    };
+ 
+  }catch(e) {
+    console.log("Error", e);
+      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+  };
+
+};
+
 module.exports = {
-  generateBankReport
+  generateBankReport, receiveBankReport
 };

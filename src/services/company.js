@@ -181,7 +181,13 @@ const getAllCompaniesForUser = async ( ) => {
   
   try{
     const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C ORDER BY C.socialReason ASC');
-    return {status: 200, data: companyRow};
+    const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS');
+    
+    return {status: 200, data: {
+                          companyRow: companyRow,
+                          cycles: cycles
+                         }
+    };
   }catch(e){
     console.log(e);
     //throw e;
