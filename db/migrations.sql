@@ -80,6 +80,7 @@ INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("CONFIAR S.
 INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("COLTEFINANCIERA", "370", false, false);
 INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("DAVIPLATA", "51", false, true);
 INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("NEQUI", "507", false, true);
+INSERT INTO Bank (bankName, bankCode, isForOutlay, isWallet) values ("EFECTY", "999", false, true);
 
 /* Bank Account Type 
 INSERT INTO AccountTypes (accountTypeName) values ("Cuenta Corriente");
