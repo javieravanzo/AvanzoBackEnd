@@ -901,7 +901,7 @@ const getAllPendingRHRequest = async () => {
     
     //Consult state
     const stateRow = await pool.query('SELECT * FROM RequestState');
-    let requeststate = getStateIdFromName(stateRow, "Aprobada Administración");
+    let requeststate = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
     ////console.log("RS", requeststate);
 
     //Select rows
