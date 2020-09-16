@@ -426,8 +426,8 @@ const createRequest = async (body, file, clientId, files) => {
 
   try{
 
-    const { quantity, split, moyen, accountType, accountNumber, interest, administration, iva, otherValues, totalValue, isBank,
-            fileString, loanData } = body;
+    const { quantity, split, moyen, accountType, accountNumber, interest, administration, iva, otherValues,
+            totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction} = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
     ////console.log("AC", approvedClient);
@@ -435,8 +435,8 @@ const createRequest = async (body, file, clientId, files) => {
     if (parseInt(approvedClient[0].platformState, 10) === 1){
      
         //Account - Request
-        const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
-        ////console.log("UR", userRow[0]);
+        const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.approveHumanResources, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
+        console.log("UR", userRow[0]);
         
         ////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
@@ -457,21 +457,31 @@ const createRequest = async (body, file, clientId, files) => {
 
           //Update account value
           const newQuantity = parseInt(userRow[0].accumulatedQuantity, 10) + parseInt(quantity, 10);
-          const newAccount = { accumulatedQuantity: newQuantity };
+
+          //Previous Capacity
+          let difference = parseInt(biweekly_salary, 10) - parseInt(general_deduction, 10);
+
+          let debt_percentage = parseInt(general_deduction, 10) / parseInt(biweekly_salary, 10);
+
+          let available_percentage = 0.5 - debt_percentage;
+
+          let computed_capacity = parseInt(biweekly_salary, 10) * available_percentage;
+
+          const newAccount = { accumulatedQuantity: newQuantity, computedCapacity: computed_capacity };
           const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientId]);
 
           //New Request
           const requestState = await pool.query('SELECT * FROM RequestState');
-          const newRequest = {quantity, split, account: moyen, accountNumber, accountType};
+          const newRequest = {quantity, split, account: moyen, accountNumber, accountType, };
          
           newRequest.administrationValue = administration;
           newRequest.otherValues = otherValues;
           newRequest.totalValue = totalValue;
           newRequest.ivaValue = iva;
           newRequest.interestValue = interest;
-
+          newRequest.computedCapacity = computed_capacity;
           newRequest.creditNumber = math.ceil(math.random()*10000);
-          newRequest.approveHumanResources = true;
+          newRequest.approveHumanResources = parseInt(userRow[0].approveHumanResources, 10) === 1 ? true : false;
           newRequest.createdDate = new Date();
           newRequest.registeredDate = new Date();
           newRequest.registeredBy = 1;
@@ -579,7 +589,7 @@ const getAllRequests = async (clientId) => {
   
   try{ 
     
-    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.totalValue, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
+    const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.totalValue, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.approveHumanResources, R.observation, R.computedCapacity, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState < ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     
     return {status: 200, data: {request: requestRow, company: company[0]}};
@@ -652,7 +662,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
           let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
           let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
           if(requestQuery[0].RequestState_idRequestState === stateRequested){
-            requeststate = stateRH;
+            requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
             console.log("RQS", requeststate);
           }else if (requestQuery[0].RequestState_idRequestState === stateRH){
             requeststate = stateAnalysis;
@@ -823,7 +833,7 @@ const getAllRequestsToApprove = async (userId) => {
       //Change the outlay state for superadmin
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate.push(getStateIdFromName(stateRow, "Ninguna"));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.totalValue, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate[0]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.totalValue, R.account, R.accountType, R.accountNumber, R.filePath, R.computedCapacity, R.totalValue, C.Company_idCompany, CO.socialReason, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate[0]]);
       return {status: 200, data: requestRow};
     }else if(userId.role === 2){
       //Change the approval/reject state for admin
@@ -831,13 +841,13 @@ const getAllRequestsToApprove = async (userId) => {
       requeststate.push(getStateIdFromName(stateRow, "Solicitada"));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Administración"));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Recursos Humanos"));
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.totalValue, R.computedCapacity, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
       return {status: 200, data: requestRow};    
     }else if(userId.role === 3 ){
       //Change the approval/reject state for company
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
-      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, U.name FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? and R.approveHumanResources = ?);', [requeststate, 1]);
+      const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, C.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, R.totalValue, R.computedCapacity, C.Company_idCompany, CO.socialReason, U.name FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? and R.approveHumanResources = ?);', [requeststate, 1]);
       return {status: 200, data: requestRow};
     }else{
       return {status: 403, message: {message: "El usuario no tiene los permisos necesarios para realizar esta acción."}};
