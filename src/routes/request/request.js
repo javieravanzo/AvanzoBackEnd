@@ -46,13 +46,15 @@ const uploads = multer({
 });
 
 
-
 //Controllers
 const { verifyToken, checkFile } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC,
-        getRejectedRequest, getPendingRRHHRequest, generateCodes, checkCodes } = require('../../controllers/request');
+        getRejectedRequest, getPendingRRHHRequest, generateCodes, checkCodes,
+        getPendingBankRefundedRequest, changeToProcessWithoutChange, changeToOutlay,
+        changeToProcessWithDocuments, getAllReviewWithoutChangeRequest
+       } = require('../../controllers/request');
   
 //Routes 
 router.get('/Request/GetOutlayData', [verifyToken], getOutLayData);
@@ -78,6 +80,14 @@ router.get('/Request/GetAllRequestByCompany', [verifyToken], getAllRequestByComp
 
 router.put('/Request/ApproveorReject', [verifyToken], approveOrReject);
 
+router.put('/Request/PassWithoutChanges', [verifyToken], changeToProcessWithoutChange);
+
+router.put('/Request/PassWithDocuments', [verifyToken], changeToProcessWithDocuments);
+
+router.put('/Request/PassToOutLay', [verifyToken], changeToOutlay);
+
+router.put('/Request/ApproveorReject', [verifyToken], approveOrReject);
+
 router.get('/Request/GetStateList', [verifyToken], getRequestStateList);
 
 router.get('/Request/GetToApproveByAdmin', [verifyToken], getRequestsToApprove);
@@ -87,6 +97,10 @@ router.get('/Request/GetAllToOutLayByAdmin', [verifyToken], getRequestToOutLay);
 router.get('/Request/GetAllRejected', [verifyToken], getRejectedRequest);
 
 router.get('/Request/GetAllPendingRRHH', [verifyToken], getPendingRRHHRequest);
+
+router.get('/Request/GetAllBankRefunded', [verifyToken], getPendingBankRefundedRequest);
+
+router.get('/Request/GetAllProcessWithoutChanges', [verifyToken], getAllReviewWithoutChangeRequest);
 
 router.get('/Documents/GenerateContract', [
   header('split', 'La cantidad de cuotas es inválida.').exists().isInt().not().isEmpty(),

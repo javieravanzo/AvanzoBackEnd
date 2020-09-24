@@ -9,7 +9,8 @@ var fs = require('fs');
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
         generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
-        getAllPendingRHRequest, generateRequestCodes, checkNewCodes
+        getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
+        passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllProcessWithoutChangeRequest
       } = require('../services/request');
 
 //Get the client with token
@@ -273,6 +274,75 @@ const approveOrReject = async (req, res, next) => {
 
 };
 
+const changeToProcessWithoutChange = async (req, res, next) => {
+
+  const userId = getUserId(req);
+  const {requestid} = req.headers;
+
+  if(req.headers.transactionCode === undefined){
+    req.headers.transactionCode = null;
+  }
+
+  try {
+    const result = await passToProcessWithoutChange(requestid, userId);
+    if(result.status === 200){
+        res.status(result.status).json(result.message);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible realizar esta acción en este momento.");
+  };
+
+};
+
+const changeToProcessWithDocuments = async (req, res, next) => {
+
+  const userId = getUserId(req);
+  const {requestid} = req.headers;
+
+  if(req.headers.transactionCode === undefined){
+    req.headers.transactionCode = null;
+  }
+
+  try {
+    const result = await passToProcessWithDocuments(requestid, userId);
+    if(result.status === 200){
+        res.status(result.status).json(result.message);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible realizar esta acción en este momento.");
+  };
+
+};
+
+const changeToOutlay = async (req, res, next) => {
+
+  const userId = getUserId(req);
+  const {requestid} = req.headers;
+
+  if(req.headers.transactionCode === undefined){
+    req.headers.transactionCode = null;
+  }
+
+  try {
+    const result = await passToOutlay(requestid, userId);
+    if(result.status === 200){
+        res.status(result.status).json(result.message);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible realizar esta acción en este momento.");
+  };
+
+};
+
 const getRequestStateList = async (req, res, next) => {
 
   try {
@@ -357,6 +427,38 @@ const getPendingRRHHRequest = async (req, res, next) => {
 
 };
 
+const getPendingBankRefundedRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllBankRefundedRequest();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };   
+
+};
+
+const getAllReviewWithoutChangeRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllProcessWithoutChangeRequest();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  };
+
+};
+
 const generateContract = async (req, res, next) => {
 
   //Validate input
@@ -430,5 +532,6 @@ module.exports = {
   getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getAllRequestByCompany,
   approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
   getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest,
-  generateCodes, checkCodes
+  generateCodes, checkCodes, getPendingBankRefundedRequest, changeToProcessWithDocuments,
+  changeToProcessWithoutChange, changeToOutlay, getAllReviewWithoutChangeRequest
 };
