@@ -86,8 +86,6 @@ router.put('/Request/PassWithDocuments', [verifyToken], changeToProcessWithDocum
 
 router.put('/Request/PassToOutLay', [verifyToken], changeToOutlay);
 
-router.put('/Request/ApproveorReject', [verifyToken], approveOrReject);
-
 router.get('/Request/GetStateList', [verifyToken], getRequestStateList);
 
 router.get('/Request/GetToApproveByAdmin', [verifyToken], getRequestsToApprove);

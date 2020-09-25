@@ -93,7 +93,7 @@ const getOutLaysData = async () => {
         return {status: 500, message: "Error interno del servidor."};
     }
   }catch(e) {
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 };
@@ -128,7 +128,7 @@ const getOultayDatesLists = async (customerId, split, quantity) => {
     
     }
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: "Error interno del servidor2."};
   }
 };
@@ -175,7 +175,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
         capital: splitQuantity + (quantity*interest*days_per_split),
       };     
 
-      //console.log("Others", others);
+      ////console.log("Others", others);
 
       new_date = {
         id: i,
@@ -201,12 +201,12 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
     let administrationValue = months * adminValue;
 
-    ////console.log("administrationValue", administrationValue);
-    ////console.log("Months", months);
+    //////console.log("administrationValue", administrationValue);
+    //////console.log("Months", months);
 
     let ivaValue = (0.19) * administrationValue;
 
-    ////console.log("IVA", ivaValue);
+    //////console.log("IVA", ivaValue);
 
     let quantitySplited = Math.ceil(totalQuantity / split);
 
@@ -226,7 +226,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
 
   }catch(e){
 
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: "Error interno del servidor."};
 
   }
@@ -254,7 +254,7 @@ const newDateList = async function(userRow){
 
     for (let i = 0; i < reportDays.length ; i++){
 
-      ////console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
+      //////console.log("Comp", todayNumber, reportDays[i], reportDays[i+1]);
 
       if( i === 0 && todayNumber < reportDays[i]){
 
@@ -268,7 +268,7 @@ const newDateList = async function(userRow){
         
       }else{
 
-        ////console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
+        //////console.log("I", i, reportDays.length-1, i === reportDays.length-1, todayNumber >= reportDays[i+1]);
 
         if( i === reportDays.length-1 && todayNumber >= reportDays[i] ){
 
@@ -285,7 +285,7 @@ const newDateList = async function(userRow){
 
     for (let j = 0; j < paymentArray.length; j++ ){
 
-      ////console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
+      //////console.log("Pay", reportDate, paymentArray[j], reportDate < paymentArray[j] );
 
       if( reportDate < paymentArray[j] ){
 
@@ -315,7 +315,7 @@ const newDateList = async function(userRow){
 
   }catch(e){
 
-    //console.log("E", e);
+    ////console.log("E", e);
 
   }
 
@@ -323,8 +323,8 @@ const newDateList = async function(userRow){
 
 const returnDateList = async function(initialDate, paymentArray, split, today, companyPaymentNumber){
 
-  ////console.log(initialDate, companyRate, firstDate, secondDate, i);
-  //console.log("ID", initialDate);
+  //////console.log(initialDate, companyRate, firstDate, secondDate, i);
+  ////console.log("ID", initialDate);
   
   let counter = 0;
 
@@ -332,9 +332,9 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   let monthsDate = new Date(initialDate);
   
-  ////console.log("Date", monthsDate);
+  //////console.log("Date", monthsDate);
 
-  ////console.log("MonthNumber", parseInt( monthsDate.getMonth(), 10));
+  //////console.log("MonthNumber", parseInt( monthsDate.getMonth(), 10));
 
   let daysArray = [];
 
@@ -353,7 +353,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
     let monthDays = 0;
 
-    ////console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
+    //////console.log("ND", parseInt(newDate.getDate(), 10),parseInt(paymentArray[0], 10), parseInt(paymentArray[1], 10));
 
     if(companyPaymentNumber > 1){
 
@@ -369,7 +369,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
         
         if(parseInt(paymentArray[1], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
 
-          ////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[1], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+          //////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[1], 10), "Current Day", parseInt(newDate.getDate(), 10) );
 
           arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
@@ -382,8 +382,8 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
       }
 
     }else{
-      ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
-      ////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
+      //////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+      //////console.log("Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
       if(parseInt(newDate.getDate(), 10) === parseInt(paymentArray[0], 10)){
 
@@ -397,7 +397,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
         if(parseInt(paymentArray[0], 10) > getDaysInMonth(newDate.getMonth(), newDate.getFullYear()) && (parseInt(newDate.getDate(), 10) === getDaysInMonth(newDate.getMonth(), newDate.getFullYear())) ){
 
-          //console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
+          ////console.log("Entro", "Days of the month:", getDaysInMonth(newDate.getMonth(), newDate.getFullYear()), "Payment Day", parseInt(paymentArray[0], 10), "Current Day", parseInt(newDate.getDate(), 10) );
 
           arrayDate = new Date (newDate.getFullYear(), newDate.getMonth(), getDaysInMonth(newDate.getMonth(), newDate.getFullYear()));
 
@@ -416,7 +416,7 @@ const returnDateList = async function(initialDate, paymentArray, split, today, c
 
   }
 
-  //console.log("daysArray", daysArray);
+  ////console.log("daysArray", daysArray);
 
   return daysArray;
 
@@ -430,15 +430,15 @@ const createRequest = async (body, file, clientId, files) => {
             totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction} = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
-    ////console.log("AC", approvedClient);
+    //////console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1){
      
         //Account - Request
         const userRow =  await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.approveHumanResources, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity, ACCOUNT.accumulatedQuantity, CLIENT.identificationId, U.lastName, U.name FROM Client CLIENT JOIN Account ACCOUNT JOIN User U ON (ACCOUNT.Client_idClient = CLIENT.idClient AND U.Client_idClient = CLIENT.idClient) where CLIENT.idClient = ?', [clientId]);
-        console.log("UR", userRow[0]);
+        //console.log("UR", userRow[0]);
         
-        ////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
+        //////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
         if ( parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)){
 
           let updateNewClient = null;
@@ -491,7 +491,7 @@ const createRequest = async (body, file, clientId, files) => {
           //Obsevations - Request
           //const observation = {observationContent: ""};
           //const observationInsert = await pool.query('INSERT INTO Observations SET ?', [observation]);
-          ////console.log("OI", observationInsert);
+          //////console.log("OI", observationInsert);
           //newRequest.Observations_idObservations = observationInsert.insertId;
           
           //PreRequestDates - Request
@@ -502,7 +502,7 @@ const createRequest = async (body, file, clientId, files) => {
           
           //Request
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
-          ////console.log("REQ ID", request.insertId);
+          //////console.log("REQ ID", request.insertId);
 
           //ConsultCodes
           const codes = await pool.query('SELECT numberEmailCode, numberPhoneCode, receiveTime FROM Codes where Client_idClient = ?', [clientId]);
@@ -518,12 +518,12 @@ const createRequest = async (body, file, clientId, files) => {
           //Development
           //var dest = './files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/';
           
-          ////console.log("DL", loanData);
+          //////console.log("DL", loanData);
 
           let codeDates = codes[0].receiveTime.toLocaleDateString('es-CO', {}) + "-" + codes[0].receiveTime.getHours() + ":"  
           + codes[0].receiveTime.getMinutes() + ":"  + codes[0].receiveTime.getSeconds();
 
-          console.log("CodeDates", codeDates);
+          //console.log("CodeDates", codeDates);
 
           let userData = {
             identificationId: userRow[0].identificationId,
@@ -543,7 +543,7 @@ const createRequest = async (body, file, clientId, files) => {
             phoneCodeDate: codeDates,
           };
 
-          ////console.log("UserData", userData);
+          //////console.log("UserData", userData);
 
           mkdirp.sync(dest);
           const content = await compile('contract', userData);
@@ -580,7 +580,7 @@ const createRequest = async (body, file, clientId, files) => {
       return {status: 404, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 };
@@ -595,7 +595,7 @@ const getAllRequests = async (clientId) => {
     return {status: 200, data: {request: requestRow, company: company[0]}};
   
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -603,12 +603,12 @@ const getAllRequests = async (clientId) => {
 const getAllRequestsWasOutlayed = async (clientId) => {
   
   try{ 
-    ////console.log("ClientId", clientId);
+    //////console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -616,12 +616,12 @@ const getAllRequestsWasOutlayed = async (clientId) => {
 const getAllRequestWasRejected = async (clientId) => {
   
   try{ 
-    ////console.log("ClientId", clientId);
+    //////console.log("ClientId", clientId);
     const requestRow =  await pool.query('SELECT R.idRequest, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (C.idClient = ? and RS.idRequestState = ? or RS.idRequestState = ? or RS.idRequestState = ?) ORDER BY R.createdDate DESC', [clientId, 6, 7, 8]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return {status: 200, data: {request: requestRow, company: company[0]}};
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   } 
 };
@@ -640,19 +640,30 @@ const getAllRequestsByCompany = async (companyId) => {
 const approveOrRejectRequest = async (requestid, approve, userId, transactionCode, text) => { 
 
   try{
-    //Change the approval/reject state
+    
+    //Get the states list.
     const stateRow = await pool.query('SELECT * FROM RequestState');
 
-    const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, ivaValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid])
-    console.log("RQ", requestQuery);
+    //Get the request.
+    const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, ivaValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid]);
     
+    //Get the user info.
     const clientEmail = await pool.query('SELECT U.email, A.partialCapacity, A.totalInterest, A.accumulatedQuantity, A.totalFeeAdministration, A.totalRemainder, A.totalIva, A.totalCapital FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
+    
+    //Set the params.
     let requeststate = -1;
     let sendApprovedEmail = -1;
     let response = "";
+
+    //If request exist
     if(requestQuery){
+      //console.log("If request exist");
+
+      //If is approved
       if(approve === "true"){
+        //console.log("If is approved");
         response = "aprobada";
+
         if(userId.role === 1 ){
           response = "desembolsada";
           requeststate = getStateIdFromName(stateRow, "En desembolso");
@@ -663,35 +674,40 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
           let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
           if(requestQuery[0].RequestState_idRequestState === stateRequested){
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
-            console.log("RQS", requeststate);
+            
           }else if (requestQuery[0].RequestState_idRequestState === stateRH){
             requeststate = stateAnalysis;
-            console.log("RQS", requeststate);
+            
           }else if(requestQuery[0].RequestState_idRequestState === stateAnalysis){
+            sendApprovedEmail = stateAnalysis;
             requeststate = stateOutlay;
-            console.log("RQS", requeststate);
+            
           }
         }else if( userId.role === 3 ){
           requeststate =  stateAnalysis;
         }else if( userId.role === 5){
+          
+
           let stateRequested = getStateIdFromName(stateRow, "Solicitada");
           let stateRH = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
           let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
           let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
           if(requestQuery[0].RequestState_idRequestState === stateRequested){
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
-            console.log("RQS", requeststate);
+            
           }else if (requestQuery[0].RequestState_idRequestState === stateRH){
             requeststate = stateAnalysis;
-            console.log("RQS", requeststate);
+            
           }else if(requestQuery[0].RequestState_idRequestState === stateAnalysis){
+            sendApprovedEmail = stateAnalysis;
             requeststate = stateOutlay;
-            console.log("RQS", requeststate);
+           
           }
         }else{
           return {status: 403, message: "El usuario no tiene los permisos necesarios para para realizar esta acción."};
         }
       }else{
+        
         response = "rechazada";
         if( text === "Documentos Alterados" ){
           requeststate = getStateIdFromName(stateRow, "Documentos errados");
@@ -704,130 +720,136 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         const rejectAccount = { accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
         const rejectAccountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [rejectAccount, requestQuery[0].Account_idAccount]);
       }
+
     }else{
       return {status: 404, message: {message: "La solicitud no está registrada en nuestro sistema."}}
     }  
 
-    const request = {registeredDate: new Date(), observation: text, registeredBy: userId.idUser, RequestState_idRequestState: requeststate, bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null };
-    console.log("R", request);
+    const request = {
+      registeredDate: new Date(),
+      observation: text,
+      registeredBy: userId.idUser,
+      RequestState_idRequestState: requeststate,
+      bankTransactionCode: (transactionCode !== undefined) ? transactionCode : null 
+    };
     
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
-    if (updateRequest){
-      //console.log("SAE", sendApprovedEmail, getStateIdFromName(stateRow, "Aprobada Administración"));
-      if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Administración")){
 
-        //Transactions
-        const quantityTransaction = {
-          quantity: requestQuery[0].quantity,
-          transactionType: "Préstamo",
-          createdDate: new Date(),
-          registeredBy: userId.idUser,
-          registeredDate: new Date,
-          Account_idAccount: requestQuery[0].Account_idAccount};
+    if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Administración")){
 
-        const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [quantityTransaction]);
+      ////console.log("SendApproved", getStateIdFromName(stateRow, "Aprobada Administración"));
+      //Transactions
+      const quantityTransaction = {
+        quantity: requestQuery[0].quantity,
+        transactionType: "Préstamo",
+        createdDate: new Date(),
+        registeredBy: userId.idUser,
+        registeredDate: new Date,
+        Account_idAccount: requestQuery[0].Account_idAccount};
 
-        const administrationTransaction = {
-          quantity: requestQuery[0].administrationValue,
-          transactionType: "Cuota de administración",
-          createdDate: new Date(),
-          registeredBy: userId.idUser,
-          registeredDate: new Date,
-          Account_idAccount: requestQuery[0].Account_idAccount};
-        
-        const administrationQuery = await pool.query('INSERT INTO Transaction SET ?', [administrationTransaction]);
+      const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [quantityTransaction]);
 
-        const interestTransaction = {
-          quantity: requestQuery[0].interestValue,
-          transactionType: "Interés",
-          createdDate: new Date(),
-          registeredBy: userId.idUser,
-          registeredDate: new Date,
-          Account_idAccount: requestQuery[0].Account_idAccount};
-        
-        const interestQuery = await pool.query('INSERT INTO Transaction SET ?', [interestTransaction]);
-
-        const ivaTransaction = {
-          quantity: requestQuery[0].ivaValue,
-          transactionType: "IVA",
-          createdDate: new Date(),
-          registeredBy: userId.idUser,
-          registeredDate: new Date,
-          Account_idAccount: requestQuery[0].Account_idAccount};
-        
-        const ivaQuery = await pool.query('INSERT INTO Transaction SET ?', [ivaTransaction]);
-        
-        //Request
-        const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
-        
-        //RequestOutLay
-        const outlay = {datesList: new Date().toString(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date(), wasComputed: "false", Request_idRequest: requestid};
-        const outlayQuery = await pool.query('INSERT INTO RequestOutLay SET ?', [outlay]);
-
-        //Update account values
-        const account = {
-          totalCapital: clientEmail[0].totalCapital + requestQuery[0].quantity,
-          totalInterest: clientEmail[0].totalInterest + requestQuery[0].interestValue,
-          totalFeeAdministration: clientEmail[0].totalFeeAdministration + requestQuery[0].administrationValue,
-          totalIva:  clientEmail[0].totalIva + requestQuery[0].ivaValue,
-          totalRemainder: clientEmail[0].totalRemainder + requestQuery[0].quantity + requestQuery[0].administrationValue + requestQuery[0].interestValue + requestQuery[0].ivaValue};
-        const accountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [account, requestQuery[0].Account_idAccount]);
-
-        //Mailer
-        sgMail.setApiKey(email_api_key);
-
-        let userData = {
-          email: clientEmail[0].email,
-          url: front_URL,
-          base_URL_test: base_URL + "/approved.png",
-          footer: base_URL + "/footer.png",
-        };
-  
-        let output = await compile('approveRequest', userData);
-
-        let info = {
-            from: 'operaciones@avanzo.co', // sender address
-            to: clientEmail[0].email, // list of receivers
-            subject: 'Avanzo (Créditos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
-            text: 'Avanzo Créditos', // plain text body
-            html: output // html body
-        };
-
-        await sgMail.send(info);
+      const administrationTransaction = {
+        quantity: requestQuery[0].administrationValue,
+        transactionType: "Cuota de administración",
+        createdDate: new Date(),
+        registeredBy: userId.idUser,
+        registeredDate: new Date,
+        Account_idAccount: requestQuery[0].Account_idAccount};
       
-      }else if(sendApprovedEmail === getStateIdFromName(stateRow, "Rechazada")){
-        
-        ////console.log("Text", text, "Correo");
+      const administrationQuery = await pool.query('INSERT INTO Transaction SET ?', [administrationTransaction]);
 
-        //Mailer
-        sgMail.setApiKey(email_api_key);
+      const interestTransaction = {
+        quantity: requestQuery[0].interestValue,
+        transactionType: "Interés",
+        createdDate: new Date(),
+        registeredBy: userId.idUser,
+        registeredDate: new Date,
+        Account_idAccount: requestQuery[0].Account_idAccount};
+      
+      const interestQuery = await pool.query('INSERT INTO Transaction SET ?', [interestTransaction]);
 
-        let userData = {
-          email: clientEmail[0].email,
-          url: front_URL,
-          base_URL_test: base_URL + "/rejected.png",
-          footer: base_URL + "/footer.png",
-        };
-  
-        let output = await compile('rejectedRequest', userData);
+      const ivaTransaction = {
+        quantity: requestQuery[0].ivaValue,
+        transactionType: "IVA",
+        createdDate: new Date(),
+        registeredBy: userId.idUser,
+        registeredDate: new Date,
+        Account_idAccount: requestQuery[0].Account_idAccount};
+      
+      const ivaQuery = await pool.query('INSERT INTO Transaction SET ?', [ivaTransaction]);
+      
+      //RequestOutLay
+      const outlay = {datesList: new Date().toString(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date(), wasComputed: "false", Request_idRequest: requestid};
+      const outlayQuery = await pool.query('INSERT INTO RequestOutLay SET ?', [outlay]);
 
-        let info = {
-            from: 'operaciones@avanzo.co', // sender address
-            to: clientEmail[0].email, // list of receivers
-            subject: 'Avanzo (Créditos al instante) - Rechazo de solicitud  No. '  + requestid, // Subject line
-            text: 'Avanzo', // plain text body
-            html: output // html body
-        };
+      //Update account values
+      const account = {
+        totalCapital: clientEmail[0].totalCapital + requestQuery[0].quantity,
+        totalInterest: clientEmail[0].totalInterest + requestQuery[0].interestValue,
+        totalFeeAdministration: clientEmail[0].totalFeeAdministration + requestQuery[0].administrationValue,
+        totalIva:  clientEmail[0].totalIva + requestQuery[0].ivaValue,
+        totalRemainder: clientEmail[0].totalRemainder + requestQuery[0].quantity + requestQuery[0].administrationValue + requestQuery[0].interestValue + requestQuery[0].ivaValue};
+      const accountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [account, requestQuery[0].Account_idAccount]);
 
-        await sgMail.send(info);
-      }
+      //Request
+      const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
 
-      return {status: 200, message: {message: "La solicitud ha sido " + response + " satisfactoriamente."}};
-    }else{
-      return {status: 500, message: "Error interno del servidor."};
+      //Mailer
+      sgMail.setApiKey(email_api_key);
+
+      let userData = {
+        email: clientEmail[0].email,
+        url: front_URL,
+        base_URL_test: base_URL + "/approved.png",
+        footer: base_URL + "/footer.png",
+      };
+
+      let output = await compile('approveRequest', userData);
+
+      let info = {
+          from: 'operaciones@avanzo.co', // sender address
+          to: clientEmail[0].email, // list of receivers
+          subject: 'Avanzo (Créditos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
+          text: 'Avanzo Créditos', // plain text body
+          html: output // html body
+      };
+
+      await sgMail.send(info);
+    
+    }else if(sendApprovedEmail === getStateIdFromName(stateRow, "Rechazada")){
+      
+      //////console.log("Text", text, "Correo");
+
+      //Mailer
+      sgMail.setApiKey(email_api_key);
+
+      let userData = {
+        email: clientEmail[0].email,
+        url: front_URL,
+        base_URL_test: base_URL + "/rejected.png",
+        footer: base_URL + "/footer.png",
+      };
+
+      let output = await compile('rejectedRequest', userData);
+
+      let info = {
+          from: 'operaciones@avanzo.co', // sender address
+          to: clientEmail[0].email, // list of receivers
+          subject: 'Avanzo (Créditos al instante) - Rechazo de solicitud  No. '  + requestid, // Subject line
+          text: 'Avanzo', // plain text body
+          html: output // html body
+      };
+
+      await sgMail.send(info);
     }
+
+    
+
+    return {status: 200, message: {message: "La solicitud ha sido " + response + " satisfactoriamente."}};
+
   }catch(e){
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
   }
 
@@ -850,8 +872,6 @@ const passToProcessWithoutChange = async (requestid, userId) => {
       bankTransactionCode:  null 
     };
 
-    console.log("R", request);
-
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]); 
 
     if (updateRequest){
@@ -862,7 +882,7 @@ const passToProcessWithoutChange = async (requestid, userId) => {
 
   }catch(e){
     
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
 
   }
@@ -886,8 +906,6 @@ const passToProcessWithDocuments = async (requestid, userId) => {
       bankTransactionCode: null 
     };
 
-    console.log("R", request);
-
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]); 
 
     if (updateRequest){
@@ -898,7 +916,7 @@ const passToProcessWithDocuments = async (requestid, userId) => {
 
   }catch(e){
     
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
     
   }
@@ -922,8 +940,6 @@ const passToOutlay = async (requestid, userId) => {
       bankTransactionCode: null 
     };
 
-    console.log("R", request);
-
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]); 
 
     if (updateRequest){
@@ -934,7 +950,7 @@ const passToOutlay = async (requestid, userId) => {
 
   }catch(e){
     
-    console.log(e);
+    //console.log(e);
     return {status: 500, message: "Error interno del servidor."};
     
   }
@@ -1036,7 +1052,6 @@ const getAllRejectedRequest = async () => {
     const stateRow = await pool.query('SELECT * FROM RequestState');
     let requeststate = getStateIdFromName(stateRow, "Rechazada");
     let requeststate2 = getStateIdFromName(stateRow, "Documentos errados");
-    ////console.log("RS", requeststate);
 
     //Select rows
     const  requestRow =  await pool.query('SELECT R.idRequest, R.observation, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? or R.RequestState_idRequestState = ?);', [requeststate, requeststate2]);
@@ -1056,14 +1071,14 @@ const getAllPendingRHRequest = async () => {
     //Consult state
     const stateRow = await pool.query('SELECT * FROM RequestState');
     let requeststate = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
-    ////console.log("RS", requeststate);
+    //////console.log("RS", requeststate);
 
     //Select rows
     const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
     
     return {status: 200, data: requestRow};
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes pendientes por RR.HH.."}};
   }
 
@@ -1082,7 +1097,7 @@ const getAllBankRefundedRequest = async () => {
     
     return {status: 200, data: requestRow};
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes devueltas por el banco."}};
   }
 
@@ -1101,7 +1116,7 @@ const getAllProcessWithoutChangeRequest = async () => {
     
     return {status: 200, data: requestRow};
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
     return {status: 500, message: {message: "No es posible traer las solicitudes devueltas por el banco."}};
   }
 
@@ -1122,7 +1137,7 @@ const generateContracts = async (customerid, split, quantity, company) => {
     //Production
     const result = await pdf.create(content, {}).toFile('../files/contracts/'+userRow[0].identificationId+'-'+company+'/contrato-libranza1.pdf', (err) => {
       if(err){
-        ////console.log("Entro2");
+        //////console.log("Entro2");
         return {status: 500, data: "false"};
       }
       return 200;
@@ -1130,7 +1145,7 @@ const generateContracts = async (customerid, split, quantity, company) => {
     return {status: 200, data: "true"};
     
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
   }
 
 };
@@ -1144,7 +1159,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
       //CheckQuery
       const userRow =  await pool.query('SELECT C.idClient, U.idUser, U.email FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);      
 
-      ////console.log("UserRow", userRow);
+      //////console.log("UserRow", userRow);
 
       if(userRow.length > 0){
         
@@ -1155,14 +1170,14 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
           //Encrypt Codes
           const newEmailCode = await helpers.encryptPassword(emailCode.toString());
 
-          console.log("EC", emailCode);
+          //console.log("EC", emailCode);
 
           const phoneCode = Math.floor(100000 + Math.random() * 900000);
 
           //Encrypt Codes
           const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
-          console.log("PC", phoneCode);
+          //console.log("PC", phoneCode);
 
           let objectCode = {
             numberEmailCode: emailCode.toString(),
@@ -1229,7 +1244,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
     }
 
   }catch(e){
-    console.log(e);
+    //console.log(e);
   }
 
 };
@@ -1275,7 +1290,7 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
     }
   
   }catch(e){
-    //console.log(e);
+    ////console.log(e);
   }
 
 };

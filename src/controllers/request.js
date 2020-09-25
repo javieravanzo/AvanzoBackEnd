@@ -67,7 +67,7 @@ const getOutLayData = async (req, res, next) => {
       }
       next();
   } catch(e) {
-      res.status(500).json("No es posible obtener la información en este momento.");
+      res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 };
 
@@ -93,7 +93,7 @@ const getOultayDatesList = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -186,7 +186,7 @@ const getAllRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 };
 
@@ -205,7 +205,7 @@ const getAllRequestWasOutlayedC = async (req, res, next) => {
     next();
   } catch(e) {
     console.log(e);
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 };
 
@@ -224,7 +224,7 @@ const getAllRequestWasRejectedC = async (req, res, next) => {
     next();
   } catch(e) {
     console.log(e);
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 };
 
@@ -246,7 +246,7 @@ const getAllRequestByCompany = async (req, res, next) => {
     
     next();
   } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -268,8 +268,8 @@ const approveOrReject = async (req, res, next) => {
         res.status(result.status).json(result.message);
     }
     next();
-  } catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+  }catch(e) {
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -292,7 +292,7 @@ const changeToProcessWithoutChange = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible realizar esta acción en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -315,7 +315,7 @@ const changeToProcessWithDocuments = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible realizar esta acción en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -338,7 +338,7 @@ const changeToOutlay = async (req, res, next) => {
     }
     next();
   } catch(e) {
-    res.status(500).json("No es posible realizar esta acción en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -354,7 +354,7 @@ const getRequestStateList = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };  
 
 };
@@ -372,7 +372,7 @@ const getRequestsToApprove = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };  
 
 };
@@ -390,7 +390,7 @@ const getRequestToOutLay = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };  
 
 };
@@ -406,7 +406,7 @@ const getRejectedRequest = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };   
 
 };
@@ -422,7 +422,7 @@ const getPendingRRHHRequest = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };   
 
 };
@@ -438,7 +438,7 @@ const getPendingBankRefundedRequest = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };   
 
 };
@@ -454,7 +454,7 @@ const getAllReviewWithoutChangeRequest = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -503,7 +503,7 @@ const generateCodes = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
@@ -523,7 +523,7 @@ const checkCodes = async (req, res, next) => {
     }
     next();
   }catch(e) {
-    res.status(500).json("No es posible obtener la información en este momento.");
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
 };
