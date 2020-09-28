@@ -3,25 +3,21 @@ INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate)
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (80, 'Manager', NOW(), 1, NOW());
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (50, 'Company', NOW(), 1, NOW());
 INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (10, 'User', NOW(), 1, NOW());
+INSERT INTO Role (priority, roleName, createdDate, registeredBy, registeredDate) values (60, 'CallCenter', NOW(), 1, NOW());
+
+/* Super Administrator */
+INSERT INTO Administrator (identificationId, adminType) values ("1032488727", "superAdmin");
+INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ("ccorjuelavela@gmail.com", "Cristian", "Orjuela", false, false, NOW(), 1, NOW(), 1, null, null, 1);
+
+/* Administrator */
+INSERT INTO Administrator (identificationId, adminType) values ("1011222333", "admin");
+INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Administrador", "General", false, false, NOW(), 1, NOW(), 2, null, null, 2);
 
 SELECT * FROM Administrator;
 
-/* Main Administrator */
-INSERT INTO Administrator (identificationId, adminType) values ("1032488727", "superAdmin");
-INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values 
-( "ccorjuelavela@gmail.com", "Cristian", "Orjuela", false, false, NOW(), 1, NOW(), 1, null, null, 1);
-
-/*INSERT INTO Client (identificationId, documentType, phoneNumber, Company_idCompany, registeredBy, registeredDate, platformState, createdDate, ClientDocuments_idClientDocuments, CompanySalaries_idCompanySalaries) values (1564576532, 1, "3156453722", "11", "1", "2020-04-08 13:07:42.491", "true", "2020-04-08 13:07:42.491", "6", "13");
-*/
-
-SELECT * FROM User;
-SELECT * FROM NewClient;
-
-UPDATE User SET isConfirmed = 1 where idUser = 4;
-
-/* Main Administrator */
-INSERT INTO Administrator (identificationId, adminType) values ("1011222333", "admin");
-INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ( "desarrollador@avanzo.co", "Administrador", "General", false, false, NOW(), 1, NOW(), 2, null, null, 2);
+/* CallCenter */
+INSERT INTO Administrator (identificationId, adminType) values ("1000000000", "callCenter");
+INSERT INTO User (email, name, lastName, status, isConfirmed, createdDate, registeredBy, registeredDate, Role_idRole, Client_idClient, Company_idCompany, Administrator_idAdministrator) values ("gambetalatower@gmail.com", "Prueba", "CallCenter", true, false, NOW(), 1, NOW(), 5, null, null, 3);
 
 /* Request */
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Solicitada", NOW(), 1, NOW());

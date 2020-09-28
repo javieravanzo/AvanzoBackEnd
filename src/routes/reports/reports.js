@@ -1,6 +1,7 @@
 //Requires
 const express = require('express');
 const multer = require('multer');
+const mkdirp = require('mkdirp');
 const { header, body } = require('express-validator');
 
 //Controllers
@@ -15,7 +16,10 @@ const storageAdmin = multer.diskStorage({
   destination: function(req, file, callback){
     
     //Production
-    callback(null, '../files/admin/reads');
+    var dest = '../files/reads';
+  
+    mkdirp.sync(dest);
+    callback(null, dest);
 
   },
   filename: function(req, file, callback){
@@ -35,8 +39,8 @@ const uploads = multer({
 router.get('/Reports/GenerateBankReport', [verifyToken], generateBankReport);
 
 router.post('/Reports/ReceiveBankReport', uploads.fields([
-  { name: 'read', maxCount: 1 },
-  { name: 'write', maxCount: 1 }
+  { name: 'write', maxCount: 1 },
+  { name: 'read', maxCount: 1 }
 ]), [verifyToken], receiveBankReport);
 
 //Export

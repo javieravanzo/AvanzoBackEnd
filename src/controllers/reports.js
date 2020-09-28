@@ -131,6 +131,10 @@ const generateBankReport = async (req, res, next) => {
 const receiveBankReport = async (req, res, next) => {
     
   try {
+
+    //console.log("Read", req);
+    //console.log("Write", req.write);
+    //console.log("Read", req.files[0].path);
   
     //Get the user id
     const adminId = getAdminId(req);
