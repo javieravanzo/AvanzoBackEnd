@@ -10,7 +10,9 @@ const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getA
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
         generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
         getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
-        passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllProcessWithoutChangeRequest
+        passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllProcessWithoutChangeRequest,
+        updateDocumentsRequest, updateRequestInformation, getAllDefinitelyRejected, getAllProcessDocumentsChange,
+        getAllProcessBank, getAllRequestFinalized
       } = require('../services/request');
 
 //Get the client with token
@@ -149,7 +151,7 @@ const createNewRequest = async (req, res, next) => {
   }else{
     files = null;
   }
-  
+
   try {
     //Decode
     //decode_base64(req.body.file);
@@ -167,6 +169,64 @@ const createNewRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
+const updateDocumentsRequests = async (req, res, next) => {
+
+  let clientId = getClientId(req);
+  let {idRequest} = req.body;
+  let files = null;
+  
+  //Guardar archivos
+  if(req.files.paymentSupport !== undefined){
+    files = {paymentSupport: path.normalize(req.files.paymentSupport[0].path).replace("../files/documents/",""), 
+                 workingSupport: path.normalize(req.files.workingSupport[0].path).replace("../files/documents/","")};
+  }else{
+    files = null;
+  }
+  
+  try {
+  
+    //Request
+    const result = await updateDocumentsRequest(idRequest, clientId, files);
+    if(result.status === 200){
+        res.status(result.status).json(result.message);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    console.log("Error", e);
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
+const updateRequestsInformation = async (req, res, next) => {
+
+  let clientId = getClientId(req);
+
+  let body = {
+    account: req.headers.account,
+    accountType: req.headers.accounttype,
+    accountNumber: req.headers.accountnumber,
+  };
+
+  try {
+  
+    //Request
+    const result = await updateRequestInformation(req.headers.idrequest, body, clientId);
+    if(result.status === 200){
+        res.status(result.status).json(result.message);
+    }else{
+        res.status(result.status).json(result.message);
+    }
+    next();
+  } catch(e) {
+    console.log("Error", e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
@@ -269,6 +329,7 @@ const approveOrReject = async (req, res, next) => {
     }
     next();
   }catch(e) {
+    console.log("Error", e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
@@ -411,6 +472,23 @@ const getRejectedRequest = async (req, res, next) => {
 
 };
 
+const getDefinitelyRejectedRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllDefinitelyRejected();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    console.log("Error", e);
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };   
+
+};
+
 const getPendingRRHHRequest = async (req, res, next) => {
 
   try {
@@ -454,6 +532,57 @@ const getAllReviewWithoutChangeRequest = async (req, res, next) => {
     }
     next();
   }catch(e) {
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
+const getAllRequestWithDocumentsChange = async (req, res, next) => {
+
+  try {
+    const result = await getAllProcessDocumentsChange();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
+const getAllProcessInBank = async (req, res, next) => {
+
+  try {
+    const result = await getAllProcessBank();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
+
+
+const getAllFinalizedRequest = async (req, res, next) => {
+
+  try {
+    const result = await getAllRequestFinalized();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    console.log("E", e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
@@ -533,5 +662,7 @@ module.exports = {
   approveOrReject, getRequestStateList, getRequestsToApprove, getRequestToOutLay, generateContract,
   getAllRequestWasRejectedC, getAllRequestWasOutlayedC, getRejectedRequest, getPendingRRHHRequest,
   generateCodes, checkCodes, getPendingBankRefundedRequest, changeToProcessWithDocuments,
-  changeToProcessWithoutChange, changeToOutlay, getAllReviewWithoutChangeRequest
+  changeToProcessWithoutChange, changeToOutlay, getAllReviewWithoutChangeRequest, 
+  updateRequestsInformation, updateDocumentsRequests, getDefinitelyRejectedRequest,
+  getAllRequestWithDocumentsChange, getAllProcessInBank, getAllFinalizedRequest
 };

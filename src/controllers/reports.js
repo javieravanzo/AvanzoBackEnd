@@ -85,10 +85,14 @@ const generateBankReport = async (req, res, next) => {
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
     let date = new Date();
+
+    console.log("Date", date);
     
-    let day = date.getDay();
-    let month = date.getMonth();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
     let year = date.getFullYear();
+
+    console.log("Days", day, month, year);
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 

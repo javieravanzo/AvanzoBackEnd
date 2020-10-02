@@ -93,12 +93,16 @@ const readBankReport = async (readData, writeData) => {
               //Tomar las solicitudes que están en desembolso.
               let stateOutlay =  getStateIdFromName(stateRow, "Finalizada");
               let stateBankRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
+              let stateDefinitelyRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
+
+              //RejectedPayment
+              let rejectedObservation = readData[i].Motivo.split("|")[0];
 
               //Cuerpo de la solicitud.
               let requestBody = {
-                RequestState_idRequestState: (readData[i].Estado === "Pago Exitoso") ? stateOutlay : stateBankRejected,
+                RequestState_idRequestState: (readData[i].Estado === "Pago Exitoso") ? stateOutlay : rejectedObservation === "Id. no Coincide" ? stateDefinitelyRejected : stateBankRejected,
                 bankTransactionState: (readData[i].Estado === "Pago Exitoso") ? true : false,
-                observation: (readData[i].Estado === "Pago Exitoso") ? "Solicitud finalizada" : readData[i].Motivo, 
+                observation: (readData[i].Estado === "Pago Exitoso") ? "Solicitud finalizada" : rejectedObservation === "Id. no Coincide" ? "La cédula no existe o no coincide con los registros" : "Algunos datos de la cuenta no coinciden.", 
                 registeredDate: new Date(),
                 registeredBy: 0, 
                 bankTransactionCode: (readData[i].Estado === "Pago Exitoso") ? "Aprobado" : "Rechazado Banco",
