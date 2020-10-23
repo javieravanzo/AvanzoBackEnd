@@ -1,7 +1,7 @@
 
 //Requires
-const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 var path = require('path');
 var fs = require('fs');
 

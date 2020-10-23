@@ -11,9 +11,7 @@ const router = express.Router();
 //Modify the folder/file storage
 const storage = multer.diskStorage({
   destination: function(req, file, callback){
-    
-    console.log("Holi", req.body);
-
+  
     //Production
     var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.idCompany+'/';
     
@@ -31,16 +29,21 @@ const storage = multer.diskStorage({
   }
 });
 
-const uploads = multer({
+//const uploads;
+
+const avatarUpload = multer({
   storage: storage,
   limits: {
     fileSize: 1024 * 1024 * 5
   }
-});
+  }).fields([
+    { name: 'paymentSupport', maxCount: 1},
+    { name: 'workingSupport', maxCount: 1},
+  ]);
 
 
 //Controllers
-const { verifyToken, checkFile } = require('../../controllers/validator');
+const { verifyToken, validateFileSize } = require('../../controllers/validator');
 const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getRequestsToApprove,
         getAllRequestByCompany, approveOrReject, getRequestStateList, getRequestToOutLay,
         generateContract, getAllRequestWasOutlayedC, getAllRequestWasRejectedC,
@@ -60,15 +63,35 @@ router.get('/Request/GetOultayDatesList',[
 ],
 [verifyToken], getOultayDatesList);
 
-router.post('/Request/Create', uploads.fields([
-  { name: 'paymentSupport', maxCount: 1},
-  { name: 'workingSupport', maxCount: 1},
-]), [verifyToken], createNewRequest);
+router.post('/Request/Create', function(req, res, next) { 
 
-router.post('/Request/UpdateDocuments', uploads.fields([
-  { name: 'paymentSupport', maxCount: 1},
-  { name: 'workingSupport', maxCount: 1},
-]), [verifyToken], updateDocumentsRequests);
+  try{
+    avatarUpload( req, res, ( err ) => {
+      console.log("Error", err);
+      console.log("File", req.file);
+      if ( err ){
+        return res.status(400).json({message: "Uno o varios de los archivo/s cargado/s es/son muy pesado/s. Modifícalo/s e intenta de nuevo, por favor."});
+      }
+      next();
+    });
+  }catch (err){
+    console.log("Error", err);
+  }
+}, [verifyToken], createNewRequest);
+
+router.post('/Request/UpdateDocuments', function(req, res, next) { 
+
+  try{
+    avatarUpload( req, res, ( err ) => {
+      if ( err || !req.file ){
+        return res.status(400).json({message: "Uno o varios de los archivo/s cargado/s es/son muy pesado/s. Modifícalo e intenta de nuevo, por favor."});
+      }
+      next();
+    });
+  }catch (err){
+    console.log("Error", err);
+  }
+}, [verifyToken], updateDocumentsRequests);
 
 router.put('/Request/UpdateInformation', [verifyToken], updateRequestsInformation);
 

@@ -1,17 +1,6 @@
 //Requires
-const math = require('math');
-const fs = require('fs-extra');
-const hbs = require('handlebars');
-const moment = require('moment');
-const path = require('path');
-const sgMail = require('@sendgrid/mail');
-const mkdirp = require('mkdirp');
-const pdf = require('html-pdf');
-const crypto = require('crypto');
-const bytesFormat = require('biguint-format');
-
-//Imports
 const pool = require('../config/database.js');
+const { excluded_account } = require('../config/global');
 
 //Functions
 function parseLocaleNumber(stringNumber) {
@@ -22,6 +11,53 @@ function parseLocaleNumber(stringNumber) {
       .replace(new RegExp('\\' + thousandSeparator, 'g'), '')
       .replace(new RegExp('\\' + decimalSeparator), '.')
   );
+};
+
+function checkFinalBankState(state, observation){
+
+  //Differents states
+  let stateOutlay =  getStateIdFromName(stateRow, "Finalizada");
+  let stateBankRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
+  let stateDefinitelyRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
+  let stateWaitingBankOutLay = getStateIdFromName(stateRow, "Pendientes desembolsar por banco");
+
+  //Return variables
+  let newState;
+  let newObservation;
+  let newTransactionState;
+  let newTransactionCode;
+
+  if(state === "Pago Exitoso"){
+    newState = stateOutlay;
+    newObservation = "Solicitud finalizada";
+    newTransactionState = true;
+    newTransactionCode = "Aprobado";
+  }else if(state ===  "Pago Rechazado"){
+    if(observation === "Id. no Coincide"){
+      newState = stateDefinitelyRejected;
+      newObservation = "La cédula no existe o no coincide con los registros";
+      newTransactionState = false;
+      newTransactionCode = "Rechazado Banco";
+    }else if(observation === "Cuenta invalida"){
+      newState = stateBankRejected;
+      newObservation = "Algunos datos de la cuenta no coinciden.";
+      newTransactionState = false;
+      newTransactionCode = "Rechazado Banco";
+    }
+  }else if(state === "Enviado a Otro Banco"){
+    newState = stateWaitingBankOutLay;
+    newObservation = "La solicitud está pendiente de desembolsar por el banco.";
+    newTransactionState = false;
+    newTransactionCode = "Pendiente Banco";
+  }
+
+  return {
+    newState,
+    newObservation,
+    newTransactionState,
+    newTransactionCode
+  };
+
 };
 
 function getStateIdFromName (row, name){
@@ -43,12 +79,84 @@ function getStateIdFromName (row, name){
 //Services
 const generateBankReports = async () => {
 
+  //Slect StateRequest
+  const stateRow = await pool.query('SELECT * FROM RequestState');
+
+  //Differents states
+  let stateOutlay =  getStateIdFromName(stateRow, "En desembolso");
+
   try {
-    const clientRow =  await pool.query('SELECT C.documentType as "Tipo de Identificacion", C.identificationId as "Numero de Identificacion", U.name as "Nombre", U.lastName as "Apellido", BA.bankCode as "Codigo del Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "Numero del Producto o Servicio", R.quantity as "Valor del Pago o de la recarga", R.idRequest as "Referencia", U.email as "Correo Electronico", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ?', [4]);
+    const clientRow =  await pool.query('SELECT C.documentType as "Tipo de Identificacion", C.identificationId as "Numero de Identificacion", U.name as "Nombre", U.lastName as "Apellido", BA.bankCode as "Codigo del Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "Numero del Producto o Servicio", R.quantity as "Valor del Pago o de la recarga", R.idRequest as "Referencia", U.email as "Correo Electronico", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? and R.account <> ?', [stateOutlay, excluded_account]);
+    
+    return {status: 200, data: clientRow, message: "OK"};
+  
+  }catch(e){
+  
+    return {status: 400, message: "Error al generar el archivo del banco."};
+  
+  }
+
+};
+
+const generatePendingBankRequest = async () => {
+
+  //Slect StateRequest
+  const stateRow = await pool.query('SELECT * FROM RequestState');
+
+  //Differents states
+  let stateWaitingBankOutLay =  getStateIdFromName(stateRow, "Pendientes desembolsar por banco");
+
+  try {
+    const clientRow =  await pool.query('SELECT C.documentType as "Tipo de Identificacion", C.identificationId as "Numero de Identificacion", U.name as "Nombre", U.lastName as "Apellido", BA.bankCode as "Codigo del Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "Numero del Producto o Servicio", R.quantity as "Valor del Pago o de la recarga", R.idRequest as "Referencia", U.email as "Correo Electronico", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? and R.account <> ?', [stateWaitingBankOutLay, excluded_account]);
     
     return {status: 200, data: clientRow, message: "OK"};
   }catch(e){
-    return {status: 404, message: "FAIL"};
+    console.log("Err", e);
+    return {status: 400, message: "Error al generar el archivo del banco."};
+  }
+
+};
+
+const generatePendingByHumanResources = async (companyIdToNotInclude) => {
+
+  //Slect StateRequest
+  const stateRow = await pool.query('SELECT * FROM RequestState');
+
+  //Differents states
+  let statePendingRRHH =  getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
+
+  try {
+    const clientRow =  await pool.query('SELECT CO.socialReason as "EMPRESA", U.name as "NOMBRE", C.identificationId as "CEDULA", R.quantity as "MONTO", R.totalValue as "TOTAL A PAGAR", R.split as "CUOTAS", U.lastname as "ESTADO (RESPUESTA DE LA EMPRESA)" FROM Company CO JOIN Client C JOIN User U JOIN Account A JOIN Request R ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount) where R.RequestState_idRequestState = ? and CO.idCompany <> ? and R.sendRRHHEmail <> ?', [statePendingRRHH, companyIdToNotInclude, true]);
+    
+    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdDate < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany <> ?)', [false, companyIdToInclude]);
+    
+    return {status: 200, data: clientRow, message: "OK"};
+  
+  }catch(e){
+    console.log("Err", e);
+    return {status: 400, message: "Error al generar el archivo del banco."};
+  }
+
+};
+
+const generateParticularPendingByRRHH = async (companyIdToInclude) => {
+
+  //Slect StateRequest
+  const stateRow = await pool.query('SELECT * FROM RequestState');
+
+  //Differents states
+  let statePendingRRHH =  getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
+
+  try {
+    const clientRow =  await pool.query('SELECT C.identificationId as "CEDULA", U.name as "NOMBRE", C.entryDate as "FECHA INGRESO", C.salary as "SALARIO", R.quantity as "MONTO", R.totalValue as "TOTAL A PAGAR", R.split as "CUOTAS", U.lastname as "ESTADO (RESPUESTA DE LA EMPRESA)" FROM Company CO JOIN Client C JOIN User U JOIN Account A JOIN Request R ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount) where R.RequestState_idRequestState = ? and CO.idCompany = ? and R.sendRRHHEmail <> ?', [statePendingRRHH, companyIdToInclude, true]);
+    
+    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdDate < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany = ?)', [false, companyIdToInclude]);
+
+    return {status: 200, data: clientRow, message: "OK"};
+  
+  }catch(e){
+    console.log("Err", e);
+    return {status: 400, message: "Error al generar el archivo del banco."};
   }
 
 };
@@ -83,29 +191,27 @@ const readBankReport = async (readData, writeData) => {
               //Si todo coincide, hago un spli del campo Referencia y saco el id de la solicitud.
               let requestId = writeData[j]['Referencia'].split(' ')[0];
 
-
-              //Change the approval/reject state
               const stateRow = await pool.query('SELECT * FROM RequestState');
               
               //Ahí actualizo a:
-              //1.  Finalizada si el campo dice Pago Exitoso
-              //2. Devolución bancaria si dice Pago Rechazado y agrega observación
-              //Tomar las solicitudes que están en desembolso.
-              let stateOutlay =  getStateIdFromName(stateRow, "Finalizada");
-              let stateBankRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
-              let stateDefinitelyRejected =  getStateIdFromName(stateRow, "Devolución bancaria");
+              //1.  Finalizada si el campo dice Pago Exitoso.
+              //2. Devolución bancaria si dice Pago Rechazado y agrega observación.
+              //3. Pendientes por banco cuando estén en período de espera para desembolsar.
 
               //RejectedPayment
               let rejectedObservation = readData[i].Motivo.split("|")[0];
 
+              //GetCurrentStates
+              let statesAndInfo = checkFinalBankState(readData[i].Estado, rejectedObservation);
+
               //Cuerpo de la solicitud.
               let requestBody = {
-                RequestState_idRequestState: (readData[i].Estado === "Pago Exitoso") ? stateOutlay : rejectedObservation === "Id. no Coincide" ? stateDefinitelyRejected : stateBankRejected,
-                bankTransactionState: (readData[i].Estado === "Pago Exitoso") ? true : false,
-                observation: (readData[i].Estado === "Pago Exitoso") ? "Solicitud finalizada" : rejectedObservation === "Id. no Coincide" ? "La cédula no existe o no coincide con los registros" : "Algunos datos de la cuenta no coinciden.", 
+                RequestState_idRequestState: statesAndInfo.newState,
+                bankTransactionState: statesAndInfo.newTransactionState,
+                observation: statesAndInfo.newObservation,
                 registeredDate: new Date(),
                 registeredBy: 0, 
-                bankTransactionCode: (readData[i].Estado === "Pago Exitoso") ? "Aprobado" : "Rechazado Banco",
+                bankTransactionCode: statesAndInfo.newTransactionCode 
               };
 
               //console.log("RI", requestId);
@@ -125,11 +231,12 @@ const readBankReport = async (readData, writeData) => {
 
     return {status: 200, message: "Los archivos han sido leídos correctamente."};
   }catch(e){
-    return {status: 404, message: "El archivo no ha sido leído correctamente."};
+    return {status: 400, message: "El archivo no ha sido leído correctamente, porque tiene datos que no se pueden interpretar o contiene columnas adicionales."};
   }
 
 };
 
 module.exports = {
-  generateBankReports, readBankReport
+  generateBankReports, readBankReport, generatePendingBankRequest, generatePendingByHumanResources, 
+  generateParticularPendingByRRHH
 };

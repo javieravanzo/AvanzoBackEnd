@@ -31,6 +31,7 @@ INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) value
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Procesadas sin cambio", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Procesada documentos con cambio", NOW(), 1, NOW());
 INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Rechazadas por el banco procesadas", NOW(), 1, NOW());
+INSERT INTO RequestState (name, createdDate, registeredBy, registeredDate) values ("Pendiente desembolsar por banco", NOW(), 1, NOW());
 
 /*Indicators */
 INSERT INTO Indicators (indicatorName, indicatorValue, indicatorRate, registeredBy, registeredDate) values ("Interest", 0, 0.00069, 1, NOW());

@@ -6,13 +6,16 @@ const helpers = require('../lib/helpers');
 const createCompanies = async (req, userId) => {
   
   //NewObject
-  const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, 
-         paymentSupport, workingSupport, companySalaries, companyMembers, email, password} = req.body;
+  const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
+         approveHumanResources, paymentSupport, workingSupport, companySalaries, companyMembers,
+         email, password, databaseExchange} = req.body;
 
   try{   
     
     //Company
-    const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, paymentSupport, workingSupport};
+    const company = {
+      nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
+      approveHumanResources, paymentSupport, workingSupport, databaseExchange};
     company.registeredDate = new Date();
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
@@ -238,7 +241,46 @@ const activateCompanies = async (companyId, active) => {
 
 };
 
+const modifymaximumAmountByCompany = async (customersData, adminId, idCompany) => {
+
+  try{
+  
+    const companyNitQuery = await pool.query('SELECT C.idCompany FROM Company C where C.idCompany = ?', idCompany);
+
+    if (companyNitQuery !== '[]'){
+
+      for (let i in customersData){       
+        
+        //Create the client
+        let new_account = {
+          maximumAmount: customersData[i]['MONTO A PRESTAR'],
+          registeredBy: adminId,
+          registeredDate: new Date(),
+        };
+
+        //console.log("NA", new_account);
+
+        //Insert the client
+        const clientQuery = await pool.query('UPDATE Account A JOIN Client C ON (A.Client_idClient = C.idClient) SET A.maximumAmount = ?, A.registeredBy = ?, A.registeredDate = ?  where C.identificationId = ?', [customersData[i]['MONTO A PRESTAR'], adminId, new Date(), customersData[i]['CEDULA DEL EMPLEADO']]);
+      
+      };
+  
+      return {status: 200, message: "Los nuevos valores han sido cambiados exitosamente."};
+
+    }else{
+
+      return {status: 400, message: "La empresa asociada no se encuentra dentro de nuestros registros."};
+    
+    } 
+      
+  }catch(e){
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor"};
+  }
+
+};
+
 module.exports = {
   createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries,
-  activateCompanies, updateCompanySalary
+  activateCompanies, updateCompanySalary, modifymaximumAmountByCompany
 };

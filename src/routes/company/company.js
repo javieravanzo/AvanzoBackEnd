@@ -1,6 +1,7 @@
 //Requires
 const express = require('express');
 const { body, header } = require('express-validator');
+const multer = require('multer');
 
 //Initialize
 const router = express.Router();
@@ -8,8 +9,31 @@ const router = express.Router();
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
 const { createCompany, getAllCompanies, getCompaniesForUser, updateCompany,
-        getCompanyWithSalary, activateCompany, updateSalaries } = require('../../controllers/company');
- 
+        getCompanyWithSalary, activateCompany, updateSalaries, updateMaximumAmountByCompany
+      } = require('../../controllers/company');
+
+//Constants
+//- Modify the folder/file storage
+const storageAdmin = multer.diskStorage({
+  destination: function(req, file, callback){
+    
+    //Production
+    callback(null, '../files/reads');
+
+  },
+  filename: function(req, file, callback){
+    callback(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+  }
+});
+
+const uploads = multer({
+  storage: storageAdmin,
+  limits: {
+    fileSize: 1024 * 1024 * 5
+  }
+});   
+
+
 //Routes 
 router.post('/Company/Create', 
   [
@@ -50,6 +74,11 @@ router.get('/Company/GetAllForUsers', getCompaniesForUser);
 router.put('/Company/ChangePlatformStatus', activateCompany);
 
 router.put('/Company/UpdateCompanySalaries', updateSalaries);
+
+router.post('/Company/LoadMaxAmountToOutLayByClient', 
+uploads.single('file'),
+[verifyToken], updateMaximumAmountByCompany);
+
 
 //Export
 module.exports = router;

@@ -1,10 +1,12 @@
 //Requires
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const Excel = require('xlsx');
 
 //Imports
 const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies,
-        getCompanyWithSalaries, activateCompanies, updateCompanySalary } = require('../services/company');
+        getCompanyWithSalaries, activateCompanies, updateCompanySalary,
+        modifymaximumAmountByCompany } = require('../services/company');
 
 //Functions
 //Get the user with token
@@ -184,9 +186,41 @@ const activateCompany = async (req, res, next) => {
 
 };
 
+const updateMaximumAmountByCompany = async (req, res, next) => {
+
+  //Get the user id
+  const adminId = getUserId(req);
+
+  // Create a workbook, like a file.
+  let workbook = Excel.readFile(req.file.path, {cellDates: true});
+
+  // Define the sheet of work.
+  let customerData = workbook.Sheets[workbook.SheetNames[0]];
+
+  // Map the xlsx format to json.
+  let data = Excel.utils.sheet_to_json(customerData);
+
+  //Get the company id
+  let idCompany = req.body.idCompany;
+
+  try {
+      
+    const result = await modifymaximumAmountByCompany(data, adminId, idCompany);
+    
+    res.status(result.status).json({message: result.message});
+
+  }catch(e) {
+      
+    res.status(500).json({message:"No es posible realizar el registro en este momento."}); 
+
+  };
+
+
+};
+
 
 module.exports = {
   createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary,
-  activateCompany, updateSalaries
+  activateCompany, updateSalaries, updateMaximumAmountByCompany
 };
 

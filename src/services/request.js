@@ -568,11 +568,11 @@ const createRequest = async (body, file, clientId, files) => {
 
           return {status: 200, message: {message: "Tu solicitud #"+request.insertId+" ha sido creada con éxito. Pronto nos pondremos en contacto contigo."}};
         }else{
-          return {status: 404, message: {message: "El usuario no tiene cupo disponible para realizar la solicitud."}};
+          return {status: 400, message: {message: "El usuario no tiene cupo disponible para realizar la solicitud."}};
         }
       
     }else{
-      return {status: 404, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
+      return {status: 400, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
     ////console.log(e);
@@ -618,7 +618,7 @@ const updateDocumentsRequest = async (idRequest, clientId, files) => {
           return {status: 200, message: {message: "La solicitud #"+idRequest+" ha sido actualizada con éxito."}};
       
     }else{
-      return {status: 404, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
+      return {status: 400, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
     console.log("Error", e);
@@ -672,7 +672,7 @@ const updateRequestInformation = async (idRequest, body, clientId) => {
         return {status: 200, message: {message: "La solicitud #"+idRequest+" ha sido actualizada con éxito."}};
       
     }else{
-      return {status: 404, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
+      return {status: 400, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
     console.log(e);
@@ -745,97 +745,106 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     //Get the states list.
     const stateRow = await pool.query('SELECT * FROM RequestState');
 
+    //Different request states.
+    let stateRequested = getStateIdFromName(stateRow, "Solicitada");
+    let stateRH = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
+    let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
+    let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
+    let stateDocumentsError = getStateIdFromName(stateRow, "Documentos errados");
+    let stateDocumentsChange = getStateIdFromName(stateRow, "Procesada documentos con cambio");
+    let stateRejected = getStateIdFromName(stateRow, "Rechazada");
+
     //Get the request.
     const requestQuery = await pool.query('SELECT quantity, administrationValue, interestValue, ivaValue, RequestState_idRequestState, Account_idAccount, approveHumanResources FROM Request where idRequest = ?', [requestid]);
     
     //Get the user info.
     const clientEmail = await pool.query('SELECT U.email, A.partialCapacity, A.totalInterest, A.accumulatedQuantity, A.totalFeeAdministration, A.totalRemainder, A.totalIva, A.totalCapital FROM User U JOIN Client C JOIN Account A ON (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient) where A.idAccount = ?', [requestQuery[0].Account_idAccount]);
     
-    //Set the params.
+    //Set the auxiliar params.
     let requeststate = -1;
     let sendApprovedEmail = -1;
     let response = "";
+    let currentRequestState = requestQuery[0].RequestState_idRequestState;
 
-    //If request exist
+    //Define next request state
     if(requestQuery){
-      //console.log("If request exist");
 
       //If is approved
       if(approve === "true"){
-        //console.log("If is approved");
+
         response = "aprobada";
 
         if(userId.role === 1 ){
+
           response = "desembolsada";
-          requeststate = getStateIdFromName(stateRow, "En desembolso");
+          requeststate = stateOutlay;
+
         }else if(userId.role === 2 ){
-          let stateRequested = getStateIdFromName(stateRow, "Solicitada");
-          let stateRH = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
-          let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
-          let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
-          if(requestQuery[0].RequestState_idRequestState === stateRequested){
+
+          if(currentRequestState === stateRequested){
+
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
             
-          }else if (requestQuery[0].RequestState_idRequestState === stateRH){
+          }else if (currentRequestState === stateRH){
+            
             requeststate = stateAnalysis;
             
-          }else if(requestQuery[0].RequestState_idRequestState === stateAnalysis){
+          }else if(currentRequestState === stateAnalysis){
+            
             sendApprovedEmail = stateAnalysis;
             requeststate = stateOutlay;
             
           }
+
         }else if( userId.role === 3 ){
-          let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
+
           requeststate =  stateAnalysis;
+
         }else if( userId.role === 5){
-          
 
-          let stateRequested = getStateIdFromName(stateRow, "Solicitada");
-          let stateRH = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
-          let stateAnalysis = getStateIdFromName(stateRow, "Aprobada Administración");
-          let stateOutlay = getStateIdFromName(stateRow, "En desembolso");
-          let stateDocumentsError = getStateIdFromName(stateRow, "Documentos errados");
-          let stateDocumentsChange = getStateIdFromName(stateRow, "Procesada documentos con cambio");
-
-          if(requestQuery[0].RequestState_idRequestState === stateRequested){
+          if(currentRequestState === stateRequested){
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
             
-          }else if (requestQuery[0].RequestState_idRequestState === stateRH){
+          }else if (currentRequestState === stateRH){
             requeststate = stateAnalysis;
             
-          }else if(requestQuery[0].RequestState_idRequestState === stateAnalysis){
+          }else if(currentRequestState === stateAnalysis){
             sendApprovedEmail = stateAnalysis;
             requeststate = stateOutlay;
            
-          }else if(requestQuery[0].RequestState_idRequestState === stateDocumentsError){
+          }else if(currentRequestState === stateDocumentsError){
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
           
-          }else if(requestQuery[0].RequestState_idRequestState === stateDocumentsChange){
+          }else if(currentRequestState === stateDocumentsChange){
             requeststate = parseInt(requestQuery[0].approveHumanResources, 10) === 1 ? stateRH : stateAnalysis;
           }
 
         }else{
           return {status: 403, message: "El usuario no tiene los permisos necesarios para para realizar esta acción."};
         }
+
       }else{
         
         response = "rechazada";
+
         if( text === "Documentos Alterados" ){
-          requeststate = getStateIdFromName(stateRow, "Documentos errados");
+          requeststate = stateDocumentsError;
         }else{
-          requeststate = getStateIdFromName(stateRow, "Rechazada");
+          requeststate = stateRejected;
         }
         
-        sendApprovedEmail = getStateIdFromName(stateRow, "Rechazada");
+        sendApprovedEmail = stateRejected;
+
         //Update account values
         const rejectAccount = { accumulatedQuantity: clientEmail[0].accumulatedQuantity - requestQuery[0].quantity};
         const rejectAccountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [rejectAccount, requestQuery[0].Account_idAccount]);
       }
 
     }else{
-      return {status: 404, message: {message: "La solicitud no está registrada en nuestro sistema."}}
+      return {status: 400, message: {message: "La solicitud no está registrada en nuestro sistema."}}
     }  
 
+    //Update Request
     const request = {
       registeredDate: new Date(),
       observation: text,
@@ -846,9 +855,9 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
     
     const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [request, requestid]);
 
-    if (sendApprovedEmail === getStateIdFromName(stateRow, "Aprobada Administración")){
-
-      ////console.log("SendApproved", getStateIdFromName(stateRow, "Aprobada Administración"));
+    //Create Transactions - IsAdminApproved
+    if (sendApprovedEmail === stateAnalysis){
+      
       //Transactions
       const quantityTransaction = {
         quantity: requestQuery[0].quantity,
@@ -901,11 +910,18 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         totalFeeAdministration: clientEmail[0].totalFeeAdministration + requestQuery[0].administrationValue,
         totalIva:  clientEmail[0].totalIva + requestQuery[0].ivaValue,
         totalRemainder: clientEmail[0].totalRemainder + requestQuery[0].quantity + requestQuery[0].administrationValue + requestQuery[0].interestValue + requestQuery[0].ivaValue};
+      
       const accountQuery = await pool.query('UPDATE Account set ? WHERE idAccount = ?', [account, requestQuery[0].Account_idAccount]);
 
       //Request
       const requestUpdateQuery = await pool.query('UPDATE Request SET Transaction_idTransaction = ? where idRequest = ?', [transactionQuery.insertId, requestid]);
+          
+    } 
 
+    //Send Emails
+    if((sendApprovedEmail === stateAnalysis) || (sendApprovedEmail === stateRH) || 
+       (sendApprovedEmail === stateOutlay) ){
+      
       //Mailer
       sgMail.setApiKey(email_api_key);
 
@@ -916,21 +932,23 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
         footer: base_URL + "/footer.png",
       };
 
+      let approvalTemplate = sendApprovedEmail === stateAnalysis ? 'approveRequest' : 'preApproveRequest';
+
       let output = await compile('approveRequest', userData);
+
+      let emailMessage = sendApprovedEmail === stateAnalysis ? "Aprobación" : "Validación";
 
       let info = {
           from: 'operaciones@avanzo.co', // sender address
           to: clientEmail[0].email, // list of receivers
-          subject: 'Avanzo (Créditos al instante) - Aprobación de solicitud  No. '  + requestid, // Subject line
+          subject: 'Avanzo (Créditos al instante) - ' + emailMessage + ' de solicitud  No. '  + requestid, // Subject line
           text: 'Avanzo Créditos', // plain text body
           html: output // html body
       };
 
       await sgMail.send(info);
-    
-    }else if(sendApprovedEmail === getStateIdFromName(stateRow, "Rechazada")){
-      
-      //////console.log("Text", text, "Correo");
+
+    }else if((sendApprovedEmail === stateRejected) || (sendApprovedEmail === stateRejected) ){
 
       //Mailer
       sgMail.setApiKey(email_api_key);
@@ -953,9 +971,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       };
 
       await sgMail.send(info);
-    }
-
-    
+    } 
 
     return {status: 200, message: {message: "La solicitud ha sido " + response + " satisfactoriamente."}};
 
@@ -1205,7 +1221,7 @@ const getAllPendingRHRequest = async () => {
     let requeststate = getStateIdFromName(stateRow, "Aprobada Recursos Humanos");
 
     //Select rows
-    const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
+    const  requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, R.sendRRHHEmail, C.Company_idCompany, CO.socialReason, A.accumulatedQuantity, U.name FROM Client C JOIN Company CO JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND CO.idCompany = C.Company_idCompany AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
     
     return {status: 200, data: requestRow};
   }catch(e){
@@ -1417,24 +1433,24 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
   
         }else{
   
-          return {status: 404, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
+          return {status: 400, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
         
         }
 
       }else{
 
-        return {status: 404, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
+        return {status: 400, message: "Los datos ingresados no coinciden con el registro actual. Por favor, contáctanos."};
 
       }
 
     }else{
 
-      return {status: 404, message: "Los datos ingresados no son válidos."};
+      return {status: 400, message: "Los datos ingresados no son válidos."};
 
     }
 
   }catch(e){
-    //console.log(e);
+    console.log("E", e);
   }
 
 };
@@ -1464,18 +1480,18 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode) => {
         if(validEmailCode){
           return {status: 200, message: "Los códigos son auténticos"};
         }else{
-          return {status: 404, message: "Los códigos ingresados no coinciden con el registro."};
+          return {status: 400, message: "Los códigos ingresados no coinciden con el registro."};
         } 
   
       }else{
 
-        return {status: 404, message: "Los códigos ingresados no coinciden con el registro."};
+        return {status: 400, message: "Los códigos ingresados no coinciden con el registro."};
       
       }
 
     }else{
 
-      return {status: 404, message: "Los códigos ingresados no son números válidos."};
+      return {status: 400, message: "Los códigos ingresados no son números válidos."};
 
     }
   

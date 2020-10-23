@@ -178,7 +178,7 @@ const confirmedPassword = async (userId, password, confirmPassword) => {
                 return {status: 500, message: "Error interno del servidor."};
             }
         }else{
-            return {status: 404, message: "Las contraseñas no coinciden."};
+            return {status: 400, message: "Las contraseñas no coinciden."};
         }
     } catch(e) {
         console.log(e);

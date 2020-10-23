@@ -46,7 +46,7 @@ const makeLogin = async (req, res, next) => {
         res.status(500).json({message:"No es posible realizar el login en este momento."});
     };
   }else{
-    res.status(404).json({message:"Ingrese correctamente los datos, por favor."});
+    res.status(400).json({message:"Ingrese correctamente los datos, por favor."});
   }
 };
 
@@ -58,7 +58,7 @@ const newLogin = async (req, res, next) => {
     //console.log("Req.hed", req.headers);
     res.status(500).json({message:"No es posible realizar el login en este momento."});
   } catch(e) {
-    res.status(404).json({message:"Ingrese correctamente los datos, por favor."});
+    res.status(400).json({message:"Ingrese correctamente los datos, por favor."});
   };
 
 };

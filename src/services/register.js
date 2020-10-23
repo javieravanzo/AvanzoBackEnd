@@ -211,6 +211,7 @@ const newPreregister = async (client, user, files, auth) => {
         newClient.registeredBy = 1;
         newClient.documentType = "Cédula";
         newClient.isApproved = false;
+        newClient.entryDate = new Date();
         newClient.registeredDate = new Date();
         newClient.createdDate = new Date();
         newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
@@ -237,7 +238,7 @@ const newPreregister = async (client, user, files, auth) => {
       
       }else{
         
-        return {status: 404, message: "Tu usuario ya ha sido registrado anteriormente en la plataforma con tu cédula o con tu correo. Inicia sesión o espera el correo de aprobación de tu cuenta."};
+        return {status: 400, message: "Tu usuario ya ha sido registrado anteriormente en la plataforma con tu cédula o con tu correo. Inicia sesión o espera el correo de aprobación de tu cuenta."};
 
       }
     }        

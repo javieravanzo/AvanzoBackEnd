@@ -251,6 +251,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           genus: customersData[i].Genero,
           Company_idCompany: companyNitQuery[0].idCompany,
           registeredBy: adminId,
+          entryDate: new Date(),
           registeredDate: new Date(),
         };
 
@@ -294,7 +295,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
         const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       }else{
-        return {status: 404, message: "La empresa asociada no se encuentra dentro de nuestros registros."};
+        return {status: 400, message: "La empresa asociada no se encuentra dentro de nuestros registros."};
       } 
     } 
     return {status: 200, message: "Los usuarios han sido registrados a la plataforma satisfactoriamente."}   

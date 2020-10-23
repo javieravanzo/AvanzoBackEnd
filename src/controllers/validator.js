@@ -33,8 +33,22 @@ const verifyToken = async (req, res, next) => {
 const checkFile = async (req, res, next) => {
   //console.log("REQ!!", req);
   fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
-}
+};
+
+const validateFileSize = async(req, res, next) => {
+
+  //console.log("Request", req);
+
+  console.log("FileError", req.fileSizeError);
+
+  if(typeof req.fileSizeError != "undefined") {
+    res.send({"error":"File too large"});// to display filesize error
+  } else {
+    next();
+  }
+
+};
 
 module.exports = {
-  verifyToken, checkFile
+  verifyToken, checkFile, validateFileSize
 };

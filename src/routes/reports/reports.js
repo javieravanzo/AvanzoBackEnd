@@ -6,7 +6,8 @@ const { header, body } = require('express-validator');
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
-const { generateBankReport, receiveBankReport } = require('../../controllers/reports');
+const { generateBankReport, receiveBankReport, generatePendingRequestReport, 
+        generatePendingByRRHH, generateParticularPendingRequestByRRHH } = require('../../controllers/reports');
 
 //Initialize
 const router = express.Router();
@@ -37,6 +38,12 @@ const uploads = multer({
 
 //Routes 
 router.get('/Reports/GenerateBankReport', [verifyToken], generateBankReport);
+
+router.get('/Reports/PendingToFinalizeByBank', [verifyToken], generatePendingRequestReport);
+
+router.get('/Reports/PendingGeneralByRRHH', [verifyToken], generatePendingByRRHH);
+
+router.get('/Reports/PendingParticularByRRHH', [verifyToken], generateParticularPendingRequestByRRHH);
 
 router.post('/Reports/ReceiveBankReport', uploads.fields([
   { name: 'write', maxCount: 1 },
