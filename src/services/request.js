@@ -575,7 +575,7 @@ const createRequest = async (body, file, clientId, files) => {
       return {status: 400, message: {message: "Tu usuario ha sido deshabilitado para realizar solicitudes en el sistema."}};
     }
   }catch(e){
-    ////console.log(e);
+    console.log("Error Servicio", e);
     return {status: 500, message: {message: "Error interno del servidor."}};
   }    
 };

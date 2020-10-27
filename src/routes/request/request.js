@@ -67,8 +67,8 @@ router.post('/Request/Create', function(req, res, next) {
 
   try{
     avatarUpload( req, res, ( err ) => {
-      console.log("Error", err);
-      console.log("File", req.file);
+      //console.log("Error", err);
+      //console.log("File", req.file);
       if ( err ){
         return res.status(400).json({message: "Uno o varios de los archivo/s cargado/s es/son muy pesado/s. Modifícalo/s e intenta de nuevo, por favor."});
       }

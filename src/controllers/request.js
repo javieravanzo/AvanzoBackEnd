@@ -169,6 +169,7 @@ const createNewRequest = async (req, res, next) => {
     }
     next();
   } catch(e) {
+    console.log("Error Controller", e);
     res.status(500).json({message: "No es posible obtener la información en este momento."});
   };
 
@@ -179,6 +180,8 @@ const updateDocumentsRequests = async (req, res, next) => {
   let clientId = getClientId(req);
   let {idRequest} = req.body;
   let files = null;
+
+  console.log("RQ-F", req.files);
   
   //Guardar archivos
   if(req.files.paymentSupport !== undefined){
