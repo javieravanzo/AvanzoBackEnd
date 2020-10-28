@@ -518,10 +518,12 @@ const createRequest = async (body, file, clientId, files) => {
           
           //////console.log("DL", loanData);
 
+          console.log("Codes", codes[0].receiveTime.getDate());
+
           let codeDates = codes[0].receiveTime.getDate() + "-" + codes[0].receiveTime.getHours() + ":"  
           + codes[0].receiveTime.getMinutes() + ":"  + codes[0].receiveTime.getSeconds();
 
-          //console.log("CodeDates", codeDates);
+          console.log("CodeDates", codeDates);
 
           let userData = {
             identificationId: userRow[0].identificationId,
@@ -1516,6 +1518,8 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
           receiveTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           receiveIP: ipAddress  
         };
+
+        console.log("ReceiveTime", updateCodes.receiveTime);
 
         const updateDates = await pool.query('UPDATE Codes SET ? WHERE Client_idClient = ?', [updateCodes, clientId]);            
 
