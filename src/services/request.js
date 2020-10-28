@@ -1371,9 +1371,9 @@ const generateContracts = async (customerid, split, quantity, company) => {
     var config = {
       border: {
         "top": "60px",            // default is 0, units: mm, cm, in, px
-        "right": "10px",
+        "right": "8px",
         "bottom": "50px",
-        "left": "10px"
+        "left": "8px"
       },
 
       format: "A4", 
