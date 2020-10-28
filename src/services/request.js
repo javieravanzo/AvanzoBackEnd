@@ -518,7 +518,7 @@ const createRequest = async (body, file, clientId, files) => {
           
           //////console.log("DL", loanData);
 
-          let codeDates = codes[0].receiveTime.getDay() + "-" + codes[0].receiveTime.getHours() + ":"  
+          let codeDates = codes[0].receiveTime.getDate() + "-" + codes[0].receiveTime.getHours() + ":"  
           + codes[0].receiveTime.getMinutes() + ":"  + codes[0].receiveTime.getSeconds();
 
           //console.log("CodeDates", codeDates);
