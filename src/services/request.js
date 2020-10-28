@@ -1433,10 +1433,11 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             emailCode: newEmailCode,
             phoneCode: newPhoneCode,
             Client_idClient: userRow[0].idClient,
-            sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
+            sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+            receiveTime: null,
           };
 
-          //console.log("Codes", objectCode);
+          console.log("Codes", objectCode);
 
           const checkClient = await pool.query('SELECT idCodes FROM Codes where Client_idClient = ?', [userRow[0].idClient]);
 
@@ -1519,7 +1520,7 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
           receiveIP: ipAddress  
         };
 
-        console.log("ReceiveTime", updateCodes.receiveTime);
+        console.log("ReceiveTime", updateCodes);
 
         const updateDates = await pool.query('UPDATE Codes SET ? WHERE Client_idClient = ?', [updateCodes, clientId]);            
 
