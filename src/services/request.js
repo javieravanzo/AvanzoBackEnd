@@ -1425,10 +1425,6 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
           //Encrypt Codes
           const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
-          //console.log("PC", phoneCode);
-          //let emailDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
-          //emailDate = await helpers.convertLocalDate(emailDate);
-
           let objectCode = {
             numberEmailCode: emailCode.toString(),
             numberPhoneCode: phoneCode.toString(),
@@ -1516,9 +1512,6 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
         let validEmailCode = await helpers.matchPassword(emailcode.toString(), userRow[0].emailCode);
     
         let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
-
-        //let emailDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
-        //emailDate = await helpers.convertLocalDate(emailDate);
 
         let updateCodes = {
           receiveTime: new Date(),
