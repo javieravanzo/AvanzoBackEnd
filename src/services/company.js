@@ -19,11 +19,11 @@ const createCompanies = async (req, userId) => {
     company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
-    //console.log("CE", consultEmail.length > 0);
+    ////console.log("CE", consultEmail.length > 0);
     if(consultEmail.length === 0){
 
       const companyRow = await pool.query('INSERT INTO Company SET ?', [company]);
-      console.log("0", companyRow);
+      //console.log("0", companyRow);
       
       //CompanySalaries
       for (let i in companySalaries){
@@ -42,18 +42,18 @@ const createCompanies = async (req, userId) => {
           paymentArray = cycle.companyFirstDate;
         }
 
-        console.log("CRD", cycle);
+        //console.log("CRD", cycle);
 
         let reports =  cycle.companyReportDates;
         let reportArray = reports.split(',');
         
         reportArray.sort();
 
-        console.log("ReportArray", reportArray);
+        //console.log("ReportArray", reportArray);
 
         let newArray = reportArray.toString();
 
-        console.log("ReportArray", newArray);
+        //console.log("ReportArray", newArray);
 
         newCycle.companyRateName = cycle.companyRate;
         newCycle.companyPaymentNumber = cycle.companyRate === "Mensual" ? 1 : 2;
@@ -61,10 +61,10 @@ const createCompanies = async (req, userId) => {
         newCycle.companyPaymentDates = paymentArray;
         newCycle.companyReportDates = newArray;
 
-        console.log("Cycle", newCycle);
+        //console.log("Cycle", newCycle);
 
         const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [newCycle]);
-        console.log("1", companySalaryRow);
+        ////console.log("1", companySalaryRow);
 
         const newLinks = {
           Company_idCompany: companyRow.insertId,
@@ -72,7 +72,7 @@ const createCompanies = async (req, userId) => {
         };
 
         const companyLink = await pool.query('INSERT INTO Company_has_CompanySalaries SET ?', [newLinks]);
-        console.log("2", companyLink);
+        //console.log("2", companyLink);
       }
 
       //CompanyMembers
@@ -110,7 +110,7 @@ const updateCompanies = async (req, userId) => {
   const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, 
          email, idCompany, idUser, changeSplit, changeAmount} = req.body;
 
-  console.log("Split", maximumSplit);
+  //console.log("Split", maximumSplit);
 
   try{
     

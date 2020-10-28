@@ -181,7 +181,6 @@ const updateDocumentsRequests = async (req, res, next) => {
   let {idRequest} = req.body;
   let files = null;
 
-  console.log("RQ-F", req.files);
   
   //Guardar archivos
   if(req.files.paymentSupport !== undefined){

@@ -135,18 +135,18 @@ const generateBankReport = async (req, res, next) => {
 
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
-    console.log("Date", date);
+    //console.log("Date", date);
     
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
 
-    console.log("Days", day, month, year);
+    //console.log("Days", day, month, year);
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
     let url = "/Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
-    //console.log("Length", result.data.length);
+    ////console.log("Length", result.data.length);
 
     if(result){
       res.status(200).json({data: url});  
@@ -154,7 +154,7 @@ const generateBankReport = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
-    console.log("Error", e);
+    //console.log("Error", e);
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 
@@ -204,7 +204,7 @@ const generatePendingRequestReport = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
-    console.log("Error", e);
+    //console.log("Error", e);
     res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 
@@ -234,7 +234,7 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     const result = await generatePendingByHumanResources(companyIdToNotInclude);
 
-    //console.log("Result", result.data);
+    ////console.log("Result", result.data);
 
     const processData = processReportByRRHHData(result.data);
 
@@ -244,13 +244,13 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
-    console.log("Date", date);
+    //console.log("Date", date);
     
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
 
-    console.log("Days", day, month, year);
+    //console.log("Days", day, month, year);
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHH_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
@@ -262,7 +262,7 @@ const generatePendingByRRHH = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
-    console.log("Error", e);
+    //console.log("Error", e);
     res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 
@@ -314,7 +314,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
-    console.log("Error", e);
+    //console.log("Error", e);
     res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 
@@ -325,9 +325,9 @@ const receiveBankReport = async (req, res, next) => {
     
   try {
 
-    //console.log("Read", req);
-    //console.log("Write", req.write);
-    //console.log("Read", req.files[0].path);
+    ////console.log("Read", req);
+    ////console.log("Write", req.write);
+    ////console.log("Read", req.files[0].path);
   
     //Get the user id
     const adminId = getAdminId(req);
@@ -352,7 +352,7 @@ const receiveBankReport = async (req, res, next) => {
     };
  
   }catch(e) {
-    console.log("Error", e);
+    //console.log("Error", e);
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 

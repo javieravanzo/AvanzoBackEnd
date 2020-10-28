@@ -27,7 +27,7 @@ const login = async (email, password) => {
                     //console.log("VP",validPassword);
                     if (validPassword){
                         const jwtoken = jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
-                        const new_date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+                        const new_date = new Date();
                         new_date.setHours(new_date.getHours()+expirationTime);
                         userAuth.expiresOn = new_date;     
                         const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
