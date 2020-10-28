@@ -313,7 +313,7 @@ const newDateList = async function(userRow){
 
   }catch(e){
 
-    console.log("NewDateList", e);
+    console.log("Error", e);
 
   }
 
@@ -518,7 +518,7 @@ const createRequest = async (body, file, clientId, files) => {
           
           //////console.log("DL", loanData);
 
-          let codeDates = codes[0].receiveTime.toLocaleDateString('es-CO', {}) + "-" + codes[0].receiveTime.getHours() + ":"  
+          let codeDates = codes[0].receiveTime.getDay() + "-" + codes[0].receiveTime.getHours() + ":"  
           + codes[0].receiveTime.getMinutes() + ":"  + codes[0].receiveTime.getSeconds();
 
           //console.log("CodeDates", codeDates);
@@ -1434,7 +1434,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
           };
 
-          console.log("Codes", objectCode);
+          //console.log("Codes", objectCode);
 
           const checkClient = await pool.query('SELECT idCodes FROM Codes where Client_idClient = ?', [userRow[0].idClient]);
 
