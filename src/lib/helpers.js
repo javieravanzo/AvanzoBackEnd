@@ -25,7 +25,6 @@ helpers.matchPassword = async (password, savedPassword) => {
     }
 };
 
-
 helpers.generateSMS = async (data) => {
 
     let options = {
@@ -48,7 +47,21 @@ helpers.generateSMS = async (data) => {
 
 };
 
+helpers.convertLocalDate = async (date) => {
 
+    try{
+        date = date.getUTCFullYear() + '-' +
+            ('00' + (date.getUTCMonth()+1)).slice(-2) + '-' +
+            ('00' + date.getUTCDate()).slice(-2) + 'T' + 
+            ('00' + date.getUTCHours()).slice(-2) + ':' + 
+            ('00' + date.getUTCMinutes()).slice(-2) + ':' + 
+            ('00' + date.getUTCSeconds()).slice(-2);
+    }catch(e){
+        console.log("Error", e);
+    };
+    
+    return date;
+};
 
 
 module.exports = helpers;

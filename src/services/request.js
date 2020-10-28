@@ -1426,6 +1426,8 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
           const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
           //console.log("PC", phoneCode);
+          let emailDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+          emailDate = await helpers.convertLocalDate(emailDate);
 
           let objectCode = {
             numberEmailCode: emailCode.toString(),
@@ -1433,7 +1435,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             emailCode: newEmailCode,
             phoneCode: newPhoneCode,
             Client_idClient: userRow[0].idClient,
-            sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+            sendTime: emailDate,
             receiveTime: null,
           };
 
@@ -1515,8 +1517,11 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
     
         let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
 
+        let emailDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+        emailDate = await helpers.convertLocalDate(emailDate);
+
         let updateCodes = {
-          receiveTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          receiveTime: emailDate,
           receiveIP: ipAddress  
         };
 
