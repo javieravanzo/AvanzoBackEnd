@@ -642,12 +642,16 @@ const generateCodes = async (req, res, next) => {
 
 const checkCodes = async (req, res, next) => {
 
+  //console.log("CheckReqInfo", req);
+
   const {userid, phonecode, emailcode} = req.headers;
+
+  let ipAddress = req.connection.remoteAddress
 
   let clientId = getClientId(req);
   
   try {
-    const result = await checkNewCodes(clientId, userid, phonecode, emailcode);
+    const result = await checkNewCodes(clientId, userid, phonecode, emailcode, ipAddress);
     if(result.status === 200){
       res.status(result.status).json(result.message);
     }else{

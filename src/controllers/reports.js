@@ -120,7 +120,7 @@ const generateBankReport = async (req, res, next) => {
     workbook.Props = {
       Title: "Reporte del banco",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date(),
+      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -133,7 +133,7 @@ const generateBankReport = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date();
+    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
     console.log("Date", date);
     
@@ -175,7 +175,7 @@ const generatePendingRequestReport = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes finalizar por banco",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date(),
+      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -188,7 +188,7 @@ const generatePendingRequestReport = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date();
+    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     
     let day = date.getDate();
     let month = date.getMonth() + 1;
@@ -227,7 +227,7 @@ const generatePendingByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date(),
+      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -242,7 +242,7 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date();
+    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
     console.log("Date", date);
     
@@ -285,7 +285,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos en IGS",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date(),
+      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -298,7 +298,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date();
+    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
    
     let day = date.getDate();
     let month = date.getMonth() + 1;

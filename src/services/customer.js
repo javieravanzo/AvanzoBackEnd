@@ -150,7 +150,7 @@ const createCustomer = async (body, user, company, adminId) => {
   //newClient.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
 
   newClient.registeredBy = adminId;
-  newClient.registeredDate = new Date();
+  newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
   newClient.Company_idCompany = idCompany;
   newClient.CompanySalaries_idCompanySalaries = companyPayment;
 
@@ -162,8 +162,8 @@ const createCustomer = async (body, user, company, adminId) => {
     const newUser = user;
     newUser.lastName = lastName;
     newUser.registeredBy = adminId;
-    newUser.registeredDate = new Date();
-    newUser.createdDate = new Date();
+    newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    newUser.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     newUser.Role_idRole = 4;
     newUser.status = false;
     newUser.Client_idClient = clientQuery.insertId;
@@ -180,7 +180,7 @@ const createCustomer = async (body, user, company, adminId) => {
                         totalRemainder: 0,
                         approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
                         registeredBy: adminId,
-                        registeredDate: new Date(),
+                        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
                         Client_idClient: clientQuery.insertId};
     const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
@@ -200,7 +200,7 @@ const updateCustomers = async (body, user, adminId) => {
   
   const newClient = {identificationId, phoneNumber, profession};
   newClient.registeredBy = adminId;
-  newClient.registeredDate = new Date();
+  newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
   try{
 
@@ -210,7 +210,7 @@ const updateCustomers = async (body, user, adminId) => {
     const newUser = user;
     newUser.lastName = lastName;
     newUser.registeredBy = adminId;
-    newUser.registeredDate = new Date();
+    newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
 
     const consultAccumulated = await pool.query('SELECT accumulatedQuantity FROM Account where idAccount = ?', [idAccount]);
@@ -219,7 +219,7 @@ const updateCustomers = async (body, user, adminId) => {
     const newAccount = {maximumAmount: maximumAmount,
                         montlyFee: montlyFee, 
                         registeredBy: adminId,
-                        registeredDate: new Date()};
+                        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
     const accountQuery = await pool.query('UPDATE Account SET ? where idAccount = ?', [newAccount, idAccount]);
 
     return {status: 200, message: "El cliente ha sido actualizado exitosamente."};
@@ -251,8 +251,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
           genus: customersData[i].Genero,
           Company_idCompany: companyNitQuery[0].idCompany,
           registeredBy: adminId,
-          entryDate: new Date(),
-          registeredDate: new Date(),
+          entryDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         };
 
         //Insert the client
@@ -264,8 +264,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
           name: customersData[i].Nombre,
           email: customersData[i].CorreoElectronico,
           registeredBy: adminId,
-          registeredDate: new Date(),
-          createdDate: new Date(),
+          registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           Role_idRole: 4,
           status: false,
           Client_idClient: clientQuery.insertId
@@ -288,7 +288,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           totalRemainder: 0,
           approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
           registeredBy: adminId,
-          registeredDate: new Date(),
+          registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           Client_idClient: clientQuery.insertId
         };
         
@@ -428,11 +428,11 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         phoneNumber: newClient[0].phoneNumber,
         Company_idCompany: newClient[0].Company_idCompany,
         registeredBy: 1,
-        registeredDate: new Date(),
+        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         rejectState: false,
         isDeleted: false,
         platformState:  true,
-        createdDate: new Date(),
+        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         ClientDocuments_idClientDocuments: fileQuery.insertId,
         CompanySalaries_idCompanySalaries: cycleId,
         
@@ -449,8 +449,8 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         email: newClient[0].email,
         status: true,
         registeredBy: 1,
-        registeredDate: new Date(),
-        createdDate: new Date(),
+        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         Role_idRole: 4,
         Client_idClient: clientQuery.insertId,
       };
@@ -465,14 +465,14 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
                          totalInterest: 0, totalFeeAdministration: 0,
                          totalOtherCollection: 0, totalRemainder: 0,
                          approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-                         registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+                         registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), Client_idClient: clientQuery.insertId};
       const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       //Insert into auth
       const newAuth = { User_idUser: userQuery.insertId,
                         registeredBy: 1,
-                        registeredDate: new Date(),
-                        createdDate: new Date(),
+                        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+                        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
                         password: newClient[0].password};
       
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
@@ -603,7 +603,7 @@ const makePayments = async(clientid, quantity) => {
     const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientid]);
 
     //Transaction
-    const paymentTransaction = {quantity: quantity, transactionType: "Pago", createdDate: new Date(), registeredDate: new Date, Account_idAccount: userRow[0].idAccount}
+    const paymentTransaction = {quantity: quantity, transactionType: "Pago", createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredDate: new Date, Account_idAccount: userRow[0].idAccount}
     
     //Transaction Query
     const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [paymentTransaction]);

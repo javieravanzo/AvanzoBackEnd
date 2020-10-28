@@ -16,7 +16,7 @@ const createCompanies = async (req, userId) => {
     const company = {
       nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
       approveHumanResources, paymentSupport, workingSupport, databaseExchange};
-    company.registeredDate = new Date();
+    company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
     //console.log("CE", consultEmail.length > 0);
@@ -83,11 +83,11 @@ const createCompanies = async (req, userId) => {
       }
 
       //User
-      const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date(), registeredBy: userId, registeredDate: new Date(), Role_idRole: 3, Company_idCompany: companyRow.insertId};
+      const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), Role_idRole: 3, Company_idCompany: companyRow.insertId};
       const userRow = await pool.query('INSERT INTO User SET ?', [user]);
 
       //Auth
-      const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date(), createdDate: new Date()};
+      const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
       newAuth.password = await helpers.encryptPassword(password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]); 
 
@@ -120,7 +120,7 @@ const updateCompanies = async (req, userId) => {
     
     //Company
     const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources};
-    company.registeredDate = new Date();
+    company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     //company.CompanySalaries_idCompanySalaries = companySalaryRow.insertId;
     const companyRow = await pool.query('UPDATE Company SET ? where idCompany = ?', [company, idCompany]);
@@ -150,11 +150,11 @@ const updateCompanies = async (req, userId) => {
     }*/
 
     //User
-    const user = {email, name: socialReason, status: true, registeredBy: userId, registeredDate: new Date()};
+    const user = {email, name: socialReason, status: true, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
     const userRow = await pool.query('UPDATE User SET ? where idUser = ?', [user, idUser]);
 
     //Auth
-    /*const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date(), createdDate: new Date()};
+    /*const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
     newAuth.password = await helpers.encryptPassword(password);
     const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);*/
 
@@ -255,13 +255,13 @@ const modifymaximumAmountByCompany = async (customersData, adminId, idCompany) =
         let new_account = {
           maximumAmount: customersData[i]['MONTO A PRESTAR'],
           registeredBy: adminId,
-          registeredDate: new Date(),
+          registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         };
 
         //console.log("NA", new_account);
 
         //Insert the client
-        const clientQuery = await pool.query('UPDATE Account A JOIN Client C ON (A.Client_idClient = C.idClient) SET A.maximumAmount = ?, A.registeredBy = ?, A.registeredDate = ?  where C.identificationId = ?', [customersData[i]['MONTO A PRESTAR'], adminId, new Date(), customersData[i]['CEDULA DEL EMPLEADO']]);
+        const clientQuery = await pool.query('UPDATE Account A JOIN Client C ON (A.Client_idClient = C.idClient) SET A.maximumAmount = ?, A.registeredBy = ?, A.registeredDate = ?  where C.identificationId = ?', [customersData[i]['MONTO A PRESTAR'], adminId, new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), customersData[i]['CEDULA DEL EMPLEADO']]);
       
       };
   

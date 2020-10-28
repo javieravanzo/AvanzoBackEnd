@@ -209,7 +209,7 @@ const readBankReport = async (readData, writeData) => {
                 RequestState_idRequestState: statesAndInfo.newState,
                 bankTransactionState: statesAndInfo.newTransactionState,
                 observation: statesAndInfo.newObservation,
-                registeredDate: new Date(),
+                registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
                 registeredBy: 0, 
                 bankTransactionCode: statesAndInfo.newTransactionCode 
               };

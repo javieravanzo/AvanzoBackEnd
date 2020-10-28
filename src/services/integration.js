@@ -20,7 +20,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
 
       const newUser = user;
       newUser.registeredBy = 1;
-      newUser.registeredDate = new Date();
+      newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
       //console.log("Row2", customerQuery[0].idUser);
 
@@ -32,7 +32,7 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       newClient.expeditionDate = new Date(client.expeditionDate.split('-')[2], client.expeditionDate.split('-')[1], client.expeditionDate.split('-')[0]);
       newClient.documentType = "Cédula";
       newClient.registeredBy = 1;
-      newClient.registeredDate = new Date();
+      newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
       const updateClient = await pool.query('UPDATE Client SET ? WHERE identificationId = ?', [newClient, identificationId]);
       //console.log("up", updateClient);
@@ -43,8 +43,8 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       //Confirmation link
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
 
-      const userAuth = { idAuth: userRow[0].idAuth, expiresOn: new Date(), registeredDate: new Date() };
-      const new_date = new Date();
+      const userAuth = { idAuth: userRow[0].idAuth, expiresOn: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}) };
+      const new_date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
       new_date.setHours(new_date.getHours()+8);
       userAuth.expiresOn = new_date;
 

@@ -17,20 +17,20 @@ const registerCustomer = async (identificationId, client, user, auth) => {
         
       //New Client
       const newClient = client;
-      newClient.registeredDate = new Date();
+      newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
       clientQuery = await pool.query('UPDATE Client set ? WHERE identificationId = ?', [newClient, identificationId]);
       
       //Insert in user
       const newUser = user;
-      newUser.registeredDate = new Date();
+      newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
       newUser.Role_idRole = 4;
       newUser.status = true;
       newUser.Client_idClient = userRow[0].idClient;  
       
       const userUpdateQuery = await pool.query('UPDATE User SET ? WHERE Client_idClient = ?', [newUser, userRow[0].idClient]);
       //Insert into auth
-      const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
-                          createdDate: new Date()};
+      const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+                          createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
@@ -137,8 +137,8 @@ const newPreregister = async (client, user, files, auth) => {
         //status: 0 = Created, 1 = Approved, 2 = Rejected.
         status: 0,
         totalRemainder:  companyQuery[0].defaultAmount,
-        createdDate: new Date(),
-        registeredDate: new Date(),
+        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         registeredBy: 0,
         Company_idCompany: client.Company_idCompany,
         city: client.city, 
@@ -161,8 +161,8 @@ const newPreregister = async (client, user, files, auth) => {
       newClient.registeredBy = 1;
       newClient.documentType = "Cédula";
       newClient.isApproved = false;
-      newClient.registeredDate = new Date();
-      newClient.createdDate = new Date();
+      newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+      newClient.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
       newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
       //console.log("NC", newClient);
       const clientQuery = await pool.query('INSERT INTO Client SET ?', [newClient]);
@@ -170,8 +170,8 @@ const newPreregister = async (client, user, files, auth) => {
       //Insert in user
       const newUser = user;
       newUser.registeredBy = 1;
-      newUser.registeredDate = new Date();
-      newUser.createdDate = new Date();
+      newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+      newUser.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
       newUser.Role_idRole = 4;
       newUser.status = true;
       newUser.Client_idClient = clientQuery.insertId;  
@@ -186,12 +186,12 @@ const newPreregister = async (client, user, files, auth) => {
                          totalInterest: 0, totalFeeAdministration: 0,
                          totalOtherCollection: 0, totalRemainder: 0,
                          approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-                         registeredBy: 1, registeredDate: new Date(), Client_idClient: clientQuery.insertId};
+                         registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), Client_idClient: clientQuery.insertId};
       const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       //Insert into auth
-      const newAuth = { User_idUser: userQuery.insertId, registeredBy: 1, registeredDate: new Date(),
-                          createdDate: new Date()};
+      const newAuth = { User_idUser: userQuery.insertId, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+                          createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
       
@@ -211,9 +211,9 @@ const newPreregister = async (client, user, files, auth) => {
         newClient.registeredBy = 1;
         newClient.documentType = "Cédula";
         newClient.isApproved = false;
-        newClient.entryDate = new Date();
-        newClient.registeredDate = new Date();
-        newClient.createdDate = new Date();
+        newClient.entryDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+        newClient.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+        newClient.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
         newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
         
         const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
@@ -221,16 +221,16 @@ const newPreregister = async (client, user, files, auth) => {
         //Insert in user
         const newUser = user;
         newUser.registeredBy = 1;
-        newUser.registeredDate = new Date();
-        newUser.createdDate = new Date();
+        newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+        newUser.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
         newUser.Role_idRole = 4;
         newUser.status = true;
         const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
 
         
         //Insert into auth
-        const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date(),
-                          createdDate: new Date()};
+        const newAuth = { User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+                          createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
         newAuth.password = await helpers.encryptPassword(auth.password);
         const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
 
@@ -265,13 +265,13 @@ const registerAdmins = async (admin, user, auth) => {
         const adminQuery = await pool.query('UPDATE Administrator SET ? WHERE idAdministrator = ?', [newAdmin, userRow[0].Administrator_idAdministrator]);
 
         //Insert in user
-        newUser.registeredDate = new Date(); 
+        newUser.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}); 
         newUser.status = true;
         const result2 = await pool.query('UPDATE User SET ? WHERE idUser = ?', [newUser, userRow[0].idUser]);
 
         //Auth
-        const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date(),
-                          createdDate: new Date()};
+        const newAuth = { User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+                          createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
         newAuth.password = await helpers.encryptPassword(auth.password);
         const result3 = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
         

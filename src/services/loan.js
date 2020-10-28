@@ -17,8 +17,8 @@ const checkDateList = (customerId, split, quantity) => {
 
     const userRow =  await pool.query('SELECT COMSAL.* FROM User USR JOIN Client CLI JOIN Company COM JOIN Company_has_CompanySalaries CHC JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient AND CLI.Company_idCompany = COM.idCompany AND CHC.Company_idCompany = COM.idCompany AND CHC.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);
     //console.log("UR", userRow[0]);
-    //let today = new Date().toLocaleString("en-US", {timeZone: "America/Bogota"});
-    let today = new Date();
+    //let today = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("en-US", {timeZone: "America/Bogota"});
+    let today = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     console.log("Today", today.getHours());
     console.log("TodayHours", today.getUTCHours());
 

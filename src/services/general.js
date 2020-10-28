@@ -21,13 +21,13 @@ const login = async (email, password) => {
             if(userRow.length > 0){
                 //console.log("UC", parseInt(userRow[0].isConfirmed, 10) === 1);
                 if(parseInt(userRow[0].isConfirmed, 10) === 1){
-                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date() };
+                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}) };
                     const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };      
                     const validPassword = await helpers.matchPassword(password, userQuery.password);
                     //console.log("VP",validPassword);
                     if (validPassword){
                         const jwtoken = jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
-                        const new_date = new Date();
+                        const new_date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
                         new_date.setHours(new_date.getHours()+expirationTime);
                         userAuth.expiresOn = new_date;     
                         const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
