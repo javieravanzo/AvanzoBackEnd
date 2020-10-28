@@ -1356,8 +1356,8 @@ const generateContracts = async (customerid, split, quantity, company) => {
       splitQuantity: format(80000),
       emailCode: '123456',
       phoneCode: '834578',
-      emailCodeDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("es-CO", {timeZone: "America/Bogota"}),
-      phoneCodeDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      emailCodeDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      phoneCodeDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
     //////console.log("UserData", userData);
@@ -1431,7 +1431,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
             emailCode: newEmailCode,
             phoneCode: newPhoneCode,
             Client_idClient: userRow[0].idClient,
-            sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
+            sendTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
           };
 
           //console.log("Codes", objectCode);
@@ -1513,7 +1513,7 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
         let validPhoneCode = await helpers.matchPassword(phonecode.toString(), userRow[0].phoneCode);
 
         let updateCodes = {
-          receiveTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          receiveTime: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           receiveIP: ipAddress  
         };
 
