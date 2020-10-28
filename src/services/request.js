@@ -143,7 +143,7 @@ const checkDateList = async function(customerId, split, interest, adminValue, qu
     //Dates
     const userRow =  await pool.query('SELECT COMSAL.* FROM Client CLI JOIN User USR JOIN CompanySalaries COMSAL ON (USR.Client_idClient = CLI.idClient and CLI.CompanySalaries_idCompanySalaries = COMSAL.idCompanySalaries ) where USR.idUser = ?', [customerId]);   
     
-    let today = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    let today = new Date();
 
     let variables = await newDateList(userRow);
     let initialDate = variables.initialDate;
@@ -480,8 +480,8 @@ const createRequest = async (body, file, clientId, files) => {
           newRequest.computedCapacity = computed_capacity;
           newRequest.creditNumber = math.ceil(math.random()*10000);
           newRequest.approveHumanResources = parseInt(userRow[0].approveHumanResources, 10) === 1 ? true : false;
-          newRequest.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
-          newRequest.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+          newRequest.createdDate = new Date();
+          newRequest.registeredDate = new Date();
           newRequest.registeredBy = 1;
           newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
           newRequest.observation = "";
@@ -610,7 +610,7 @@ const updateDocumentsRequest = async (idRequest, clientId, files) => {
           let requeststate =  getStateIdFromName(stateRow, "Procesada documentos con cambio");
           
           const newRequest = {
-            registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+            registeredDate: new Date(),
             registeredBy: 0,
             RequestState_idRequestState: requeststate,
             observation: "Documentos actualizados",
@@ -664,7 +664,7 @@ const updateRequestInformation = async (idRequest, body, clientId) => {
           account: body.account,
           accountNumber: body.accountNumber,
           accountType: body.accountType,
-          registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          registeredDate: new Date(),
           registeredBy: 0,
           RequestState_idRequestState: requeststate,
           observation: "La información ha sido modificada y actualizada por el cliente."
@@ -851,7 +851,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
 
     //Update Request
     const request = {
-      registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      registeredDate: new Date(),
       observation: text,
       registeredBy: userId.idUser,
       RequestState_idRequestState: requeststate,
@@ -867,7 +867,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const quantityTransaction = {
         quantity: requestQuery[0].quantity,
         transactionType: "Préstamo",
-        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        createdDate: new Date(),
         registeredBy: userId.idUser,
         registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount};
@@ -877,7 +877,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const administrationTransaction = {
         quantity: requestQuery[0].administrationValue,
         transactionType: "Cuota de administración",
-        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        createdDate: new Date(),
         registeredBy: userId.idUser,
         registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount};
@@ -887,7 +887,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const interestTransaction = {
         quantity: requestQuery[0].interestValue,
         transactionType: "Interés",
-        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        createdDate: new Date(),
         registeredBy: userId.idUser,
         registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount};
@@ -897,7 +897,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const ivaTransaction = {
         quantity: requestQuery[0].ivaValue,
         transactionType: "IVA",
-        createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        createdDate: new Date(),
         registeredBy: userId.idUser,
         registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount};
@@ -905,7 +905,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const ivaQuery = await pool.query('INSERT INTO Transaction SET ?', [ivaTransaction]);
       
       //RequestOutLay
-      const outlay = {datesList: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toString(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), wasComputed: "false", Request_idRequest: requestid};
+      const outlay = {datesList: new Date().toString(),  totalInterest: requestQuery[0].interestValue, lastComputedDate: new Date(), wasComputed: "false", Request_idRequest: requestid};
       const outlayQuery = await pool.query('INSERT INTO RequestOutLay SET ?', [outlay]);
 
       //Update account values
@@ -998,7 +998,7 @@ const passToProcessWithoutChange = async (requestid, userId) => {
     let response = "modificada";
 
     let request = {
-      registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
+      registeredDate: new Date(), 
       registeredBy: userId.idUser, 
       RequestState_idRequestState: requeststate, 
       bankTransactionCode:  null 
@@ -1032,7 +1032,7 @@ const passToProcessWithDocuments = async (requestid, userId) => {
     let response = "modificada";
 
     let request = {
-      registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
+      registeredDate: new Date(), 
       registeredBy: userId.idUser, 
       RequestState_idRequestState: requeststate, 
       bankTransactionCode: null 
@@ -1066,7 +1066,7 @@ const passToOutlay = async (requestid, userId) => {
     let response = "procesada";
 
     let request = {
-      registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), 
+      registeredDate: new Date(), 
       registeredBy: userId.idUser, 
       RequestState_idRequestState: requeststate, 
       bankTransactionCode: null 
