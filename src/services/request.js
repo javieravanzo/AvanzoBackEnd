@@ -1362,7 +1362,7 @@ const generateContracts = async (customerid, split, quantity, company) => {
       phoneCodeDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
     };
 
-    //////console.log("UserData", userData);
+    console.log("UserData", userData);
 
     mkdirp.sync(dest);
     const content = await compile('contract', userData);
