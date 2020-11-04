@@ -13,7 +13,7 @@ function parseLocaleNumber(stringNumber) {
   );
 };
 
-function checkFinalBankState(state, observation){
+function checkFinalBankState(state, observation, stateRow){
 
   //Differents states
   let stateOutlay =  getStateIdFromName(stateRow, "Finalizada");
@@ -28,35 +28,42 @@ function checkFinalBankState(state, observation){
   let newTransactionCode;
 
   if(state === "Pago Exitoso"){
+    //console.log("Entro1");
     newState = stateOutlay;
     newObservation = "Solicitud finalizada";
     newTransactionState = true;
     newTransactionCode = "Aprobado";
   }else if(state ===  "Pago Rechazado"){
+    //console.log("Entro2");
     if(observation === "Id. no Coincide"){
+      //console.log("Entro3");
       newState = stateDefinitelyRejected;
       newObservation = "La cédula no existe o no coincide con los registros";
       newTransactionState = false;
       newTransactionCode = "Rechazado Banco";
-    }else if(observation === "Cuenta invalida"){
+    }else if(observation === "Cuenta Invalida"){
+      //console.log("Entro4");
       newState = stateBankRejected;
       newObservation = "Algunos datos de la cuenta no coinciden.";
       newTransactionState = false;
       newTransactionCode = "Rechazado Banco";
     }
   }else if(state === "Enviado a Otro Banco"){
+    //console.log("Entro5");
     newState = stateWaitingBankOutLay;
     newObservation = "La solicitud está pendiente de desembolsar por el banco.";
     newTransactionState = false;
     newTransactionCode = "Pendiente Banco";
   }
 
-  return {
+  let data = {
     newState,
     newObservation,
     newTransactionState,
     newTransactionCode
   };
+
+  return data;
 
 };
 
@@ -91,7 +98,7 @@ const generateBankReports = async () => {
     return {status: 200, data: clientRow, message: "OK"};
   
   }catch(e){
-  
+    console.log("Error", e);
     return {status: 400, message: "Error al generar el archivo del banco."};
   
   }
@@ -199,10 +206,12 @@ const readBankReport = async (readData, writeData) => {
               //3. Pendientes por banco cuando estén en período de espera para desembolsar.
 
               //RejectedPayment
-              let rejectedObservation = readData[i].Motivo.split("|")[0];
+              let rejectedObservation = readData[i].Motivo !== undefined ? readData[i].Motivo.split("|")[0] : null;
 
               //GetCurrentStates
-              let statesAndInfo = checkFinalBankState(readData[i].Estado, rejectedObservation);
+              let statesAndInfo = checkFinalBankState(readData[i].Estado, rejectedObservation, stateRow);
+
+              //console.log("State", statesAndInfo);
 
               //Cuerpo de la solicitud.
               let requestBody = {
@@ -231,6 +240,7 @@ const readBankReport = async (readData, writeData) => {
 
     return {status: 200, message: "Los archivos han sido leídos correctamente."};
   }catch(e){
+    console.log("Error", e);
     return {status: 400, message: "El archivo no ha sido leído correctamente, porque tiene datos que no se pueden interpretar o contiene columnas adicionales."};
   }
 

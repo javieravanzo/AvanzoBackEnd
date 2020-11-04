@@ -18,7 +18,7 @@
         font-size: 12px !important;
         text-align: justify !important;
         margin-left: 70px !important;
-        margin-right: 70px !important;
+        margin-right: 60px !important;
         line-height: 100% !important;
       }
       .body-content{
@@ -26,7 +26,7 @@
         text-align: justify;
         font-size: 10px !important;
         margin-left: 70px !important;
-        margin-right: 70px !important;
+        margin-right: 60px !important;
         margin-bottom: 30px !important;
       }
       .payment-title {
@@ -35,22 +35,21 @@
         text-align: justify !important;
         font-weight: bold !important;
         margin-left: 70px !important;
-        margin-right: 70px !important;
+        margin-right: 60px !important;
       }
       .signature-image{
         font-size: 10px !important;
         font-family: 'Times New Roman', Times, serif !important;
         margin-left: 0px ;
-        margin-right: 70px;
+        margin-right: 60px;
         width: 65%;
       }
       .footer-confirmation{
         font-size: 10px !important;
         font-family: 'Times New Roman', Times, serif !important;
         text-align: justify !important;
-        font-weight: bold !important;
         margin-left: 70px !important;
-        margin-right: 70px !important;
+        margin-right: 60px !important;
       }
     </style>
   </head>
@@ -193,18 +192,17 @@
           </br>
           <ul>
             <li>
-              Código Correo: {{emailCode}} - Hora de Firma: {{emailCodeDate}} 
+              <b>Código Correo:</b> {{emailCode}} - <b>Hora de Firma:</b> {{emailCodeDate}} 
             </li>
             <li>
-              Código Celular: {{phoneCode}} - Hora de Firma: {{phoneCodeDate}}  
+              <b>Código Celular:</b> {{phoneCode}} - <b>Hora de Firma:</b> {{phoneCodeDate}}  
             </li>
           </ul>
           </br>
-          FIRMA
           </br>
-          NOMBRE Y APELLIDOS (COMPLETOS): {{name}} {{lastName}}
+          <b>NOMBRE Y APELLIDOS (COMPLETOS):</b> {{name}} {{lastName}}
           </br>
-          C.C. No. {{identificationId}} de ____________          
+          <b>C.C. No.</b> {{identificationId}} de ____________          
         </p>
       </div>
 

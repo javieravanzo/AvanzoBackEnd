@@ -136,10 +136,11 @@ const generateBankReport = async (req, res, next) => {
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
     //console.log("Date", date);
+    //console.log("Day", date.getDay());
     
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
+    let day = date.split(" ")[0].split("-")[2];
+    let month = date.split(" ")[0].split("-")[1];
+    let year = date.split(" ")[0].split("-")[0];
 
     //console.log("Days", day, month, year);
 
@@ -154,7 +155,7 @@ const generateBankReport = async (req, res, next) => {
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
     }   
   }catch(e) {
-    //console.log("Error", e);
+      console.log("Error", e);
       res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
   };
 
@@ -190,9 +191,9 @@ const generatePendingRequestReport = async (req, res, next) => {
 
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
+    let day = date.split(" ")[0].split("-")[2];
+    let month = date.split(" ")[0].split("-")[1];
+    let year = date.split(" ")[0].split("-")[0];
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesTerminarDesembolsoPorBanco_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
@@ -246,9 +247,9 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     //console.log("Date", date);
     
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
+    let day = date.split(" ")[0].split("-")[2];
+    let month = date.split(" ")[0].split("-")[1];
+    let year = date.split(" ")[0].split("-")[0];
 
     //console.log("Days", day, month, year);
 
@@ -300,9 +301,9 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
 
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
    
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
+    let day = date.split(" ")[0].split("-")[2];
+    let month = date.split(" ")[0].split("-")[1];
+    let year = date.split(" ")[0].split("-")[0];
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHEnIGS_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 

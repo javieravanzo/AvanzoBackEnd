@@ -24,7 +24,7 @@ const storageAdmin = multer.diskStorage({
 
   },
   filename: function(req, file, callback){
-    callback(null, new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}).toISOString().replace(/:/g, '-').split("T")[0] + "-" + file.originalname );
+    callback(null, new Date().toISOString().replace(/:/g, '-').split("T")[0] + "-" + file.originalname );
   }
 });
 
