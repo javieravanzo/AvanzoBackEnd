@@ -133,14 +133,17 @@ const generateBankReport = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    let date = new Date();
 
     console.log("Date", date);
     //console.log("Day", date.getDay());
     
-    let day = date.split(" ")[0].split("-")[2];
-    let month = date.split(" ")[0].split("-")[1];
-    let year = date.split(" ")[0].split("-")[0];
+    //let day = date.split(" ")[0].split("-")[2];
+    //let month = date.split(" ")[0].split("-")[1];
+    //let year = date.split(" ")[0].split("-")[0];
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
 
     //console.log("Days", day, month, year);
 
@@ -189,11 +192,15 @@ const generatePendingRequestReport = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    let date = new Date();
     
-    let day = date.split(" ")[0].split("-")[2];
-    let month = date.split(" ")[0].split("-")[1];
-    let year = date.split(" ")[0].split("-")[0];
+    //let day = date.split(" ")[0].split("-")[2];
+    //let month = date.split(" ")[0].split("-")[1];
+    //let year = date.split(" ")[0].split("-")[0];
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesTerminarDesembolsoPorBanco_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
@@ -243,13 +250,15 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
-
-    //console.log("Date", date);
+    //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    let date = new Date();
     
-    let day = date.split(" ")[0].split("-")[2];
-    let month = date.split(" ")[0].split("-")[1];
-    let year = date.split(" ")[0].split("-")[0];
+    //let day = date.split(" ")[0].split("-")[2];
+    //let month = date.split(" ")[0].split("-")[1];
+    //let year = date.split(" ")[0].split("-")[0];
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
 
     //console.log("Days", day, month, year);
 
@@ -299,11 +308,15 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
 
     workbook.Sheets["Hoja 1"] = final_woorkbook;
 
-    let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
-   
-    let day = date.split(" ")[0].split("-")[2];
-    let month = date.split(" ")[0].split("-")[1];
-    let year = date.split(" ")[0].split("-")[0];
+    //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+    let date = new Date();
+    
+    //let day = date.split(" ")[0].split("-")[2];
+    //let month = date.split(" ")[0].split("-")[1];
+    //let year = date.split(" ")[0].split("-")[0];
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
 
     let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHEnIGS_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
 
