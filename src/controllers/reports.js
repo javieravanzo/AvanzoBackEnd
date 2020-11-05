@@ -135,7 +135,7 @@ const generateBankReport = async (req, res, next) => {
 
     let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
-    //console.log("Date", date);
+    console.log("Date", date);
     //console.log("Day", date.getDay());
     
     let day = date.split(" ")[0].split("-")[2];
