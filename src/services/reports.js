@@ -178,19 +178,19 @@ const readBankReport = async (readData, writeData) => {
 
         let completeName = writeData[j].Nombre + " " + writeData[j].Apellido;
 
-        //console.log("Nombre", completeName, readData[i].Titular);
+        console.log("Nombre", completeName, readData[i].Titular);
 
         //Comparar nombre
         if( completeName === readData[i].Titular){
           
-          //console.log("No. Cuenta", writeData[j]['Numero del Producto o Servicio'], (readData[i]['Numero Destino']).slice(-4));
+          console.log("No. Cuenta", writeData[j]['Numero del Producto o Servicio'], (readData[i]['Numero Destino']).slice(-4));
 
           //Comparar número de cuenta
           if ( (writeData[j]['Numero del Producto o Servicio']).slice(-4) === (readData[i]['Numero Destino']).slice(-4) ) {
                       
             let readValue = parseLocaleNumber((readData[i].Valor).replace('$', '').replace('.', '').replace(',', '.'));
 
-            //console.log("Valor", parseInt(writeData[j]['Valor del Pago o de la recarga'], 10), parseInt(readValue, 10));
+            console.log("Valor", parseInt(writeData[j]['Valor del Pago o de la recarga'], 10), parseInt(readValue, 10));
 
             //Comparar el valor
             if (parseInt(writeData[j]['Valor del Pago o de la recarga'], 10) === parseInt(readValue, 10)){

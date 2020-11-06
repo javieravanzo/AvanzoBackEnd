@@ -1129,7 +1129,6 @@ const getAllRequestsToApprove = async (userId) => {
       //Change the approval/reject state for admin
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate.push(getStateIdFromName(stateRow, "Solicitada"));
-      requeststate.push(getStateIdFromName(stateRow, "Aprobada Administración"));
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Recursos Humanos"));
       const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, R.createdDate, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.totalValue, R.computedCapacity, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ?);', [requeststate[0], requeststate[1], requeststate[2]]);
       return {status: 200, data: requestRow};
@@ -1154,7 +1153,7 @@ const getRequestsToOutLay = async (userId) => {
       requeststate = getStateIdFromName(stateRow, "En desembolso");
       const requestRow =  await pool.query('SELECT R.idRequest, C.identificationId, U.lastName, C.profession, RS.idRequestState, RS.name, R.createdDate, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
       return {status: 200, data: requestRow};
-    }else if(userId.role === 2 ){
+    }else if(userId.role === 2 || userId.role === 5){
       //Change the approval/reject state
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En desembolso");

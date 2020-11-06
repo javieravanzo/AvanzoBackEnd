@@ -66,7 +66,7 @@ const getRequestsData = async (userId) => {
 
   try {
       const userRow =  await pool.query('SELECT CLIENT.Company_idCompany, CLIENT.phoneNumber, CLIENT.identificationId, CLIENT.accountBank, CLIENT.accountType, CLIENT.accountNumber, ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.montlyFee, ACCOUNT.partialCapacity, ACCOUNT.documentsUploaded FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
-      const companyInfo = await pool.query('SELECT workingSupport, paymentSupport FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
+      const companyInfo = await pool.query('SELECT workingSupport, paymentSupport, fixedFee FROM Company where idCompany = ?', [userRow[0].Company_idCompany]);
       
       //Interest
       //const interest = await pool.query('SELECT indicatorName, indicatorValue, indicatorRate FROM Indicators where indicatorName = ?', "Interest" );
@@ -84,6 +84,7 @@ const getRequestsData = async (userId) => {
                   partialCapacity: userRow[0].partialCapacity,
                   maximumAmount: userRow[0].maximumAmount,
                   maximumSplit: userRow[0].montlyFee,
+                  fixedFee: companyInfo[0].fixedFee,
                   workingSupport: companyInfo[0].workingSupport,
                   paymentSupport: companyInfo[0].paymentSupport,
                   haveDocumentsLoaded: userRow[0].documentsUploaded === 1 ? true : false,
