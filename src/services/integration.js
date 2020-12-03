@@ -44,9 +44,9 @@ const integrationRegister = async (identificationId, client, user, auth) => {
       const jwtoken = await jwt.sign({userRow}, my_secret_key, { expiresIn: '8h' });
 
       const userAuth = { idAuth: userRow[0].idAuth, expiresOn: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}) };
-      const new_date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+      const new_date = new Date();
       new_date.setHours(new_date.getHours()+8);
-      userAuth.expiresOn = new_date;
+      userAuth.expiresOn = new_date.toLocaleString("es-CO", {timeZone: "America/Bogota"});
 
       delete userRow[0].password;
       delete userRow[0].Administrator_idAdministrator;

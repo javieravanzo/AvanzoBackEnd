@@ -425,7 +425,9 @@ const createRequest = async (body, file, clientId, files) => {
   try{
 
     const { quantity, split, moyen, accountType, accountNumber, interest, administration, iva, otherValues,
-            totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction} = body;
+            totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction, fromapp} = body;
+
+    console.log("Fromapp", fromapp);
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
     //////console.log("AC", approvedClient);
@@ -480,10 +482,11 @@ const createRequest = async (body, file, clientId, files) => {
           newRequest.computedCapacity = computed_capacity;
           newRequest.creditNumber = math.ceil(math.random()*10000);
           newRequest.approveHumanResources = parseInt(userRow[0].approveHumanResources, 10) === 1 ? true : false;
-          newRequest.createdDate = new Date();
-          newRequest.registeredDate = new Date();
+          newRequest.createdDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
+          newRequest.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});;
           newRequest.registeredBy = 1;
           newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
+          newRequest.fromapp = fromapp === 'true' ? 1 : 0;
           newRequest.observation = "";
 
           //Obsevations - Request
@@ -497,7 +500,7 @@ const createRequest = async (body, file, clientId, files) => {
           const preRequestDatesRow = await pool.query('INSERT INTO PreRequestDates SET ?', [preRequestDates]);
           newRequest.preRequestDates_idPreRequestDates = preRequestDatesRow.insertId;         
           newRequest.Account_idAccount = userRow[0].idAccount;
-          
+        
           //Request
           const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
           //////console.log("REQ ID", request.insertId);
@@ -1403,10 +1406,12 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
 
     if(phoneNumber !== null && phoneNumber !== "" && email !== null && email !== ""){
 
+      console.log("PhoneNumber", phoneNumber, "Email", email);
+
       //CheckQuery
       const userRow =  await pool.query('SELECT C.idClient, U.idUser, U.email FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);      
 
-      //////console.log("UserRow", userRow);
+      console.log("UserRow", userRow);
 
       if(userRow.length > 0){
         

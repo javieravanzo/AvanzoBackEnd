@@ -430,6 +430,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         Company_idCompany: newClient[0].Company_idCompany,
         registeredBy: 1,
         registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+        entryDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
         rejectState: false,
         isDeleted: false,
         platformState:  true,

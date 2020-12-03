@@ -174,15 +174,26 @@ const readBankReport = async (readData, writeData) => {
    
     for (let i in readData){
 
+      readData[i].process = readData[i].process === true ? readData[i].process :  false;
+
+      console.log("ReadData1", i, readData[i].process);
+
       for (let j in writeData){
 
-        let completeName = writeData[j].Nombre + " " + writeData[j].Apellido;
+        //Si es diferente de procesado, actualicelo.
+        writeData[j].process = writeData[j].process === true ? writeData[j].process : false;
 
-        console.log("Nombre", completeName, readData[i].Titular);
+        console.log("writeData1", j, writeData[j].process);
+
+        let completeName = writeData[j].Nombre + " " + writeData[j].Apellido;        
+
+        console.log("Cumple R", i, "W", j,  (readData[i].process === false), (writeData[j].process === false ));
 
         //Comparar nombre
-        if( completeName === readData[i].Titular){
+        if( (completeName === readData[i].Titular) && (readData[i].process === false) && (writeData[j].process === false )){
           
+          console.log("Nombre", completeName, readData[i].Titular, readData[i].process, writeData[j].process);
+
           console.log("No. Cuenta", writeData[j]['Numero del Producto o Servicio'], (readData[i]['Numero Destino']).slice(-4));
 
           //Comparar número de cuenta
@@ -223,12 +234,16 @@ const readBankReport = async (readData, writeData) => {
                 bankTransactionCode: statesAndInfo.newTransactionCode 
               };
 
-              //console.log("RI", requestId);
-              //console.log("RB", requestBody);
+              console.log("RI", requestId);
+              console.log("RB", requestBody);
               
               const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [requestBody, requestId]);
 
+              writeData[j].process = true;
+              readData[i].process = true;
               //console.log("Se pudo concretar.");
+              //console.log("ReadData2", j, readData);
+              //console.log("WriteData2", j, writeData);
             }
 
           }

@@ -645,7 +645,7 @@ const checkCodes = async (req, res, next) => {
 
   const {userid, phonecode, emailcode} = req.headers;
 
-  let ipAddress = req.connection.remoteAddress
+  let ipAddress = req.connection.remoteAddress;
 
   let clientId = getClientId(req);
   

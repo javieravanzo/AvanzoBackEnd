@@ -8,14 +8,14 @@ const createCompanies = async (req, userId) => {
   //NewObject
   const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
          approveHumanResources, paymentSupport, workingSupport, companySalaries, companyMembers,
-         email, password, databaseExchange} = req.body;
+         email, password, databaseExchange, fixedFee} = req.body;
 
   try{   
     
     //Company
     const company = {
       nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
-      approveHumanResources, paymentSupport, workingSupport, databaseExchange};
+      approveHumanResources, paymentSupport, workingSupport, databaseExchange, fixedFee};
     company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
@@ -108,7 +108,7 @@ const updateCompanies = async (req, userId) => {
   
   //NewObject
   const {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources, 
-         email, idCompany, idUser, changeSplit, changeAmount} = req.body;
+         email, idCompany, idUser, changeSplit, changeAmount, fixedFee} = req.body;
 
   //console.log("Split", maximumSplit);
 
@@ -119,7 +119,9 @@ const updateCompanies = async (req, userId) => {
     //const companySalaryRow = await pool.query('INSERT INTO CompanySalaries SET ?', [companyRates]);
     
     //Company
-    const company = {nit, address, socialReason, economyActivity, maximumSplit, defaultAmount, approveHumanResources};
+    const company = {
+      nit, address, socialReason, economyActivity, maximumSplit,
+      defaultAmount, approveHumanResources, fixedFee};
     company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     //company.CompanySalaries_idCompanySalaries = companySalaryRow.insertId;
