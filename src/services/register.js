@@ -144,9 +144,10 @@ const newPreregister = async (client, user, files, auth) => {
         city: client.city, 
         birthDate: client.birthDate,
         CompanySalaries_idCompanySalaries: client.salary,
-        Role_idRole: 4
+        Role_idRole: 4,
+        gender: client.gender
       };
-
+      console.log(preClient);
       const preClientQuery = await pool.query('INSERT INTO NewClient SET ?', [preClient]);
 
       return {status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico."};

@@ -43,7 +43,7 @@ const registerClient = async (req, res, next) => {
 const preRegister = async (req, res, next) => {
   
   //Variables
-  const {name, lastName, identificationId, documentType, city, birthDate, salary, email, company, phoneNumber, password} = req.body;
+  const {name, lastName, identificationId, documentType, city, birthDate, salary, email, company, phoneNumber, password, gender} = req.body;
 
   //console.log("Body", documentType);
 
@@ -57,7 +57,7 @@ const preRegister = async (req, res, next) => {
   }
 
   //Logic
-  const client = {documentType, identificationId, city, birthDate, salary, phoneNumber, Company_idCompany: company};
+  const client = {documentType, identificationId, city, birthDate, salary, phoneNumber, Company_idCompany: company, gender};
   const user = {name, email, lastName};
   //console.log("RF", req.files);
   const files = {documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/",""),
