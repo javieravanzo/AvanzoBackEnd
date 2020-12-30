@@ -31,7 +31,8 @@ const login = async (email, password) => {
                              var data = {
                                 serviceIcon: element.serviceIcon,
                                 className: element.serviceClassName,
-                                serviceRoute: element.serviceRoute
+                                serviceRoute: element.serviceRoute,
+                                serviceName: element.serviceName
                             };
                             jsonMenu.push(data);
                          }
