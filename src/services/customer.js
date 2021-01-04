@@ -156,7 +156,7 @@ const createCustomer = async (body, user, company, adminId) => {
   newClient.CompanySalaries_idCompanySalaries = companyPayment;
 
   try{
-
+     await pool.query('START TRANSACTION');
     const clientQuery = await pool.query('INSERT INTO Client SET ?', [newClient]);
 
     //Insert in user
@@ -183,15 +183,15 @@ const createCustomer = async (body, user, company, adminId) => {
                         registeredBy: adminId,
                         registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
                         Client_idClient: clientQuery.insertId};
+                        
     const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
-
+    await pool.query('COMMIT');
     return {status: 200, message: "El cliente ha sido registrado exitosamente."};
   }catch(e){
     console.log("E", e);
+     await pool.query('ROLLBACK');
     return {status: 500, message: "Error interno del servidor. Por favor, intente más tarde."};
-
-  }    
-
+  }  
 };
 
 const updateCustomers = async (body, user, adminId) => {
