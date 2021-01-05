@@ -19,7 +19,7 @@
   "homepage": "https://github.com/CristianOrjuela/AvanzoBackEnd#readme",
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "biguint-format": "^1.0.2",
     "body-parser": "^1.19.0",
