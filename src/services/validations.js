@@ -46,5 +46,23 @@ const validatePhoneNumber = async (phoneNumber) =>{
 
 };
 
+const validateEmail = async (email) =>{
+  
+  try {
 
-module.exports = {validateDocumentNumber,validatePhoneNumber}
+    const exist = await pool.query('SELECT U.email FROM User U  where (U.email = ?)', email);
+
+    if(JSON.stringify(exist) !== '[]' ){
+      return {status: 200, data: true};
+    }else{
+      return {status: 200, data: false};
+    }
+  }catch(e) {
+    console.log(e);
+    return {status: 500, message: "Error interno del servidor."};
+  }
+
+};
+
+
+module.exports = {validateDocumentNumber,validatePhoneNumber,validateEmail}
