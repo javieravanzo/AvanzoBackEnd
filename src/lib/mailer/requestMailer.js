@@ -8,7 +8,13 @@ const hbs = require('handlebars');
 const compile = async function(templateName, data){
 
   //Production
-  const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  let filePath ="";
+  if(fs.existsSync(dirPath)){
+    filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  }else{
+    filePath = path.join(process.cwd(), '..\\files\\templates', `${templateName}.hbs`);
+  }
+ // const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
   
   //Development
   //const filePath = path.join(process.cwd(), './files/templates', `${templateName}.hbs`);
