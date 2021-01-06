@@ -60,7 +60,13 @@ hbs.registerHelper('dateFormat', function (value, format) {
 const compile = async function (templateName, data) {
 
   //Production
-  const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  const dirPath = path.join(process.cwd(), '../files/templates');
+  let filePath ="";
+  if(fs.existsSync(dirPath)){
+    filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
+  }else{
+    filePath = path.join(process.cwd(), '..\\files\\templates', `${templateName}.hbs`);
+  }
 
   //Development
   //const filePath = path.join(process.cwd(), './files/templates', `${templateName}.hbs`);
