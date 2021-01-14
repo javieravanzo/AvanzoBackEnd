@@ -146,13 +146,13 @@ const createCustomer = async (body, user, company, adminId) => {
   //NewClient
   const { identificationId, lastName, documentType, phoneNumber, fixedNumber, birthDate, expeditionDate,
     contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany, companyPayment,
-    vehicle, vehicle_type, license_plate_vehicle } = body;
+    vehicle, vehicle_type, license_plate_vehicle,clie_address,clie_from } = body;
   
 
   const newClient = {
     identificationId, documentType, phoneNumber, fixedNumber, contractType, salary,
     entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate,
-    vehicle, vehicle_type, license_plate_vehicle
+    vehicle, vehicle_type, license_plate_vehicle,clie_address,clie_from
   };
 
   //newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
@@ -164,10 +164,7 @@ const createCustomer = async (body, user, company, adminId) => {
   newClient.CompanySalaries_idCompanySalaries = companyPayment;
 
   try {
-        console.log("============================");
-
     await pool.query('START TRANSACTION');
-    console.log("============================");
 console.log(newClient);
     const clientQuery = await pool.query('INSERT INTO Client SET ?', [newClient]);
 

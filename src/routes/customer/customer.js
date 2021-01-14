@@ -71,8 +71,8 @@ router.post('/Customer/Create', [
   body('birthDate', 'Fecha de nacimiento es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
   body('expeditionDate', 'Fecha de expedición es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
   body('entryDate', 'Fecha de entrada es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
-
-
+  body('clie_address', 'Falta direccion del cliente').exists().not().isEmpty(),
+  body('clie_from', 'Falta el campo ¿De dónde nos conoces?').exists().not().isEmpty(),
 
 ],
 [verifyToken], createNewCustomer);
