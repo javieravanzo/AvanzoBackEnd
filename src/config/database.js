@@ -3,10 +3,17 @@ const mysql = require('mysql');
 const { promisify } = require('util');
 
 //DBConnection
+//  const poolConnection = mysql.createPool({
+//      host: 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com',
+//      user: 'appavanzo',
+//      password: '$vAnk6SpQBcNzY97E',
+//      database: 'avanzo',
+//  });
+
 const poolConnection = mysql.createPool({
-    host: 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com',
-    user: 'appavanzo',
-    password: '$vAnk6SpQBcNzY97E',
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
     database: 'avanzo',
 });
 

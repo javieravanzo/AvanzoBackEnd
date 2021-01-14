@@ -2,13 +2,15 @@
 //Requires
 const jwt = require('jsonwebtoken');
 const Excel = require('xlsx');
+const { banks } = require('../config/constants.js');
 
+var fs = require('fs');
 //Imports
 const { generateBankReports, readBankReport, generatePendingBankRequest,
-        generatePendingByHumanResources, generateParticularPendingByRRHH } = require('../services/reports');
+  generatePendingByHumanResources, generateParticularPendingByRRHH } = require('../services/reports');
 
 //Functions
-function getAdminId(req){
+function getAdminId(req) {
   //Get the admin with token
 
   //Get the clientId
@@ -17,59 +19,83 @@ function getAdminId(req){
   const bearer = bearerHeader.split(" ")[1];
   //Set the token
   const decoded = jwt.decode(bearer);
-  return (decoded.userRow[0].Administrator_idAdministrator);  
+  return (decoded.userRow[0].Administrator_idAdministrator);
 
 };
 
-function processQueryData(data){ 
- 
+function processQueryData(data, bank_id) {
+
   let newArray = [];
 
   let arrayLength = parseInt(data.length);
 
-  for (let i = 0; i<arrayLength; i++){
+  switch (parseInt(bank_id, 10)) {
+    case banks.BANCO_DAVIVIENDA:
+      for (let i = 0; i < arrayLength; i++) {
 
-    let newObject = data[i];
+        let newObject = data[i];
 
-    if( newObject['Tipo de Identificacion'] === 'Cédula' ){
-      newObject['Tipo de Identificacion'] = '1';
-    }else if( newObject['Tipo de Identificacion'] === 'Cédula de Extranjería' ){
-      newObject['Tipo de Identificacion'] = '2';
-    }else if( newObject['Tipo de Identificacion'] === 'Pasaporte' ){
-      newObject['Tipo de Identificacion'] = '5';
-    }
+        if (newObject['Tipo de Identificacion'] === 'Cédula') {
+          newObject['Tipo de Identificacion'] = '1';
+        } else if (newObject['Tipo de Identificacion'] === 'Cédula de Extranjería') {
+          newObject['Tipo de Identificacion'] = '2';
+        } else if (newObject['Tipo de Identificacion'] === 'Pasaporte') {
+          newObject['Tipo de Identificacion'] = '5';
+        }
 
-    if( newObject['Tipo de Producto o Servicio'] === 'Cuenta corriente' ){
-      newObject['Tipo de Producto o Servicio'] = 'CC';
-    }else if( newObject['Tipo de Producto o Servicio'] === 'Cuenta de ahorros' ){
-      newObject['Tipo de Producto o Servicio'] = 'CA';
-    }else if( newObject['Tipo de Producto o Servicio'] === 'Tarjeta Prepago Maestro' ){
-      newObject['Tipo de Producto o Servicio'] = 'TP';
-    }else if( newObject['Tipo de Producto o Servicio'] === 'Depósitos Electrónicos' ){
-      newObject['Tipo de Producto o Servicio'] = 'DE';
-    }else if( newObject['Tipo de Producto o Servicio'] === 'null' ){
-      if( newObject['Codigo del Banco'] === '51' ){
-        newObject['Tipo de Producto o Servicio'] = 'DP';
-      }else{
-        newObject['Tipo de Producto o Servicio'] = 'OP';
+        if (newObject['Tipo de Producto o Servicio'] === 'Cuenta corriente') {
+          newObject['Tipo de Producto o Servicio'] = 'CC';
+        } else if (newObject['Tipo de Producto o Servicio'] === 'Cuenta de ahorros') {
+          newObject['Tipo de Producto o Servicio'] = 'CA';
+        } else if (newObject['Tipo de Producto o Servicio'] === 'Tarjeta Prepago Maestro') {
+          newObject['Tipo de Producto o Servicio'] = 'TP';
+        } else if (newObject['Tipo de Producto o Servicio'] === 'Depósitos Electrónicos') {
+          newObject['Tipo de Producto o Servicio'] = 'DE';
+        } else if (newObject['Tipo de Producto o Servicio'] === 'null') {
+          if (newObject['Codigo del Banco'] === '51') {
+            newObject['Tipo de Producto o Servicio'] = 'DP';
+          } else {
+            newObject['Tipo de Producto o Servicio'] = 'OP';
+          }
+        }
+
+        newObject['Referencia'] = newObject['Referencia'] + " " + newObject['Numero de Identificacion'];
+
+        newArray.push(newObject);
+
       }
-    }
+      break;
+    case banks.BANCOLOMBIA:
+      for (let i = 0; i < arrayLength; i++) {
 
-    newObject['Referencia'] = newObject['Referencia'] + " " + newObject['Numero de Identificacion'];
+        let newObject = data[i];
 
-    newArray.push(newObject);
-    
+        if (newObject['Tipo Documento Beneficiario'] === 'Cédula') {
+          newObject['Tipo Documento Beneficiario'] = '1';
+        } else if (newObject['Tipo Documento Beneficiario'] === 'Cédula de Extranjería') {
+          newObject['Tipo Documento Beneficiario'] = '2';
+        } else if (newObject['Tipo Documento Beneficiario'] === 'Pasaporte') {
+          newObject['Tipo Documento Beneficiario'] = '5';
+        }
+
+        newArray.push(newObject);
+
+      }
+      break;
+    default:
   }
+
+
 
   return newArray;
 
 };
 
-function processReportByRRHHData(data){
+function processReportByRRHHData(data) {
 
   let newArray = [];
 
-  for (let i = 0; i<data.length; i++){
+  for (let i = 0; i < data.length; i++) {
 
     let newObject = data[i];
 
@@ -78,18 +104,18 @@ function processReportByRRHHData(data){
     newObject['ESTADO (RESPUESTA DE LA EMPRESA)'] = "";
 
     newArray.push(newObject);
-    
+
   };
 
   return newArray;
 
 };
 
-function processReportByRRHHData(data){
+function processReportByRRHHData(data) {
 
   let newArray = [];
 
-  for (let i = 0; i<data.length; i++){
+  for (let i = 0; i < data.length; i++) {
 
     let newObject = data[i];
 
@@ -98,7 +124,7 @@ function processReportByRRHHData(data){
     newObject['ESTADO (RESPUESTA DE LA EMPRESA)'] = "";
 
     newArray.push(newObject);
-    
+
   };
 
   return newArray;
@@ -107,9 +133,8 @@ function processReportByRRHHData(data){
 
 //Extract report file
 const generateBankReport = async (req, res, next) => {
-    
+
   try {
-  
     //Get the user id
     const adminId = getAdminId(req);
 
@@ -119,56 +144,124 @@ const generateBankReport = async (req, res, next) => {
     // Define the sheet of work.
     workbook.Props = {
       Title: "Reporte del banco",
-      Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      Author: "Avanzo",
+      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
 
-    const result = await generateBankReports();
+    const result = await generateBankReports(req.params.bank_id);
 
-    const processData = processQueryData(result.data);
 
-    let final_woorkbook = Excel.utils.json_to_sheet(processData);
 
-    workbook.Sheets["Hoja 1"] = final_woorkbook;
+    if (result.status === 200) {
 
-    let date = new Date();
+      let date_ob = new Date();
 
-    console.log("Date", date);
-    //console.log("Day", date.getDay());
-    
-    //let day = date.split(" ")[0].split("-")[2];
-    //let month = date.split(" ")[0].split("-")[1];
-    //let year = date.split(" ")[0].split("-")[0];
-    let day = date.getDate();
-    let month = date.getMonth();
-    let year = date.getFullYear();
+      // current date
+      // adjust 0 before single digit date
+      let day = ("0" + date_ob.getDate()).slice(-2);
+      // current month
+      let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+      // current year
+      let year = date_ob.getFullYear();
+      // prints date in YYYY-MM-DD format
+      console.log(year + "-" + month + "-" + day);
 
-    //console.log("Days", day, month, year);
+      const processData = processQueryData(result.data, req.params.bank_id);
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
+      var final_woorkbook = null;
+      switch (parseInt(req.params.bank_id, 10)) {
+        case banks.BANCO_DAVIVIENDA:
+          final_woorkbook = Excel.utils.json_to_sheet(result.data);
+          break;
+        case banks.BANCOLOMBIA:
+          let pagador = {
+            "NIT PAGADOR": "111111",
+            "TIPO DE PAGO": 220,
+            "APLICACIÓN": 1,
+            "SECUENCIA DE ENVIÓ": "A1",
+            "NRO CUENTA A DEBITAR": 11222222,
+            "TIPO DE CUENTA A DEBITAR": "AA",
+            "DESCRIPCION DEL PAGO": "dexscrjakas",
 
-    let url = "/Desembolsos_"+day+"-"+month+"-"+year+".xlsx";
-    ////console.log("Length", result.data.length);
+          }
+          final_woorkbook = Excel.utils.json_to_sheet([pagador], { header: ["NIT PAGADOR", "TIPO DE PAGO", "APLICACIÓN", "SECUENCIA DE ENVIÓ", "NRO CUENTA A DEBITAR", "TIPO DE CUENTA A DEBITAR", "DESCRIPCION DEL PAGO"] });
 
-    if(result){
-      res.status(200).json({data: url});  
-    }else{
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
-    }   
-  }catch(e) {
-      console.log("Error", e);
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+          Excel.utils.sheet_add_json(final_woorkbook, result.data, {
+            origin: "A4", header: ["Tipo Documento Beneficiario",
+              "Nit Beneficiario",
+              "Nombre Beneficiario",
+              "Tipo Transaccion",
+              "Código Banco",
+              "No Cuenta Beneficiario",
+              "Email",
+              "Documento Autorizado",
+              "Referencia",
+              "OficinaEntrega",
+              "ValorTransaccion",
+              "Fecha de aplicación"]
+          });
+
+          break;
+        case banks.EFECTY:
+          var txt = "\"01\"|DOCUMENTO|TIPODOCUMENTO|VALOR|FECHA|NOMBRES|APELLIDO1|APELLIDO2|TELEFONO|COMENTARIOS|CODIGOPS|PIN\n";
+          var sec = 1;
+          result.data.forEach(function (element) {
+            //console.log(element);
+            txt += `"${sec < 9 ? "0" + (sec += 1) : sec += 1}"|"${element.DOCUMENTO}"|"${element.TIPODOCUMENTO}"|"${element.VALOR}"|"${element.FECHA}"|"${element.NOMBRES}"|"${element.APELLIDO1}"|"${element.APELLIDO2}"|"${element.TELEFONO}"|"${element.COMENTARIOS}"|"${element.CODIGOPS}"|"${element.PIN}"\n`;
+          });
+          fs.writeFile("../files/writes/Desembolsos_" + day + "-" + month + "-" + year + ".txt", txt, function (erro) {
+            if (erro) {
+              throw erro;
+            }
+          });
+          break;
+        case 'Papayas':
+          console.log('Mangoes and papayas are $2.79 a pound.');
+          // expected output: "Mangoes and papayas are $2.79 a pound."
+          break;
+        default:
+          console.log(`No existe este banco en nuestras constantes id banco: ${bank_id}.`);
+          return { status: 400, message: `No existe este banco en nuestras constantes id banco: ${bank_id}.` };
+
+      }
+
+      var url = "";
+      if (parseInt(req.params.bank_id, 10) !== banks.EFECTY) {
+        workbook.Sheets["Hoja 1"] = final_woorkbook;
+        let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
+        url = "/Desembolsos_" + day + "-" + month + "-" + year + ".xlsx";
+      } else {
+        url = "/Desembolsos_" + day + "-" + month + "-" + year + ".txt";
+      }
+
+
+
+
+      ////console.log("Length", result.data.length);
+      if (result) {
+        res.status(200).json({ data: url });
+      } else {
+        res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
+      }
+    } else if (result.status === 400) {
+      res.status(400).json({ message: result.message });
+    }
+
+
+  } catch (e) {
+    console.log("Error", e);
+    res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
   };
 
 };
 
 //Generate pending report file
 const generatePendingRequestReport = async (req, res, next) => {
-    
+
   try {
-  
+
     //Get the user id
     const adminId = getAdminId(req);
 
@@ -179,7 +272,7 @@ const generatePendingRequestReport = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes finalizar por banco",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -194,7 +287,7 @@ const generatePendingRequestReport = async (req, res, next) => {
 
     //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     let date = new Date();
-    
+
     //let day = date.split(" ")[0].split("-")[2];
     //let month = date.split(" ")[0].split("-")[1];
     //let year = date.split(" ")[0].split("-")[0];
@@ -202,27 +295,27 @@ const generatePendingRequestReport = async (req, res, next) => {
     let month = date.getMonth();
     let year = date.getFullYear();
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesTerminarDesembolsoPorBanco_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
+    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesTerminarDesembolsoPorBanco_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
-    let url = "/PendientesTerminarDesembolsoPorBanco_"+day+"-"+month+"-"+year+".xlsx";
+    let url = "/PendientesTerminarDesembolsoPorBanco_" + day + "-" + month + "-" + year + ".xlsx";
 
-    if(result){
-      res.status(200).json({data: url});  
-    }else{
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
-    }   
-  }catch(e) {
+    if (result) {
+      res.status(200).json({ data: url });
+    } else {
+      res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
+    }
+  } catch (e) {
     //console.log("Error", e);
-    res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+    res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
   };
 
 };
 
 //Generate pending by RRHH
 const generatePendingByRRHH = async (req, res, next) => {
-    
+
   try {
-  
+
     //Get the user id
     const adminId = getAdminId(req);
 
@@ -235,7 +328,7 @@ const generatePendingByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -252,7 +345,7 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     let date = new Date();
-    
+
     //let day = date.split(" ")[0].split("-")[2];
     //let month = date.split(" ")[0].split("-")[1];
     //let year = date.split(" ")[0].split("-")[0];
@@ -262,27 +355,27 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     //console.log("Days", day, month, year);
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHH_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
+    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHH_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
-    let url = "/PendientesPorRRHH_"+day+"-"+month+"-"+year+".xlsx";
+    let url = "/PendientesPorRRHH_" + day + "-" + month + "-" + year + ".xlsx";
 
-    if(result){
-      res.status(200).json({data: url});  
-    }else{
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
-    }   
-  }catch(e) {
+    if (result) {
+      res.status(200).json({ data: url });
+    } else {
+      res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
+    }
+  } catch (e) {
     //console.log("Error", e);
-    res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+    res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
   };
 
 };
 
 //Generate particular request pending by RRHH
 const generateParticularPendingRequestByRRHH = async (req, res, next) => {
-    
+
   try {
-  
+
     //Get the user id
     const adminId = getAdminId(req);
 
@@ -295,7 +388,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos en IGS",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -310,7 +403,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
 
     //let date = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     let date = new Date();
-    
+
     //let day = date.split(" ")[0].split("-")[2];
     //let month = date.split(" ")[0].split("-")[1];
     //let year = date.split(" ")[0].split("-")[0];
@@ -318,37 +411,37 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
     let month = date.getMonth();
     let year = date.getFullYear();
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHEnIGS_"+day+"-"+month+"-"+year+".xlsx", {bookType: 'xlsx', type: 'binary'});
+    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHEnIGS_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
-    let url = "/PendientesPorRRHEnIGS_"+day+"-"+month+"-"+year+".xlsx";
+    let url = "/PendientesPorRRHEnIGS_" + day + "-" + month + "-" + year + ".xlsx";
 
-    if(result){
-      res.status(200).json({data: url});  
-    }else{
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
-    }   
-  }catch(e) {
+    if (result) {
+      res.status(200).json({ data: url });
+    } else {
+      res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
+    }
+  } catch (e) {
     //console.log("Error", e);
-    res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+    res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
   };
 
 };
 
 //Check both formats
 const receiveBankReport = async (req, res, next) => {
-    
+
   try {
 
     ////console.log("Read", req);
     ////console.log("Write", req.write);
     ////console.log("Read", req.files[0].path);
-  
+
     //Get the user id
     const adminId = getAdminId(req);
 
     // Create a workbook, like a file.
-    var readWorkbook = Excel.readFile(req.files.read[0].path, {cellDates: true});
-    var writeWorkbook = Excel.readFile(req.files.write[0].path, {cellDates: true});
+    var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
+    var writeWorkbook = Excel.readFile(req.files.write[0].path, { cellDates: true });
 
     // Define the sheet of work.
     var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
@@ -360,14 +453,14 @@ const receiveBankReport = async (req, res, next) => {
 
     try {
       const result = await readBankReport(readData, writeData);
-      res.status(result.status).json({message: result.message});      
-    }catch(e) {
-        res.status(500).json({message:"No es posible realizar el registro en este momento."}); 
+      res.status(result.status).json({ message: result.message });
+    } catch (e) {
+      res.status(500).json({ message: "No es posible realizar el registro en este momento." });
     };
- 
-  }catch(e) {
+
+  } catch (e) {
     //console.log("Error", e);
-      res.status(500).json({message: "El archivo no puede ser generado en este momento."}); 
+    res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
   };
 
 };

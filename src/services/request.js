@@ -446,8 +446,10 @@ const createRequest = async (body, file, clientId, files) => {
       //console.log("UR", userRow[0]);
 
       //////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
-      console.log("=>"+userRow[0].partialCapacity)
-      if (parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)) {
+     // if (parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)) {
+   
+
+      if (parseInt(quantity, 10) <= parseInt('300000', 10) ) {
 
         let updateNewClient = null;
 

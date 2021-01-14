@@ -4,7 +4,7 @@ const { body, header } = require('express-validator');
 const multer = require('multer');
 //const BaseURL = require('../../config/')
 //Imports
-const  validations_controller  = require('../../controllers/validations');
+const  validations_controller  = require('../../controllers/validations.js');
 
 //Initialize
 const router = express.Router();

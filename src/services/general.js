@@ -24,19 +24,19 @@ const login = async (email, password) => {
                 //console.log("UC", parseInt(userRow[0].isConfirmed, 10) === 1);
                 if (parseInt(userRow[0].isConfirmed, 10) === 1) {
                     const userMenu = await pool.query('SELECT   S.* FROM User U  JOIN Auth A ON (A.User_idUser = U.idUser)  JOIN Role R ON U.Role_idRole = R.IdRole   JOIN avanzo.RolHasServices RHS ON R.IdRole = RHS.idRol   JOIN avanzo.Services S ON S.idService = RHS.IdService   where U.email = ?', [email]);
-                        const jsonMenu =[];
-                         
-                         for (let index = 0; index < userMenu.length; index++) {
-                             const element = userMenu[index];
-                             var data = {
-                                serviceIcon: element.serviceIcon,
-                                className: element.serviceClassName,
-                                serviceRoute: element.serviceRoute,
-                                serviceName: element.serviceName
-                            };
-                            jsonMenu.push(data);
-                         }
-                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }) };
+                    const jsonMenu = [];
+
+                    for (let index = 0; index < userMenu.length; index++) {
+                        const element = userMenu[index];
+                        var data = {
+                            serviceIcon: element.serviceIcon,
+                            className: element.serviceClassName,
+                            serviceRoute: element.serviceRoute,
+                            serviceName: element.serviceName
+                        };
+                        jsonMenu.push(data);
+                    }
+                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '') };
                     const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };
                     const validPassword = await helpers.matchPassword(password, userQuery.password);
                     //console.log("VP",validPassword);
@@ -44,11 +44,13 @@ const login = async (email, password) => {
                         const jwtoken = jwt.sign({ userRow }, my_secret_key, { expiresIn: '8h' });
                         const new_date = new Date();
                         new_date.setHours(new_date.getHours() + expirationTime);
-                        userAuth.expiresOn = new_date;
+                        userAuth.expiresOn = new_date.toISOString().
+                            replace(/T/, ' ').
+                            replace(/\..+/, '');
                         const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
                         return {
                             status: 200, message: "Ha ingresado satisfactoriamente.",
-                            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData,menu:jsonMenu },
+                            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData, menu: jsonMenu },
 
                         };
                     } else {

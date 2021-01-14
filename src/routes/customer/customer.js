@@ -67,6 +67,13 @@ router.post('/Customer/Create', [
   body('email', 'Nombre inválido').exists().isEmail().not().isEmpty(),
   body('phoneNumber', 'Teléfono celular inválido').exists().isInt().not().isEmpty(),
   body('idCompany', 'La empresa es inválida').exists().isInt().not().isEmpty(),
+  body('vehicle', 'Falta el campo ¿Tiene vehiculo?').exists().isBoolean().not().isEmpty(),
+  body('birthDate', 'Fecha de nacimiento es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
+  body('expeditionDate', 'Fecha de expedición es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
+  body('entryDate', 'Fecha de entrada es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
+
+
+
 ],
 [verifyToken], createNewCustomer);
 

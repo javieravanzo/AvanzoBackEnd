@@ -1,6 +1,7 @@
 //Requires
 const pool = require('../config/database.js');
 const { excluded_account } = require('../config/global');
+const {banks} = require( '../config/constants.js');
 
 //Functions
 function parseLocaleNumber(stringNumber) {
@@ -84,16 +85,40 @@ function getStateIdFromName (row, name){
 };
 
 //Services
-const generateBankReports = async () => {
+const generateBankReports = async (bank_id) => {
 
   //Slect StateRequest
   const stateRow = await pool.query('SELECT * FROM RequestState');
 
   //Differents states
   let stateOutlay =  getStateIdFromName(stateRow, "En desembolso");
-
+  var clientRow=null;
   try {
-    const clientRow =  await pool.query('SELECT C.documentType as "Tipo de Identificacion", C.identificationId as "Numero de Identificacion", U.name as "Nombre", U.lastName as "Apellido", BA.bankCode as "Codigo del Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "Numero del Producto o Servicio", R.quantity as "Valor del Pago o de la recarga", R.idRequest as "Referencia", U.email as "Correo Electronico", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? and R.account <> ?', [stateOutlay, excluded_account]);
+    
+    switch ( parseInt(bank_id, 10)) {
+      case banks.BANCO_DAVIVIENDA:
+         clientRow =  await pool.query('SELECT C.documentType as "Tipo de Identificacion", C.identificationId as "Numero de Identificacion", U.name as "Nombre", U.lastName as "Apellido", BA.bankCode as "Codigo del Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "Numero del Producto o Servicio", R.quantity as "Valor del Pago o de la recarga", R.idRequest as "Referencia", U.email as "Correo Electronico", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? and R.account <> ?', [stateOutlay, excluded_account]);
+        break;
+      case banks.BANCOLOMBIA:
+         clientRow =  await pool.query('SELECT C.documentType as "Tipo Documento Beneficiario", C.identificationId as "Nit Beneficiario", U.name as "Nombre Beneficiario", U.lastName as "Apellido", BA.bankCode as "Código Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "No Cuenta Beneficiario", R.quantity as "ValorTransaccion", R.idRequest as "Referencia", DATE_FORMAT(R.registeredDate, "%Y%m%d")  as "Fecha de aplicación", U.email as "Email", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? ', [stateOutlay]);
+         break;
+         case banks.BANCOLOMBIA:
+          clientRow =  await pool.query('SELECT C.documentType as "Tipo Documento Beneficiario", C.identificationId as "Nit Beneficiario", U.name as "Nombre Beneficiario", U.lastName as "Apellido", BA.bankCode as "Código Banco", R.accountType as "Tipo de Producto o Servicio", R.accountNumber as "No Cuenta Beneficiario", R.quantity as "ValorTransaccion", R.idRequest as "Referencia", DATE_FORMAT(R.registeredDate, "%Y%m%d")  as "Fecha de aplicación", U.email as "Email", CO.socialReason as "Descripcion o Detalle" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? ', [stateOutlay]);
+          break;
+          case banks.EFECTY:
+            clientRow =  await pool.query('SELECT  C.identificationId as "DOCUMENTO",C.documentType as "TIPODOCUMENTO", R.quantity as "VALOR", DATE_FORMAT(R.registeredDate, "%Y-%m-%d %h:%i:%s") as "FECHA",  U.name as "NOMBRES",substring_index(U.lastName," ",1)  as "APELLIDO1",substring_index(U.lastName," ",-1)  as "APELLIDO2",C.phoneNumber as "TELEFONO",R.creditNumber as "COMENTARIOS", "010671" as "CODIGOPS" , "N.A." as "PIN" FROM Client C JOIN User U JOIN Account A JOIN Company CO JOIN Request R JOIN Bank BA ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount AND R.account = BA.bankName) where R.RequestState_idRequestState = ? ', [stateOutlay]);
+            break;
+          var blob = new Blob(["This is my first text."], {type: "text/plain;charset=utf-8"});
+
+      case 'Papayas':
+        console.log('Mangoes and papayas are $2.79 a pound.');
+        // expected output: "Mangoes and papayas are $2.79 a pound."
+        break;
+      default:
+        console.log(`No existe este banco en nuestras constantes id banco: ${bank_id}.`);
+        return {status: 400, message: `No existe este banco en nuestras constantes id banco: ${bank_id}.`};
+
+    }
     
     return {status: 200, data: clientRow, message: "OK"};
   

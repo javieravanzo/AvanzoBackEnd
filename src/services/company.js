@@ -186,10 +186,25 @@ const getAllCompaniesForUser = async ( ) => {
   
   try{
     const companyRow = await pool.query('SELECT C.idCompany, C.socialReason FROM Company C ORDER BY C.socialReason ASC');
-    const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS');
     
     return {status: 200, data: {
                           companyRow: companyRow,
+                         }
+    };
+  }catch(e){
+    console.log(e);
+    //throw e;
+    return {status: 500, data: [], message: "Error interno del servidor."};
+  }  
+
+};
+
+const getCyclesByCompanyId = async (companyId) => {
+  
+  try{
+    const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN avanzo.Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries AND CHS.Company_idCompany=?)',[companyId]);
+    
+    return {status: 200, data: {
                           cycles: cycles
                          }
     };
@@ -284,5 +299,5 @@ const modifymaximumAmountByCompany = async (customersData, adminId, idCompany) =
 
 module.exports = {
   createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries,
-  activateCompanies, updateCompanySalary, modifymaximumAmountByCompany
+  activateCompanies, updateCompanySalary, modifymaximumAmountByCompany,getCyclesByCompanyId
 };

@@ -144,8 +144,6 @@ const createNewRequest = async (req, res, next) => {
   //fs.writeFile("/files/images/arghhhh.jpg", new Buffer.from(req.body.file, "base64"), function(err) {});
   //console.log("RF", req.files);
   let files = null;
-  console.log("======================")
- console.log(clientId)
   //Guardar archivos
   if(req.files.paymentSupport !== undefined){
     files = {paymentSupport: path.normalize(req.files.paymentSupport[0].path).replace("../files/documents/",""), 

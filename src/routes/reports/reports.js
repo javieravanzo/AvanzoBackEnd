@@ -37,7 +37,7 @@ const uploads = multer({
 });
 
 //Routes 
-router.get('/Reports/GenerateBankReport', [verifyToken], generateBankReport);
+router.get('/Reports/GenerateBankReport/:bank_id', [verifyToken], generateBankReport);
 
 router.get('/Reports/PendingToFinalizeByBank', [verifyToken], generatePendingRequestReport);
 

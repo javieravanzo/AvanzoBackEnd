@@ -167,6 +167,7 @@ const createNewCustomer = async (req, res, next) => {
   const adminId = getAdminId(req);
  
   try {
+
     const result = await createCustomer(req.body, user, idCompany, adminId);
     res.status(result.status).json({message: result.message});      
   }catch(e) {

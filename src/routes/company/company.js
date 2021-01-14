@@ -8,9 +8,7 @@ const router = express.Router();
 
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
-const { createCompany, getAllCompanies, getCompaniesForUser, updateCompany,
-        getCompanyWithSalary, activateCompany, updateSalaries, updateMaximumAmountByCompany
-      } = require('../../controllers/company');
+const  company_controller  = require('../../controllers/company');
 
 //Constants
 //- Modify the folder/file storage
@@ -49,7 +47,7 @@ router.post('/Company/Create',
     body('password', 'La contraseña es inválida.').exists().not().isEmpty(),
     body('email', 'El correo electrónico es inválido.').exists().isEmail(),
   ],
-[verifyToken], createCompany);
+[verifyToken], company_controller.createCompany);
 
 router.put('/Company/Update', 
   [
@@ -62,22 +60,25 @@ router.put('/Company/Update',
     body('approveHumanResources', 'La aprobación por recursos humano es inválida.').exists().not().isEmpty(),
     //body('email', 'El correo electrónico es inválido.').exists().isEmail(),
   ],
-[verifyToken], updateCompany);
+[verifyToken], company_controller.updateCompany);
 
 //Routes 
-router.get('/Company/GetAll', [verifyToken], getAllCompanies);
+router.get('/Company/GetAll', [verifyToken], company_controller.getAllCompanies);
 
-router.get('/Company/GetWithSalaries', [verifyToken], getCompanyWithSalary);
+router.get('/Company/GetWithSalaries', [verifyToken], company_controller.getCompanyWithSalary);
 
-router.get('/Company/GetAllForUsers', getCompaniesForUser);
+router.get('/Company/GetAllForUsers', company_controller.getCompaniesForUser);
 
-router.put('/Company/ChangePlatformStatus', activateCompany);
+router.get('/Company/GetCyclesByCompanyId/:companyId', company_controller.getCyclesByCompanyId);
 
-router.put('/Company/UpdateCompanySalaries', updateSalaries);
+
+router.put('/Company/ChangePlatformStatus', company_controller.activateCompany);
+
+router.put('/Company/UpdateCompanySalaries', company_controller.updateSalaries);
 
 router.post('/Company/LoadMaxAmountToOutLayByClient', 
 uploads.single('file'),
-[verifyToken], updateMaximumAmountByCompany);
+[verifyToken], company_controller.updateMaximumAmountByCompany);
 
 
 //Export

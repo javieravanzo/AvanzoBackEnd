@@ -4,10 +4,7 @@ const jwt = require('jsonwebtoken');
 const Excel = require('xlsx');
 
 //Imports
-const { createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies,
-        getCompanyWithSalaries, activateCompanies, updateCompanySalary,
-        modifymaximumAmountByCompany } = require('../services/company');
-
+const company_services =  require('../services/company.js');       
 //Functions
 //Get the user with token
 function getUserId(req){
@@ -48,7 +45,7 @@ const createCompany = async (req, res, next) => {
   const userId = getUserId(req);
 
   try {
-    const result = await createCompanies(req, userId);
+    const result = await company_services.createCompanies(req, userId);
     if(result.status === 200){
         res.status(result.status).json(result.message);
     }else{
@@ -75,7 +72,7 @@ const updateCompany = async (req, res, next) => {
   const userId = getUserId(req);
 
   try {
-    const result = await updateCompanies(req, userId);
+    const result = await company_services.updateCompanies(req, userId);
     if(result.status === 200){
         res.status(result.status).json(result.message);
     }else{
@@ -101,7 +98,7 @@ const getAllCompanies = async (req, res, next) => {
   const userId = getUserId(req);
 
   try {
-    const result = await getCompanies(req, userId);
+    const result = await company_services.getCompanies(req, userId);
     if(result.status === 200){
         res.status(result.status).json(result.data);
     }else{
@@ -116,7 +113,22 @@ const getAllCompanies = async (req, res, next) => {
 const getCompaniesForUser = async (req, res, next) => {
 
   try {
-    const result = await getAllCompaniesForUser( );
+    const result = await company_services.getAllCompaniesForUser( );
+    if(result.status === 200){
+        res.status(result.status).json(result.data);
+    }else{
+        res.status(result.status).json({message: result.message});
+    }
+    next();
+  } catch(e) {
+    res.status(500).json("No es posible obtener la información en este momento.");
+  }
+
+};
+const getCyclesByCompanyId = async (req, res, next) => {
+
+  try {
+    const result = await company_services.getCyclesByCompanyId(req.params.companyId);
     if(result.status === 200){
         res.status(result.status).json(result.data);
     }else{
@@ -134,7 +146,7 @@ const getCompanyWithSalary = async (req, res, next) => {
   const {companyid} = req.headers;
 
   try {
-    const result = await getCompanyWithSalaries(companyid);
+    const result = await company_services.getCompanyWithSalaries(companyid);
     if(result.status === 200){
         res.status(result.status).json(result.data);
     }else{
@@ -150,7 +162,7 @@ const getCompanyWithSalary = async (req, res, next) => {
 const updateSalaries = async (req, res, next) => {
   
   try {
-    const result = await updateCompanySalary(req.body);
+    const result = await company_services.updateCompanySalary(req.body);
     if(result.status === 200){
         res.status(result.status).json({message: result.message});
     }else{
@@ -172,7 +184,7 @@ const activateCompany = async (req, res, next) => {
       const {companyid, status} = req.headers;
 
       //console.log("CI", clientid, "S", status);
-      const result = await activateCompanies(companyid, status);
+      const result = await company_services.activateCompanies(companyid, status);
       if(result.status === 200){
           res.status(result.status).json(result.message);
       }else{
@@ -205,7 +217,7 @@ const updateMaximumAmountByCompany = async (req, res, next) => {
 
   try {
       
-    const result = await modifymaximumAmountByCompany(data, adminId, idCompany);
+    const result = await company_services.modifymaximumAmountByCompany(data, adminId, idCompany);
     
     res.status(result.status).json({message: result.message});
 
@@ -221,6 +233,6 @@ const updateMaximumAmountByCompany = async (req, res, next) => {
 
 module.exports = {
   createCompany, getAllCompanies, getCompaniesForUser, updateCompany, getCompanyWithSalary,
-  activateCompany, updateSalaries, updateMaximumAmountByCompany
+  activateCompany, updateSalaries, updateMaximumAmountByCompany,getCyclesByCompanyId
 };
 
