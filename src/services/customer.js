@@ -197,6 +197,35 @@ console.log(newClient);
 
     const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
     await pool.query('COMMIT');
+
+    console.log("Proceso envio de correo Cuenta pendiente de aprobación");
+      //Mailer approval
+      sgMail.setApiKey('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');
+
+      let userData = {
+        email: newUser.email,
+        name: newUser.name,
+        url: front_URL,
+        base_URL_test: base_URL + "/confirmation.png",
+        footer: base_URL + "/footer.png",
+      };
+
+      let output = await compile('pendingApproval', userData);
+
+      let info = {
+          from: 'operaciones@avanzo.co', // sender address
+          to: userData.email, // list of receivers
+          subject: 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación', // Subject line
+          text: 'Avanzo', // plain text body
+          html: output, // html body,
+         
+      };
+
+      await sgMail.send(info).catch(err => {
+        console.log("Error", err);
+      });
+
+
     return { status: 200, message: "El cliente ha sido registrado exitosamente." };
   } catch (e) {
     console.log("E", e);
