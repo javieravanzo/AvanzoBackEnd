@@ -337,6 +337,7 @@ const approveCustomer = async (req, res, next) => {
         //const result = {status: 200};
         
         if(result.status === 200){
+            //send SMS aprobar
             res.status(result.status).json(result.message);
         }else{
             res.status(result.status).json(result.message);

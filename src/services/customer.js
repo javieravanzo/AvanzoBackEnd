@@ -7,7 +7,9 @@ const sgMail = require('@sendgrid/mail');
 const path = require('path');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
-
+const { sendEmail, sendSMS } = require('../utils/utils.js');
+const { ENVIRONMENT, SMS_CODES, ATTACHMENT_TYPES, PATH_FILE_CONTRACT, NAME_FILE_CONTRACT, PENDING_APPROVAL,
+  ACCOUNT_CONFIRMATION } = require('../utils/constants.js');
 //Functions
 const compileContract = async function (filePath) {
   const pdf = await fs.readFileSync(filePath).toString("base64");
@@ -142,17 +144,17 @@ const getCustomersByAdmin = async () => {
 
 const createCustomer = async (body, user, company, adminId) => {
 
- 
+
   //NewClient
   const { identificationId, lastName, documentType, phoneNumber, fixedNumber, birthDate, expeditionDate,
     contractType, salary, entryDate, profession, genus, accountBank, accountType, accountNumber, idCompany, companyPayment,
-    vehicle, vehicle_type, license_plate_vehicle,clie_address,clie_from } = body;
-  
+    vehicle, vehicle_type, license_plate_vehicle, clie_address, clie_from } = body;
+
 
   const newClient = {
     identificationId, documentType, phoneNumber, fixedNumber, contractType, salary,
     entryDate, profession, genus, accountBank, accountType, accountNumber, birthDate, expeditionDate,
-    vehicle, vehicle_type, license_plate_vehicle,clie_address,clie_from
+    vehicle, vehicle_type, license_plate_vehicle, clie_address, clie_from
   };
 
   //newClient.birthDate = new Date(birthDate.split('/')[2], birthDate.split('/')[1], birthDate.split('/')[0]);
@@ -165,7 +167,7 @@ const createCustomer = async (body, user, company, adminId) => {
 
   try {
     await pool.query('START TRANSACTION');
-console.log(newClient);
+
     const clientQuery = await pool.query('INSERT INTO Client SET ?', [newClient]);
 
     //Insert in user
@@ -199,32 +201,26 @@ console.log(newClient);
     await pool.query('COMMIT');
 
     console.log("Proceso envio de correo Cuenta pendiente de aprobación");
-      //Mailer approval
-      sgMail.setApiKey('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');
+    //Mailer approval
 
-      let userData = {
-        email: newUser.email,
-        name: newUser.name,
-        url: front_URL,
-        base_URL_test: base_URL + "/confirmation.png",
-        footer: base_URL + "/footer.png",
-      };
+    var subject = 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación';
+    var text = 'Avanzo';
+    var template = PENDING_APPROVAL;
+    let userData = {
+      email: newUser.email,
+      name: newUser.name,
+      url: front_URL,
+      base_URL_test: base_URL + "/confirmation.png",
+      footer: base_URL + "/footer.png",
 
-      let output = await compile('pendingApproval', userData);
+    };
+    sendEmail(template, userData, '', '', subject, text, '')
 
-      let info = {
-          from: 'operaciones@avanzo.co', // sender address
-          to: userData.email, // list of receivers
-          subject: 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación', // Subject line
-          text: 'Avanzo', // plain text body
-          html: output, // html body,
-         
-      };
-
-      await sgMail.send(info).catch(err => {
-        console.log("Error", err);
-      });
-
+    //Send SMS 
+    if (ENVIRONMENT === 'production') {
+      const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
+      sendSMS(newClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+    }
 
     return { status: 200, message: "El cliente ha sido registrado exitosamente." };
   } catch (e) {
@@ -532,15 +528,9 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       //console.log(url.toString());
 
-      //Production
-      let contractFile = await compileContract("../files/contracts/contratoAvanzo.pdf");
 
-      //Development
-      //let contractFile = await compileContract("./files/contracts/contratoAvanzo.pdf");
 
       //Mailer
-      sgMail.setApiKey('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');
-
       let userData = {
         email: consultEmail[0].email,
         name: consultEmail[0].name,
@@ -550,39 +540,15 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         link: url,
       };
 
-      /*let userData = {
-        email: 'ccorjuelav@unal.edu.co',
-        name: 'Cristian',
-        url: front_URL,
-        base_URL_test: base_URL + "/confirmation.png",
-        footer: base_URL + "/footer.png",
-        link: "http://www.google.com",
-      };*/
-
-      let output = await compile('accountConfirmation', userData);
-
-      //console.log("Output", output);
-
-      let info = {
-        from: 'operaciones@avanzo.co', // sender address
-        to: userData.email, // list of receivers
-        subject: 'Avanzo (Créditos al instante) - Confirmación de cuenta', // Subject line
-        text: 'Avanzo', // plain text body
-        html: output, // html body,
-        attachments: [
-          {
-            content: contractFile,
-            filename: 'contratoAvanzo.pdf',
-            type: 'application/pdf',
-            disposition: 'attachment'
-          }
-        ]
-      };
-
-      await sgMail.send(info).catch(err => {
-        console.log("Error", err);
-      });
-
+      var subject = 'Avanzo (Créditos al instante) - Confirmación de cuenta';
+      var text = 'Avanzo';
+      var template = ACCOUNT_CONFIRMATION;
+      sendEmail(template, userData, NAME_FILE_CONTRACT, ATTACHMENT_TYPES.PDF, subject, text, PATH_FILE_CONTRACT)
+      //Send SMS 
+      if (ENVIRONMENT === 'production') {
+        const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.APPROVED_CLIENT]);
+        sendSMS(newClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+      }
       return { status: 200, message: "El usuario ha sido aprobado exitosamente." };
 
     } else {

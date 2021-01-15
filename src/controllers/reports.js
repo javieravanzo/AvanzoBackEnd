@@ -2,7 +2,7 @@
 //Requires
 const jwt = require('jsonwebtoken');
 const Excel = require('xlsx');
-const { banks } = require('../config/constants.js');
+const { banks } = require('../utils/constants.js');
 
 var fs = require('fs');
 //Imports

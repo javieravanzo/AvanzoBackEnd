@@ -1,7 +1,7 @@
 //Requires
 const pool = require('../config/database.js');
 const { excluded_account } = require('../config/global');
-const {banks} = require( '../config/constants.js');
+const {banks} = require( '../utils/constants.js');
 
 //Functions
 function parseLocaleNumber(stringNumber) {
