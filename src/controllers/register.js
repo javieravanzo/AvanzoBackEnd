@@ -55,7 +55,6 @@ const preRegister = async (req, res, next) => {
     res.status(422).json({ message: errors.array() });
     return;
   }
-
   //Logic
   const client = {documentType, identificationId, city, birthDate, salary, phoneNumber, Company_idCompany: company, gender};
   const user = {name, email, lastName};

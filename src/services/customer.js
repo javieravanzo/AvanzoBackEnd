@@ -9,7 +9,13 @@ const fs = require('fs-extra');
 const hbs = require('handlebars');
 const { sendEmail, sendSMS } = require('../utils/utils.js');
 const { ENVIRONMENT, SMS_CODES, ATTACHMENT_TYPES, PATH_FILE_CONTRACT, NAME_FILE_CONTRACT, PENDING_APPROVAL,
-  ACCOUNT_CONFIRMATION } = require('../utils/constants.js');
+  ACCOUNT_CONFIRMATION, ACCOUNT_REJECTED } = require('../utils/constants.js');
+
+//constants
+const todayDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '');
+const expirationTime =5 ;
+
+
 //Functions
 const compileContract = async function (filePath) {
   const pdf = await fs.readFileSync(filePath).toString("base64");
@@ -17,7 +23,6 @@ const compileContract = async function (filePath) {
 };
 
 const compile = async function (templateName, data) {
-
   //Production
   const filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
 
@@ -161,7 +166,7 @@ const createCustomer = async (body, user, company, adminId) => {
   //newClient.expeditionDate = new Date(expeditionDate.split('/')[2], expeditionDate.split('/')[1], expeditionDate.split('/')[0]);
 
   newClient.registeredBy = adminId;
-  newClient.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  newClient.registeredDate = todayDate;
   newClient.Company_idCompany = idCompany;
   newClient.CompanySalaries_idCompanySalaries = companyPayment;
 
@@ -174,8 +179,8 @@ const createCustomer = async (body, user, company, adminId) => {
     const newUser = user;
     newUser.lastName = lastName;
     newUser.registeredBy = adminId;
-    newUser.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-    newUser.createdDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+    newUser.registeredDate = todayDate;
+    newUser.createdDate = todayDate;
     newUser.Role_idRole = 4;
     newUser.status = false;
     newUser.Client_idClient = clientQuery.insertId;
@@ -193,7 +198,7 @@ const createCustomer = async (body, user, company, adminId) => {
       totalRemainder: 0,
       approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
       registeredBy: adminId,
-      registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      registeredDate: todayDate,
       Client_idClient: clientQuery.insertId
     };
 
@@ -203,24 +208,24 @@ const createCustomer = async (body, user, company, adminId) => {
     console.log("Proceso envio de correo Cuenta pendiente de aprobación");
     //Mailer approval
 
-    var subject = 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación';
-    var text = 'Avanzo';
-    var template = PENDING_APPROVAL;
-    let userData = {
-      email: newUser.email,
-      name: newUser.name,
-      url: front_URL,
-      base_URL_test: base_URL + "/confirmation.png",
-      footer: base_URL + "/footer.png",
+    // var subject = 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación';
+    // var text = 'Avanzo';
+    // var template = PENDING_APPROVAL;
+    // let userData = {
+    //   email: newUser.email,
+    //   name: newUser.name,
+    //   url: front_URL,
+    //   base_URL_test: base_URL + "/confirmation.png",
+    //   footer: base_URL + "/footer.png",
 
-    };
-    sendEmail(template, userData, '', '', subject, text, '')
+    // };
+    // sendEmail(template, userData, '', '', subject, text, '')
 
-    //Send SMS 
-    if (ENVIRONMENT === 'production') {
-      const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
-      sendSMS(newClient.phoneNumber, smsCodesQuery[0].sms_co_body);
-    }
+    // //Send SMS 
+    // if (ENVIRONMENT === 'production') {
+    //   const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
+    //   sendSMS(newClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+    // }
 
     return { status: 200, message: "El cliente ha sido registrado exitosamente." };
   } catch (e) {
@@ -237,7 +242,7 @@ const updateCustomers = async (body, user, adminId) => {
 
   const newClient = { identificationId, phoneNumber, profession };
   newClient.registeredBy = adminId;
-  newClient.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  newClient.registeredDate = todayDate;
 
   try {
 
@@ -247,7 +252,7 @@ const updateCustomers = async (body, user, adminId) => {
     const newUser = user;
     newUser.lastName = lastName;
     newUser.registeredBy = adminId;
-    newUser.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+    newUser.registeredDate = todayDate;
     const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
 
     const consultAccumulated = await pool.query('SELECT accumulatedQuantity FROM Account where idAccount = ?', [idAccount]);
@@ -257,7 +262,7 @@ const updateCustomers = async (body, user, adminId) => {
       maximumAmount: maximumAmount,
       montlyFee: montlyFee,
       registeredBy: adminId,
-      registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+      registeredDate: todayDate
     };
     const accountQuery = await pool.query('UPDATE Account SET ? where idAccount = ?', [newAccount, idAccount]);
 
@@ -290,8 +295,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
           genus: customersData[i].Genero,
           Company_idCompany: companyNitQuery[0].idCompany,
           registeredBy: adminId,
-          entryDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-          registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+          entryDate: todayDate,
+          registeredDate: todayDate,
         };
 
         //Insert the client
@@ -303,8 +308,8 @@ const createMultipleCustomers = async (customersData, adminId) => {
           name: customersData[i].Nombre,
           email: customersData[i].CorreoElectronico,
           registeredBy: adminId,
-          registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-          createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+          registeredDate: todayDate,
+          createdDate: todayDate,
           Role_idRole: 4,
           status: false,
           Client_idClient: clientQuery.insertId
@@ -327,7 +332,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           totalRemainder: 0,
           approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
           registeredBy: adminId,
-          registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+          registeredDate: todayDate,
           Client_idClient: clientQuery.insertId
         };
 
@@ -440,6 +445,11 @@ const getTransactionsByUsersId = async (userId) => {
 const approveCustomers = async (clientid, approve, adminId, cycleId) => {
 
   try {
+    await pool.query('START TRANSACTION');
+
+
+    const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
+
 
     if (approve === "true") {
 
@@ -447,7 +457,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
 
       const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientid]);
 
-      const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
+      //const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
 
       //DocumentClients
       const filesPath = {
@@ -467,12 +477,12 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         phoneNumber: newClient[0].phoneNumber,
         Company_idCompany: newClient[0].Company_idCompany,
         registeredBy: 1,
-        registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        entryDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+        registeredDate: todayDate,
+        entryDate: todayDate,
         rejectState: false,
         isDeleted: false,
         platformState: true,
-        createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+        createdDate: todayDate,
         ClientDocuments_idClientDocuments: fileQuery.insertId,
         CompanySalaries_idCompanySalaries: cycleId,
 
@@ -489,10 +499,12 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
         email: newClient[0].email,
         status: true,
         registeredBy: 1,
-        registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+        registeredDate: todayDate,
+        createdDate: todayDate,
         Role_idRole: 4,
         Client_idClient: clientQuery.insertId,
+        isConfirmed:true,
+
       };
 
       const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
@@ -501,24 +513,33 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
       const newAccount = {
         maximumAmount: companyQuery[0].defaultAmount,
+        accumulatedQuantity: 0,
         documentsUploaded: true,
         montlyFee: companyQuery[0].maximumSplit,
         totalInterest: 0, totalFeeAdministration: 0,
         totalOtherCollection: 0, totalRemainder: 0,
         approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-        registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }), Client_idClient: clientQuery.insertId
+        registeredBy: 1,
+         registeredDate: todayDate,
+         Client_idClient: clientQuery.insertId, 
+         lastAdministrationDate:todayDate
       };
       const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
       //Insert into auth
+      //todayDate.setHours(todayDate.getHours() + expirationTime)
+      const new_date = new Date();
+            new_date.setHours(new_date.getHours() + expirationTime);
+         
       const newAuth = {
         User_idUser: userQuery.insertId,
         registeredBy: 1,
-        registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        password: newClient[0].password
+        registeredDate: todayDate,
+        createdDate: todayDate,
+        password: newClient[0].password,
+        expiresOn:new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
       };
-
+      
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
 
       //Confirmation link
@@ -527,7 +548,6 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       const jwtoken = await jwt.sign({ userRow }, my_secret_key, { expiresIn: '30m' });
       const url = base_URL + `/Account/Confirm/${jwtoken}`;
       //console.log(url.toString());
-
 
 
       //Mailer
@@ -547,18 +567,41 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
       //Send SMS 
       if (ENVIRONMENT === 'production') {
         const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.APPROVED_CLIENT]);
-        sendSMS(newClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+        sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
       }
+      await pool.query('COMMIT');
+
       return { status: 200, message: "El usuario ha sido aprobado exitosamente." };
 
     } else {
 
       const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [2, clientid]);
+      //enviar correo y SMS de usuario rechazado
+      //Mailer
+      let userData = {
+        email: newClient[0].email,
+        name: newClient[0].name,
+        url: front_URL,
+        base_URL_test: base_URL + "/confirmation.png",
+        footer: base_URL + "/footer.png",
+      };
+
+      var subject = 'Avanzo (Créditos al instante) - Rechazo de cuenta';
+      var text = 'Avanzo';
+      var template = ACCOUNT_REJECTED;
+      sendEmail(template, userData, '', '', subject, text, '');
+      //Send SMS 
+      if (ENVIRONMENT === 'production') {
+        const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CLIENT_REJECTED]);
+        sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
+      }
+      await pool.query('COMMIT');
 
       return { status: 200, message: "El usuario ha sido rechazado exitosamente." };
     }
   } catch (e) {
     console.log(e);
+    await pool.query('ROLLBACK');
     return { status: 500, message: e.sqlMessage };
   }
 
@@ -617,7 +660,7 @@ const makePayments = async (clientid, quantity) => {
     const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientid]);
 
     //Transaction
-    const paymentTransaction = { quantity: quantity, transactionType: "Pago", createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }), registeredDate: new Date, Account_idAccount: userRow[0].idAccount }
+    const paymentTransaction = { quantity: quantity, transactionType: "Pago", createdDate: todayDate, registeredDate: new Date, Account_idAccount: userRow[0].idAccount }
 
     //Transaction Query
     const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [paymentTransaction]);

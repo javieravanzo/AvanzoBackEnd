@@ -56,7 +56,9 @@ router.post('/Account/Register', [
 router.post('/Account/NewRegister', uploads.fields([
   { name: 'documentId', maxCount: 1 },
   { name: 'photo', maxCount: 1 },
-  { name: 'paymentReport', maxCount: 1}
+  { name: 'paymentReport', maxCount: 1},
+  body('birthDate', 'Fecha de nacimiento es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
+
 ]), preRegister);
 
 //Routes

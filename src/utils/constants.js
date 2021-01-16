@@ -1,4 +1,5 @@
-const ENVIRONMENT = "development";
+//const ENVIRONMENT = "development";
+const ENVIRONMENT = "production";
 
 /* ----------------- Bancos ------------------- */
 const banks = {
@@ -48,6 +49,8 @@ SMS_CODES = {
   CUSTOMER_PENDING_APPROVAL: 6
 };
 
+STATE = { TRUE: true, FALSE: false };
+
 
 const ATTACHMENT_TYPES = { PDF: 'application/pdf' };
 
@@ -57,14 +60,15 @@ const FROM_SEND_SMS = "AVANZO";
 const SG_MAIL_API_KEY = "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";
 const FROM_SEND_EMAIL = "operaciones@avanzo.co"
 //FILES
-const PATH_FILE_CONTRACT ="../files/contracts/contratoAvanzo.pdf";
-const NAME_FILE_CONTRACT ="contratoAvanzo.pdf";
+const PATH_FILE_CONTRACT = "../files/contracts/contratoAvanzo.pdf";
+const NAME_FILE_CONTRACT = "contratoAvanzo.pdf";
 //TEMPLATES
-const PENDING_APPROVAL ="pendingApproval";
-const ACCOUNT_CONFIRMATION ="accountConfirmation";
+const PENDING_APPROVAL = "pendingApproval";
+const ACCOUNT_CONFIRMATION = "accountConfirmation";
+const ACCOUNT_REJECTED = "accountRejected";
 
 
 module.exports = {
-  ENVIRONMENT,banks, URL_SEND_SMS, AUTH_SEND_SMS, SG_MAIL_API_KEY, ATTACHMENT_TYPES, FROM_SEND_EMAIL, FROM_SEND_SMS,SMS_CODES,PATH_FILE_CONTRACT,
-  NAME_FILE_CONTRACT,PENDING_APPROVAL,ACCOUNT_CONFIRMATION
+  ENVIRONMENT, banks, URL_SEND_SMS, AUTH_SEND_SMS, SG_MAIL_API_KEY, ATTACHMENT_TYPES, FROM_SEND_EMAIL, FROM_SEND_SMS, SMS_CODES, PATH_FILE_CONTRACT,
+  NAME_FILE_CONTRACT, PENDING_APPROVAL, ACCOUNT_CONFIRMATION, ACCOUNT_REJECTED, STATE
 }

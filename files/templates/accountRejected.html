@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <meta chraset="UTF-8">
+    <style type="text/css">
+      .body-email{
+        width: 50% !important;
+        margin: auto !important;
+      }
+      .image-class{
+        width: 100% !important;
+      }
+      .body-content{
+        width: 85% !important;
+        margin: auto !important;
+        text-align: center !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+        color: #00609C !important;
+      }
+      .email-content{
+        font-size: 17px !important;
+      }
+      .email-divider{
+        width: 80% !important;
+        margin: auto !important;
+        color: #CCEBF8 !important;
+        border-color: #CCEBF8 !important;
+        background-color: #CCEBF8 !important;
+      }
+      .email-ignore{
+        font-size: 14px !important;
+      }
+      .web-button{
+        background-color: #00609C !important;
+        color: white !important;
+        font-size: 15px !important;
+        border-radius: 15px !important;
+        padding: 10px !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+    </style>  
+  </head>
+  <body>
+    <div class="body-email">
+      <div >
+        <img alt="signature" class="image-class" src='../images/confirmation.png'>
+      </div>
+      <br/>
+      <div class="body-content">
+        <div class="body-title">
+          <span class="email-content">
+            <b>Nada nos motiva más tú seas parte de nuestra familia.</b> Apreciado {{name}}, tu registro fue RECHAZADO si quieres saber los motivos del rechazo
+            comunicate con tu asesor de Avanzo
+          </span>
+        </div>
+        <br/>  
+        <div class="email-divider">
+          <hr/>
+        </div> 
+        <br/>
+
+        <div class="email-ignore">
+          <u>*Si no hiciste esta solicitud, por favor omite este mensaje.</u>
+        </div>
+        <br/>
+        <div class="footer-confirmation">
+          <button class="web-button" background-color= "#00609C" color= "white" font-size= "15px"
+                  border-radius= "15px" padding= "10px" font-family="Arial, Helvetica, sans-serif" href={{url}}>Ir a la página web</button>
+        </div>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>

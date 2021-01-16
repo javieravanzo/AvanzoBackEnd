@@ -8,9 +8,9 @@ var request = require('request');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
 const path = require('path');
-
+const {registerSMS,registerEmail,changeStateMail,changeStateSMS} = require('../services/utils.js')
 //constans send SMS
-const { URL_SEND_SMS,SMS_CODES,AUTH_SEND_SMS,FROM_SEND_SMS,SG_MAIL_API_KEY,FROM_SEND_EMAIL } = require('../utils/constants.js');
+const { URL_SEND_SMS,SMS_CODES,AUTH_SEND_SMS,FROM_SEND_SMS,SG_MAIL_API_KEY,FROM_SEND_EMAIL,STATE } = require('../utils/constants.js');
 
 // send mails
 const sgMail = require('@sendgrid/mail');
@@ -20,7 +20,7 @@ const sgMail = require('@sendgrid/mail');
   const sendSMS = async (to,body) => {
 
     try {
-       
+      let sms =registerSMS(to,body).then(sms => console.log(sms));
       var options = {
         'method': 'POST',
         'url': URL_SEND_SMS,
@@ -31,14 +31,14 @@ const sgMail = require('@sendgrid/mail');
           'Accept': 'application/json'
         },
         body: JSON.stringify({"from":FROM_SEND_SMS,"to":"57"+to,"text":body})
-      
       };
       request(options, function (error, response) {
-        if (error) throw new Error(error);
+        if (error){
+          changeStateSMS(sms.data.insertId,STATE.FALSE);
+          throw new Error(error);
+        } 
         console.log("Respuesta de envio SMS : \n",response.body);
       });
-      
-
     } catch(e) {
         console.log(e);
         res.status(500).json("No es posible enviar mensaje de texto de momento.");
@@ -49,12 +49,13 @@ const sgMail = require('@sendgrid/mail');
   const sendEmail = async (templateName,userData,attachmentName,attachmentType,subject,text,pathFileToCompile) => {
 
     try {
-       
+     
+      //let email = registerEmail(subject,text,templateName,attachmentName,attachmentType,pathFileToCompile,userData);
+  
+      let email =registerEmail(subject,text,templateName,attachmentName,attachmentType,pathFileToCompile,userData).then(email => console.log(email));
       sgMail.setApiKey(SG_MAIL_API_KEY);
       let output = await compile(templateName, userData);
-      
       let fileToCompile =pathFileToCompile !=='' ?  await compileContract(pathFileToCompile) : null ;
-
       let info = {
         from: FROM_SEND_EMAIL, // sender address
         to: userData.email, // list of receivers
@@ -72,13 +73,11 @@ const sgMail = require('@sendgrid/mail');
           }
         ] 
       }
-
-
+    
       await sgMail.send(info).catch(err => {
+        changeStateMail(email.data.insertId,STATE.FALSE);
         console.log("Error", err);
       });
-
-
 
     } catch(e) {
         console.log(e);
