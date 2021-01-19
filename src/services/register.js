@@ -6,8 +6,7 @@ const jwt = require('jsonwebtoken');
 const { my_secret_key, base_URL, front_URL, base_URL_test } = require('../config/global');
 
 const { sendEmail, sendSMS } = require('../utils/utils.js');
-const { ENVIRONMENT, SMS_CODES, ATTACHMENT_TYPES, PATH_FILE_CONTRACT, NAME_FILE_CONTRACT, PENDING_APPROVAL,
-  ACCOUNT_CONFIRMATION } = require('../utils/constants.js');
+const { ENVIRONMENT, SMS_CODES,PENDING_APPROVAL,PRE_CLIENT_STATES } = require('../utils/constants.js');
 //Services
 const registerCustomer = async (identificationId, client, user, auth) => {
 
@@ -114,8 +113,10 @@ const newPreregister = async (client, user, files, auth) => {
   let consultUser = [];
 
   try {
-    await pool.query('START TRANSACTION');
 
+
+    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND (nc.email = ? OR nc.identificationId = ? OR nc.phoneNumber = ?) `, [ user.email,client.identificationId,client.phoneNumber]);
+if (JSON.stringify(userPre) === '[]'){
     const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
     //console.log("UR", userRow);
     consultUser = userRow;
@@ -158,7 +159,6 @@ const newPreregister = async (client, user, files, auth) => {
         clie_address: client.clie_address,
         clie_from: client.clie_from
       };
-      console.log(preClient);
       const preClientQuery = await pool.query('INSERT INTO NewClient SET ?', [preClient]);
 
 
@@ -172,67 +172,35 @@ const newPreregister = async (client, user, files, auth) => {
         base_URL_test: base_URL + "/confirmation.png",
         footer: base_URL + "/footer.png",
       };
-      sendEmail(template, userData, '', '', subject, text, '')
 
+      sendEmail(template, userData, '', '', subject, text, '')
       //Send SMS 
       if (ENVIRONMENT === 'production') {
         const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
         sendSMS(preClient.phoneNumber, smsCodesQuery[0].sms_co_body);
       }
-      await pool.query('COMMIT');
+      console.log('--------------------------------');
 
       return { status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico." };
       
-    } else {
-
-      if (parseInt(consultUser[0].status, 10) === 0) {
-
-        //DocumentClients
-        const filesPath = files;
-        const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
-
-        //New Client
-        const newClient = client;
-        newClient.registeredBy = 1;
-        newClient.documentType = "Cédula";
-        newClient.isApproved = false;
-        newClient.entryDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newClient.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newClient.createdDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newClient.ClientDocuments_idClientDocuments = fileQuery.insertId;
-
-        const clientQuery = await pool.query('UPDATE Client SET ? where identificationId = ?', [newClient, client.identificationId]);
-
-        //Insert in user
-        const newUser = user;
-        newUser.registeredBy = 1;
-        newUser.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newUser.createdDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newUser.Role_idRole = 4;
-        newUser.status = true;
-        const userQuery = await pool.query('UPDATE User SET ? where email = ?', [newUser, user.email]);
-
-
-        //Insert into auth
-        const newAuth = {
-          User_idUser: consultUser[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-          createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
-        };
-        newAuth.password = await helpers.encryptPassword(auth.password);
-        const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
-        await pool.query('COMMIT');
-
-        return { status: 200, message: "Tu usuario ha sido actualizado exitosamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico." };
-
-      } else {
-
-        return { status: 400, message: "Tu usuario ya ha sido registrado anteriormente en la plataforma con tu cédula o con tu correo. Inicia sesión o espera el correo de aprobación de tu cuenta." };
-
-      }
     }
+    
+  }else{
+    messages =[];
+    if(userPre[0].email === user.email ){
+      messages.push("Este email ya esta registrado");
+    }
+    if(userPre[0].identificationId === client.identificationId){
+      messages.push("Este numero de documento ya esta registrado");
+    }
+    if(userPre[0].phoneNumber === user.phoneNumber ){
+      messages.push("Este numero de telefono ya esta registrado");
+    }
+    return { status: 500, message: messages};
+
+  }
   } catch (e) {
     console.log("E", e);
-    await pool.query('ROLLBACK');
 
     return { status: 500, message: { message: "Error interno del servidor." } };
   }

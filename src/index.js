@@ -34,6 +34,7 @@ app.use(require('./routes/company/company'));
 app.use(require('./routes/integration/integration'));
 app.use(require('./routes/reports/reports'));
 app.use(require('./routes/validations/validations'));
+app.use(require('./routes/user/User'));
 
 //Server
 app.listen( app.get('port'), () => {

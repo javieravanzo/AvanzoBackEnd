@@ -8,7 +8,7 @@ const { getInitialsData, getRequestsData, getAllCustomers, createCustomer, creat
         getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin,
         getCustomerToApprove, getCustomerCountToApprove, approveCustomers, changeCustomersStatus,
         updateCustomers, makePayments, getDatesListToCustomer, deleteUser,
-        getCustomerAccountDetail } = require('../services/customer');
+        getCustomerAccountDetail,updateStateCustomer } = require('../services/customer');
 
 //Get the company with token
 function getCompanyId(req){
@@ -330,9 +330,9 @@ const approveCustomer = async (req, res, next) => {
 
         //Get the user id
         const adminId = getAdminId(req);
-        const {clientid, approve, cycleid} = req.headers;
+        const {clientid, approve, cycleid,rere_id} = req.headers;
 
-        const result = await approveCustomers(clientid, approve, adminId, parseInt(cycleid, 10));
+        const result = await approveCustomers(clientid, approve, adminId, parseInt(cycleid, 10),rere_id);
         
         //const result = {status: 200};
         
@@ -443,9 +443,32 @@ const getAccountDetail = async (req, res, next) => {
 
 };
 
+const updateState = async (req, res, next) => {
+    
+    try {
+
+        //Get the user id
+        const {idClient,clie_state} = req.body;
+
+        //console.log("CI", clientid, "S", status);
+        const result = await updateStateCustomer(idClient,clie_state);
+        if(result.status === 200){
+            res.status(result.status).json(result.message);
+        }else{
+            res.status(result.status).json(result.message);
+        }
+        next();
+
+    } catch(e) {
+        console.log(e);
+        res.status(500).json("No es posible eliminar el usuario en este momento.");
+    };
+
+};
+
 module.exports = {
   getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
   getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
   getCountCustomerToApprove, approveCustomer, changeCustomerStatus, updateCustomer, makePayment,
-  getDateListToCustomer, deleteUsers, getAccountDetail
+  getDateListToCustomer, deleteUsers, getAccountDetail,updateState
 };

@@ -1352,6 +1352,23 @@ const getAllRequestFinalized = async () => {
 
 };
 
+
+const getAllReasonsOfRejection = async () => {
+
+  try {
+
+  
+    //Select rows
+    const requestRow = await pool.query('SELECT rere_id, rere_type, rere_description, rere_create_At FROM rejection_reasons');
+
+    return { status: 200, data: requestRow };
+  } catch (e) {
+    ////console.log(e);
+    return { status: 500, message: { message: "No es posible traer las Razones de rechazo." } };
+  }
+
+};
+
 const generateContracts = async (customerid, split, quantity, company) => {
 
   try {
@@ -1574,5 +1591,5 @@ module.exports = {
   getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
   passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllDefinitelyRejected,
   getAllProcessWithoutChangeRequest, updateDocumentsRequest, updateRequestInformation,
-  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized
+  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized,getAllReasonsOfRejection
 };

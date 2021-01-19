@@ -12,7 +12,7 @@ const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getA
         getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
         passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllProcessWithoutChangeRequest,
         updateDocumentsRequest, updateRequestInformation, getAllDefinitelyRejected, getAllProcessDocumentsChange,
-        getAllProcessBank, getAllRequestFinalized
+        getAllProcessBank, getAllRequestFinalized,getAllReasonsOfRejection
       } = require('../services/request');
 
 //Get the client with token
@@ -619,6 +619,24 @@ const generateContract = async (req, res, next) => {
 
 };
 
+
+const getAllRejectionReasons = async (req, res, next) => {
+
+  try {
+    const result = await getAllReasonsOfRejection();
+    if(result.status === 200){
+      res.status(result.status).json(result.data);
+    }else{
+      res.status(result.status).json(result.message);
+    }
+    next();
+  }catch(e) {
+    console.log("E", e);
+    res.status(500).json({message: "No es posible obtener la información en este momento."});
+  };
+
+};
+
 const generateCodes = async (req, res, next) => {
 
   const {clientid, phonenumber, email} = req.headers;
@@ -670,5 +688,5 @@ module.exports = {
   generateCodes, checkCodes, getPendingBankRefundedRequest, changeToProcessWithDocuments,
   changeToProcessWithoutChange, changeToOutlay, getAllReviewWithoutChangeRequest, 
   updateRequestsInformation, updateDocumentsRequests, getDefinitelyRejectedRequest,
-  getAllRequestWithDocumentsChange, getAllProcessInBank, getAllFinalizedRequest
+  getAllRequestWithDocumentsChange, getAllProcessInBank, getAllFinalizedRequest,getAllRejectionReasons
 };

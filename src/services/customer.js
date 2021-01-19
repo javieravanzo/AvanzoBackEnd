@@ -9,11 +9,11 @@ const fs = require('fs-extra');
 const hbs = require('handlebars');
 const { sendEmail, sendSMS } = require('../utils/utils.js');
 const { ENVIRONMENT, SMS_CODES, ATTACHMENT_TYPES, PATH_FILE_CONTRACT, NAME_FILE_CONTRACT, PENDING_APPROVAL,
-  ACCOUNT_CONFIRMATION, ACCOUNT_REJECTED } = require('../utils/constants.js');
+  ACCOUNT_CONFIRMATION, ACCOUNT_REJECTED, PRE_CLIENT_STATES, ROLES } = require('../utils/constants.js');
 
 //constants
 const todayDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '');
-const expirationTime =5 ;
+const expirationTime = 5;
 
 
 //Functions
@@ -238,24 +238,48 @@ const createCustomer = async (body, user, company, adminId) => {
 const updateCustomers = async (body, user, adminId) => {
 
   //NewClient
-  const { identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee } = body;
+  const { accountBank,identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee } = body;
 
-  const newClient = { identificationId, phoneNumber, profession };
-  newClient.registeredBy = adminId;
-  newClient.registeredDate = todayDate;
-
+  let newClient = {};
+  let newUser = {};
   try {
+    const currentUser = await pool.query('SELECT U.Role_idRole FROM User U where idUser = ?', [adminId]);
+    
+
+    //only user with role 1 can update , phonenumber,documentnumber,email,bankaccount
+    if (currentUser[0].Role_idRole === ROLES.ADMINISTRATOR) {
+      //update client
+      newClient = { identificationId, phoneNumber, profession,accountBank };
+      newClient.registeredBy = adminId;
+      newClient.registeredDate = todayDate;
+
+      //Update in user
+      newUser = user;
+      newUser.lastName = lastName;
+      newUser.registeredBy = adminId;
+      newUser.registeredDate = todayDate;
+
+    } else {
+      //update client
+      newClient = { profession }; 
+      newClient.registeredBy = adminId;
+      newClient.registeredDate = todayDate;
+
+      //Update in user
+      newUser.name = user.name;
+      newUser.lastName = lastName;
+      newUser.registeredBy = adminId;
+      newUser.registeredDate = todayDate;
+    }
+
+    await pool.query('START TRANSACTION');
 
     const clientQuery = await pool.query('UPDATE Client SET ? where idClient = ?', [newClient, idClient]);
 
-    //Insert in user
-    const newUser = user;
-    newUser.lastName = lastName;
-    newUser.registeredBy = adminId;
-    newUser.registeredDate = todayDate;
+
     const userQuery = await pool.query('UPDATE User SET ? where idUser = ?', [newUser, idUser]);
 
-    const consultAccumulated = await pool.query('SELECT accumulatedQuantity FROM Account where idAccount = ?', [idAccount]);
+    // const consultAccumulated = await pool.query('SELECT accumulatedQuantity FROM Account where idAccount = ?', [idAccount]);
 
     //Create an account
     const newAccount = {
@@ -265,10 +289,14 @@ const updateCustomers = async (body, user, adminId) => {
       registeredDate: todayDate
     };
     const accountQuery = await pool.query('UPDATE Account SET ? where idAccount = ?', [newAccount, idAccount]);
+    await pool.query('COMMIT');
 
     return { status: 200, message: "El cliente ha sido actualizado exitosamente." };
+
   } catch (e) {
     console.log(e);
+    await pool.query('ROLLBACK');
+
     return { status: 500, message: "Error interno del servidor. Por favor, intente más tarde." };
 
   }
@@ -442,10 +470,9 @@ const getTransactionsByUsersId = async (userId) => {
 };
 
 //Pendiente traer IDENTIFICATION ID
-const approveCustomers = async (clientid, approve, adminId, cycleId) => {
+const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) => {
 
   try {
-    await pool.query('START TRANSACTION');
 
 
     const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
@@ -453,155 +480,171 @@ const approveCustomers = async (clientid, approve, adminId, cycleId) => {
 
     if (approve === "true") {
 
-      //console.log("CI", clientid, approve, cycleId);
+      try {
+        await pool.query('START TRANSACTION');
 
-      const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientid]);
+        //console.log("CI", clientid, approve, cycleId);
 
-      //const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
+        const updateNewClient = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [1, clientid]);
 
-      //DocumentClients
-      const filesPath = {
-        documentId: newClient[0].file1,
-        paymentReport: newClient[0].file3
-      };
+        //const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
 
-      const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
+        //DocumentClients
+        const filesPath = {
+          documentId: newClient[0].file1,
+          paymentReport: newClient[0].file3
+        };
 
-      //New Client
-      const client = {
-        identificationId: newClient[0].identificationId,
-        documentType: newClient[0].documentType,
-        birthDate: newClient[0].birthDate,
-        city: newClient[0].city,
-        salary: newClient[0].salary,
-        phoneNumber: newClient[0].phoneNumber,
-        Company_idCompany: newClient[0].Company_idCompany,
-        registeredBy: 1,
-        registeredDate: todayDate,
-        entryDate: todayDate,
-        rejectState: false,
-        isDeleted: false,
-        platformState: true,
-        createdDate: todayDate,
-        ClientDocuments_idClientDocuments: fileQuery.insertId,
-        CompanySalaries_idCompanySalaries: cycleId,
+        const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
 
-      };
+        //New Client
+        const client = {
+          identificationId: newClient[0].identificationId,
+          documentType: newClient[0].documentType,
+          birthDate: newClient[0].birthDate,
+          city: newClient[0].city,
+          salary: newClient[0].salary,
+          phoneNumber: newClient[0].phoneNumber,
+          Company_idCompany: newClient[0].Company_idCompany,
+          registeredBy: 1,
+          registeredDate: todayDate,
+          entryDate: todayDate,
+          rejectState: false,
+          isDeleted: false,
+          platformState: true,
+          createdDate: todayDate,
+          ClientDocuments_idClientDocuments: fileQuery.insertId,
+          CompanySalaries_idCompanySalaries: cycleId,
 
-      //console.log("Client", client);
+        };
 
-      const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
+        //console.log("Client", client);
 
-      //Insert in user
-      const newUser = {
-        name: newClient[0].name,
-        lastName: newClient[0].lastName,
-        email: newClient[0].email,
-        status: true,
-        registeredBy: 1,
-        registeredDate: todayDate,
-        createdDate: todayDate,
-        Role_idRole: 4,
-        Client_idClient: clientQuery.insertId,
-        isConfirmed:true,
+        const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
 
-      };
+        //Insert in user
+        const newUser = {
+          name: newClient[0].name,
+          lastName: newClient[0].lastName,
+          email: newClient[0].email,
+          status: true,
+          registeredBy: 1,
+          registeredDate: todayDate,
+          createdDate: todayDate,
+          Role_idRole: 4,
+          Client_idClient: clientQuery.insertId,
+          isConfirmed: true,
 
-      const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
+        };
 
-      //Create an account
-      const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
-      const newAccount = {
-        maximumAmount: companyQuery[0].defaultAmount,
-        accumulatedQuantity: 0,
-        documentsUploaded: true,
-        montlyFee: companyQuery[0].maximumSplit,
-        totalInterest: 0, totalFeeAdministration: 0,
-        totalOtherCollection: 0, totalRemainder: 0,
-        approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-        registeredBy: 1,
-         registeredDate: todayDate,
-         Client_idClient: clientQuery.insertId, 
-         lastAdministrationDate:todayDate
-      };
-      const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
+        const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
 
-      //Insert into auth
-      //todayDate.setHours(todayDate.getHours() + expirationTime)
-      const new_date = new Date();
-            new_date.setHours(new_date.getHours() + expirationTime);
-         
-      const newAuth = {
-        User_idUser: userQuery.insertId,
-        registeredBy: 1,
-        registeredDate: todayDate,
-        createdDate: todayDate,
-        password: newClient[0].password,
-        expiresOn:new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
-      };
-      
-      const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+        //Create an account
+        const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
+        const newAccount = {
+          maximumAmount: companyQuery[0].defaultAmount,
+          accumulatedQuantity: 0,
+          documentsUploaded: true,
+          montlyFee: companyQuery[0].maximumSplit,
+          totalInterest: 0, totalFeeAdministration: 0,
+          totalOtherCollection: 0, totalRemainder: 0,
+          approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+          registeredBy: 1,
+          registeredDate: todayDate,
+          Client_idClient: clientQuery.insertId,
+          lastAdministrationDate: todayDate
+        };
+        const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
-      //Confirmation link
-      const consultEmail = await pool.query('SELECT U.email, U.name FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.idClient = ?', [clientQuery.insertId]);
-      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientQuery.insertId]);
-      const jwtoken = await jwt.sign({ userRow }, my_secret_key, { expiresIn: '30m' });
-      const url = base_URL + `/Account/Confirm/${jwtoken}`;
-      //console.log(url.toString());
+        //Insert into auth
+        //todayDate.setHours(todayDate.getHours() + expirationTime)
+        const new_date = new Date();
+        new_date.setHours(new_date.getHours() + expirationTime);
+
+        const newAuth = {
+          User_idUser: userQuery.insertId,
+          registeredBy: 1,
+          registeredDate: todayDate,
+          createdDate: todayDate,
+          password: newClient[0].password,
+          expiresOn: new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
+        };
+
+        const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+
+        //Confirmation link
+        const consultEmail = await pool.query('SELECT U.email, U.name FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.idClient = ?', [clientQuery.insertId]);
+        const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientQuery.insertId]);
+        const jwtoken = await jwt.sign({ userRow }, my_secret_key, { expiresIn: '30m' });
+        const url = base_URL + `/Account/Confirm/${jwtoken}`;
+        //console.log(url.toString());
+
+        await pool.query('COMMIT');
+        //Mailer
+        let userData = {
+          email: consultEmail[0].email,
+          name: consultEmail[0].name,
+          url: front_URL,
+          base_URL_test: base_URL + "/confirmation.png",
+          footer: base_URL + "/footer.png",
+          link: url,
+        };
+
+        var subject = 'Avanzo (Créditos al instante) - Confirmación de cuenta';
+        var text = 'Avanzo';
+        var template = ACCOUNT_CONFIRMATION;
+        sendEmail(template, userData, NAME_FILE_CONTRACT, ATTACHMENT_TYPES.PDF, subject, text, PATH_FILE_CONTRACT)
+        //Send SMS 
+        if (ENVIRONMENT === 'production') {
+          const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.APPROVED_CLIENT]);
+          sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
+        }
 
 
-      //Mailer
-      let userData = {
-        email: consultEmail[0].email,
-        name: consultEmail[0].name,
-        url: front_URL,
-        base_URL_test: base_URL + "/confirmation.png",
-        footer: base_URL + "/footer.png",
-        link: url,
-      };
+        return { status: 200, message: "El usuario ha sido aprobado exitosamente." };
 
-      var subject = 'Avanzo (Créditos al instante) - Confirmación de cuenta';
-      var text = 'Avanzo';
-      var template = ACCOUNT_CONFIRMATION;
-      sendEmail(template, userData, NAME_FILE_CONTRACT, ATTACHMENT_TYPES.PDF, subject, text, PATH_FILE_CONTRACT)
-      //Send SMS 
-      if (ENVIRONMENT === 'production') {
-        const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.APPROVED_CLIENT]);
-        sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
+      } catch (error) {
+        await pool.query('ROLLBACK');
+
       }
-      await pool.query('COMMIT');
-
-      return { status: 200, message: "El usuario ha sido aprobado exitosamente." };
 
     } else {
 
-      const clientQuery = await pool.query('UPDATE NewClient SET status = ? where idNewClient = ?', [2, clientid]);
-      //enviar correo y SMS de usuario rechazado
-      //Mailer
-      let userData = {
-        email: newClient[0].email,
-        name: newClient[0].name,
-        url: front_URL,
-        base_URL_test: base_URL + "/confirmation.png",
-        footer: base_URL + "/footer.png",
-      };
 
-      var subject = 'Avanzo (Créditos al instante) - Rechazo de cuenta';
-      var text = 'Avanzo';
-      var template = ACCOUNT_REJECTED;
-      sendEmail(template, userData, '', '', subject, text, '');
-      //Send SMS 
-      if (ENVIRONMENT === 'production') {
-        const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CLIENT_REJECTED]);
-        sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
+      try {
+        await pool.query('START TRANSACTION');
+
+        const clientQuery = await pool.query('UPDATE NewClient SET status = ?,rere_id = ? where idNewClient = ?', [PRE_CLIENT_STATES.REJECTED, rere_id, clientid]);
+        //enviar correo y SMS de usuario rechazado
+        await pool.query('COMMIT');
+
+        //Mailer
+        let userData = {
+          email: newClient[0].email,
+          name: newClient[0].name,
+          url: front_URL,
+          base_URL_test: base_URL + "/confirmation.png",
+          footer: base_URL + "/footer.png",
+        };
+
+        var subject = 'Avanzo (Créditos al instante) - Rechazo de cuenta';
+        var text = 'Avanzo';
+        var template = ACCOUNT_REJECTED;
+        sendEmail(template, userData, '', '', subject, text, '');
+        //Send SMS 
+        if (ENVIRONMENT === 'production') {
+          const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CLIENT_REJECTED]);
+          sendSMS(newClient[0].phoneNumber, smsCodesQuery[0].sms_co_body);
+        }
+
+        return { status: 200, message: "El usuario ha sido rechazado exitosamente." };
+      } catch (error) {
+        await pool.query('ROLLBACK');
+
       }
-      await pool.query('COMMIT');
-
-      return { status: 200, message: "El usuario ha sido rechazado exitosamente." };
     }
   } catch (e) {
     console.log(e);
-    await pool.query('ROLLBACK');
     return { status: 500, message: e.sqlMessage };
   }
 
@@ -691,9 +734,23 @@ const getCustomerAccountDetail = async (clientid) => {
 
 };
 
+
+const updateStateCustomer = async (idClient, clie_state) => {
+
+
+  try {
+    const clientQuery = await pool.query('UPDATE Client SET clie_state = ? where idClient = ?', [clie_state, idClient]);
+    return { status: 200, message: { message: "El Cliente cambio de estado exitosamente." } };
+  } catch (e) {
+    console.log(e);
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
 module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
   approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer,
-  deleteUser, getCustomerAccountDetail, getCustomerCountToApprove
+  deleteUser, getCustomerAccountDetail, getCustomerCountToApprove, updateStateCustomer
 }

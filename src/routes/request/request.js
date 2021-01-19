@@ -51,7 +51,7 @@ const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getR
         getPendingBankRefundedRequest, changeToProcessWithoutChange, changeToOutlay,
         changeToProcessWithDocuments, getAllReviewWithoutChangeRequest, updateDocumentsRequests,
         updateRequestsInformation, getDefinitelyRejectedRequest, getAllRequestWithDocumentsChange,
-        getAllProcessInBank, getAllFinalizedRequest
+        getAllProcessInBank, getAllFinalizedRequest,getAllRejectionReasons
        } = require('../../controllers/request');
   
 //Routes 
@@ -130,6 +130,8 @@ router.get('/Request/GetAllRequestWithDocumentChanges', [verifyToken], getAllReq
 router.get('/Request/GetAllProcessInBank', [verifyToken], getAllProcessInBank);
 
 router.get('/Request/GetAllFinalizedRequest', [verifyToken], getAllFinalizedRequest);
+
+router.get('/Request/GetAllRejectionReasons', [verifyToken], getAllRejectionReasons);
 
 router.get('/Documents/GenerateContract', [
   header('split', 'La cantidad de cuotas es inválida.').exists().isInt().not().isEmpty(),

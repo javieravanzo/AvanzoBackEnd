@@ -20,7 +20,7 @@ const sgMail = require('@sendgrid/mail');
   const sendSMS = async (to,body) => {
 
     try {
-      let sms =registerSMS(to,body).then(sms => console.log(sms));
+      let sms =registerSMS(to,body).then(/*sms => console.log(sms)*/);
       var options = {
         'method': 'POST',
         'url': URL_SEND_SMS,
@@ -52,7 +52,7 @@ const sgMail = require('@sendgrid/mail');
      
       //let email = registerEmail(subject,text,templateName,attachmentName,attachmentType,pathFileToCompile,userData);
   
-      let email =registerEmail(subject,text,templateName,attachmentName,attachmentType,pathFileToCompile,userData).then(email => console.log(email));
+      let email =registerEmail(subject,text,templateName,attachmentName,attachmentType,pathFileToCompile,userData).then(/*email => console.log(email)*/);
       sgMail.setApiKey(SG_MAIL_API_KEY);
       let output = await compile(templateName, userData);
       let fileToCompile =pathFileToCompile !=='' ?  await compileContract(pathFileToCompile) : null ;

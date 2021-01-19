@@ -10,7 +10,7 @@ const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCu
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
         getAllCustomerToApprove, getCountCustomerToApprove, getDateListToCustomer, approveCustomer,
         updateCustomer, changeCustomerStatus, makePayment, deleteUsers,
-        getAccountDetail} = require('../../controllers/customer');
+        getAccountDetail,updateState} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -125,6 +125,12 @@ router.put('/Customer/Delete', [verifyToken], deleteUsers);
 router.post('/Customer/MakePayment', [verifyToken], makePayment);
 
 router.get('/Customer/GetAccountDetail', [verifyToken], getAccountDetail);
+
+router.put('/Customer/UpdateState', [
+  body('clie_state', 'Estado nuevo no puede ser vacio').exists().isBoolean().not().isEmpty(),
+  body('idClient', 'Id usuario no puede ser vacio').exists().isInt().not().isEmpty(),
+]
+, [verifyToken], updateState);
 
 //Export
 module.exports = router;
