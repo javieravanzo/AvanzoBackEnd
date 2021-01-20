@@ -441,18 +441,18 @@ const receiveBankReport = async (req, res, next) => {
 
     // Create a workbook, like a file.
     var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
-    var writeWorkbook = Excel.readFile(req.files.write[0].path, { cellDates: true });
+    
 
     // Define the sheet of work.
     var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
-    var writeSheet = writeWorkbook.Sheets[writeWorkbook.SheetNames[0]];
+    
 
     // Map the xlsx format to json.
-    var readData = Excel.utils.sheet_to_json(readSheet);
-    var writeData = Excel.utils.sheet_to_json(writeSheet);
+    // range:14  indicates the place of the header
+    var readData = Excel.utils.sheet_to_json(readSheet,{range:14});
 
     try {
-      const result = await readBankReport(readData, writeData);
+      const result = await readBankReport(readData);
       res.status(result.status).json({ message: result.message });
     } catch (e) {
       res.status(500).json({ message: "No es posible realizar el registro en este momento." });

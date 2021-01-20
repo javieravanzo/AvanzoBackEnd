@@ -238,18 +238,18 @@ const createCustomer = async (body, user, company, adminId) => {
 const updateCustomers = async (body, user, adminId) => {
 
   //NewClient
-  const { accountBank,identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee } = body;
+  const { accountBank, identificationId, lastName, phoneNumber, profession, idClient, idUser, idAccount, maximumAmount, montlyFee } = body;
 
   let newClient = {};
   let newUser = {};
   try {
     const currentUser = await pool.query('SELECT U.Role_idRole FROM User U where idUser = ?', [adminId]);
-    
+
 
     //only user with role 1 can update , phonenumber,documentnumber,email,bankaccount
     if (currentUser[0].Role_idRole === ROLES.ADMINISTRATOR) {
       //update client
-      newClient = { identificationId, phoneNumber, profession,accountBank };
+      newClient = { identificationId, phoneNumber, profession, accountBank };
       newClient.registeredBy = adminId;
       newClient.registeredDate = todayDate;
 
@@ -261,7 +261,7 @@ const updateCustomers = async (body, user, adminId) => {
 
     } else {
       //update client
-      newClient = { profession }; 
+      newClient = { profession };
       newClient.registeredBy = adminId;
       newClient.registeredDate = todayDate;
 
@@ -469,13 +469,125 @@ const getTransactionsByUsersId = async (userId) => {
 
 };
 
+
+// get * newclient
+const getNewClientByIdNewClient = async (con,idNewClient) => {
+
+  try {
+    const newClient = await con.query('SELECT * FROM NewClient where idNewClient = ?', [idNewClient]);
+
+    if (newClient) {
+      return { status: 200, data: newClient[0] };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
+// get * newclient
+const getClientByClientId = async (con,clientId) => {
+
+  try {
+    const userRow = await con.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where C.idClient = ?', [clientId]);
+
+    if (userRow) {
+      return { status: 200, data: userRow };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
+// get * newclient
+const insertClientDocuments = async (con,filesPath) => {
+
+  try {
+    let fileQuery = await con.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
+
+    if (fileQuery) {
+      return { status: 200, data: fileQuery };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
+// get * Client
+const insertClient = async (con,client) => {
+
+  try {
+    const clientQuery = await con.query('INSERT INTO client SET ?', [client]);
+    if (clientQuery) {
+      return { status: 200, data: clientQuery };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
+
+
+const insertAccount = async (con,newAccount) => {
+
+  try {
+    const accountQuery = await con.query('INSERT INTO account SET ?', [newAccount]);
+
+    if (accountQuery) {
+      return { status: 200, data: accountQuery };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    console.log(e);
+    return { status: 500, message: "Error interno del servidor no SQL." };
+  }
+
+};
+
+
+const updateStateNewClient = async (con,newClientId,newClientState) => {
+
+  try {
+    const updateNewClient = await con.query('UPDATE NewClient SET status = ? where idNewClient = ?', [newClientState, newClientId]);
+
+    if (updateNewClient) {
+      return { status: 200, data: updateNewClient };
+    } else {
+      console.log(con.error)
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
 //Pendiente traer IDENTIFICATION ID
 const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) => {
 
   try {
 
 
-    const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
+    // const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
 
 
     if (approve === "true") {
@@ -490,71 +602,77 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
         //const newClient = await pool.query('SELECT * FROM NewClient where idNewClient = ?', [clientid]);
 
         //DocumentClients
-        const filesPath = {
-          documentId: newClient[0].file1,
-          paymentReport: newClient[0].file3
-        };
+        // const filesPath = {
+        //   documentId: newClient[0].file1,
+        //   paymentReport: newClient[0].file3
+        // };
 
-        const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
+        // const fileQuery = await pool.query('INSERT INTO ClientDocuments SET ?', [filesPath]);
 
         //New Client
-        const client = {
-          identificationId: newClient[0].identificationId,
-          documentType: newClient[0].documentType,
-          birthDate: newClient[0].birthDate,
-          city: newClient[0].city,
-          salary: newClient[0].salary,
-          phoneNumber: newClient[0].phoneNumber,
-          Company_idCompany: newClient[0].Company_idCompany,
-          registeredBy: 1,
-          registeredDate: todayDate,
-          entryDate: todayDate,
-          rejectState: false,
-          isDeleted: false,
-          platformState: true,
-          createdDate: todayDate,
-          ClientDocuments_idClientDocuments: fileQuery.insertId,
-          CompanySalaries_idCompanySalaries: cycleId,
+        // const client = {
+        //   identificationId: newClient[0].identificationId,
+        //   documentType: newClient[0].documentType,
+        //   birthDate: newClient[0].birthDate.toISOString().split("T")[0],
+        //   city: newClient[0].city,
+        //   //salary: newClient[0].salary,
+        //   phoneNumber: newClient[0].phoneNumber,
+        //   Company_idCompany: newClient[0].Company_idCompany,
+        //   registeredBy: 1,
+        //   //registeredDate: todayDate,
+        //   entryDate: todayDate.split(" ")[0],
+        //   rejectState: false,
+        //   isDeleted: false,
+        //   platformState: true,
+        //   //createdDate: todayDate,
+        //   ClientDocuments_idClientDocuments: fileQuery.insertId,
+        //   CompanySalaries_idCompanySalaries: cycleId,
 
-        };
+        // };
 
-        //console.log("Client", client);
+        // //console.log("Client", client);
 
-        const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
+        // const clientQuery = await pool.query('INSERT INTO Client SET ?', [client]);
+         console.log(clientQuery);
+        //var clientSql = `INSERT INTO client (identificationId,documentType,birthDate,city,phoneNumber,Company_idCompany,registeredBy,entryDate,rejectState,isDeleted,platformState,ClientDocuments_idClientDocuments,CompanySalaries_idCompanySalaries ) VALUES ('${client.identificationId}','${client.documentType}','${client.birthDate}','${client.city}','${client.phoneNumber}','${client.Company_idCompany}','${client.registeredBy}', '${client.entryDate}',${client.rejectState},${client.isDeleted},${client.platformState},'${client.ClientDocuments_idClientDocuments}','${client.CompanySalaries_idCompanySalaries}')`;
+        //const clientQuery = await pool.query(clientSql);
 
         //Insert in user
-        const newUser = {
-          name: newClient[0].name,
-          lastName: newClient[0].lastName,
-          email: newClient[0].email,
-          status: true,
-          registeredBy: 1,
-          registeredDate: todayDate,
-          createdDate: todayDate,
-          Role_idRole: 4,
-          Client_idClient: clientQuery.insertId,
-          isConfirmed: true,
+        // const newUser = {
+        //   name: newClient[0].name,
+        //   lastName: newClient[0].lastName,
+        //   email: newClient[0].email,
+        //   status: true,
+        //   registeredBy: 1,
+        //   registeredDate: todayDate,
+        //   createdDate: todayDate,
+        //   Role_idRole: 4,
+        //   Client_idClient: clientQuery.insertId,
+        //   isConfirmed: true,
+        //   Company_idCompany: newClient[0].Company_idCompany
+        // };
+        // console.log("Se manda a insertar el User");
 
-        };
-
-        const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
+        // const userQuery = await pool.query('INSERT INTO User SET ?', [newUser]);
 
         //Create an account
-        const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
-        const newAccount = {
-          maximumAmount: companyQuery[0].defaultAmount,
-          accumulatedQuantity: 0,
-          documentsUploaded: true,
-          montlyFee: companyQuery[0].maximumSplit,
-          totalInterest: 0, totalFeeAdministration: 0,
-          totalOtherCollection: 0, totalRemainder: 0,
-          approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
-          registeredBy: 1,
-          registeredDate: todayDate,
-          Client_idClient: clientQuery.insertId,
-          lastAdministrationDate: todayDate
-        };
-        const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
+        // const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [newClient[0].Company_idCompany]);
+        // const newAccount = {
+        //   maximumAmount: companyQuery[0].defaultAmount,
+        //   accumulatedQuantity: 0,
+        //   documentsUploaded: true,
+        //   montlyFee: companyQuery[0].maximumSplit,
+        //   totalInterest: 0, totalFeeAdministration: 0,
+        //   totalOtherCollection: 0, totalRemainder: 0,
+        //   approveHumanResources: companyQuery[0].approveHumanResources === 1 ? true : false,
+        //   registeredBy: 1,
+        //   registeredDate: todayDate,
+        //   Client_idClient: clientQuery.insertId,
+        //   lastAdministrationDate: todayDate
+        // };
+        // console.log("Se manda a insertar el Account");
+
+        // const accountQuery = await pool.query('INSERT INTO Account SET ?', [newAccount]);
 
         //Insert into auth
         //todayDate.setHours(todayDate.getHours() + expirationTime)
@@ -570,6 +688,8 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
           expiresOn: new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
         };
 
+        console.log("Se manda a insertar el auth");
+
         const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
 
         //Confirmation link
@@ -578,6 +698,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
         const jwtoken = await jwt.sign({ userRow }, my_secret_key, { expiresIn: '30m' });
         const url = base_URL + `/Account/Confirm/${jwtoken}`;
         //console.log(url.toString());
+        console.log("Se hace commit");
 
         await pool.query('COMMIT');
         //Mailer
@@ -605,6 +726,8 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
 
       } catch (error) {
         await pool.query('ROLLBACK');
+        console.log("line 624", error);
+        return { status: 500, message: error };
 
       }
 
@@ -640,11 +763,14 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
         return { status: 200, message: "El usuario ha sido rechazado exitosamente." };
       } catch (error) {
         await pool.query('ROLLBACK');
-
+        console.log("line 661", error);
+        return { status: 500, message: error };
       }
     }
   } catch (e) {
-    console.log(e);
+    console.log("line 666", e);
+    await pool.query('ROLLBACK');
+
     return { status: 500, message: e.sqlMessage };
   }
 
@@ -752,5 +878,6 @@ module.exports = {
   getInitialsData, getRequestsData, getAllCustomers, createCustomer, createMultipleCustomers,
   getAllCustomerWithCompanies, getTransactionsByUsersId, getCustomersByAdmin, getCustomerToApprove,
   approveCustomers, changeCustomersStatus, updateCustomers, makePayments, getDatesListToCustomer,
-  deleteUser, getCustomerAccountDetail, getCustomerCountToApprove, updateStateCustomer
+  deleteUser, getCustomerAccountDetail, getCustomerCountToApprove, updateStateCustomer,getNewClientByIdNewClient,
+  insertClientDocuments,insertClient,insertAccount,getClientByClientId,updateStateNewClient
 }

@@ -229,6 +229,20 @@ const getCompanyWithSalaries = async (companyId) => {
 
 };
 
+const getCompanyById = async (con,companyId ) => {
+  
+  try{
+    const companyRow = await con.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', companyId);
+    
+    return {status: 200, data:  companyRow[0] };
+  }catch(e){
+    console.log(e);
+    //throw e;
+    return {status: 500, data: [], message: "Error interno del servidor."};
+  }  
+
+};
+
 const updateCompanySalary = async (companyRow) => {
 
   try{
@@ -299,5 +313,5 @@ const modifymaximumAmountByCompany = async (customersData, adminId, idCompany) =
 
 module.exports = {
   createCompanies, getCompanies, getAllCompaniesForUser, updateCompanies, getCompanyWithSalaries,
-  activateCompanies, updateCompanySalary, modifymaximumAmountByCompany,getCyclesByCompanyId
+  activateCompanies, updateCompanySalary, modifymaximumAmountByCompany,getCyclesByCompanyId,getCompanyById
 };

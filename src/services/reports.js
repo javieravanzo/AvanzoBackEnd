@@ -193,89 +193,21 @@ const generateParticularPendingByRRHH = async (companyIdToInclude) => {
 
 };
 
-const readBankReport = async (readData, writeData) => {
+const readBankReport = async (readData) => {
 
   try{
    
+    console.log("============================================");
+console.log(readData);
+console.log("============================================");
+
     for (let i in readData){
 
       readData[i].process = readData[i].process === true ? readData[i].process :  false;
 
       console.log("ReadData1", i, readData[i].process);
 
-      for (let j in writeData){
-
-        //Si es diferente de procesado, actualicelo.
-        writeData[j].process = writeData[j].process === true ? writeData[j].process : false;
-
-        console.log("writeData1", j, writeData[j].process);
-
-        let completeName = writeData[j].Nombre + " " + writeData[j].Apellido;        
-
-        console.log("Cumple R", i, "W", j,  (readData[i].process === false), (writeData[j].process === false ));
-
-        //Comparar nombre
-        if( (completeName === readData[i].Titular) && (readData[i].process === false) && (writeData[j].process === false )){
-          
-          console.log("Nombre", completeName, readData[i].Titular, readData[i].process, writeData[j].process);
-
-          console.log("No. Cuenta", writeData[j]['Numero del Producto o Servicio'], (readData[i]['Numero Destino']).slice(-4));
-
-          //Comparar número de cuenta
-          if ( (writeData[j]['Numero del Producto o Servicio']).slice(-4) === (readData[i]['Numero Destino']).slice(-4) ) {
-                      
-            let readValue = parseLocaleNumber((readData[i].Valor).replace('$', '').replace('.', '').replace(',', '.'));
-
-            console.log("Valor", parseInt(writeData[j]['Valor del Pago o de la recarga'], 10), parseInt(readValue, 10));
-
-            //Comparar el valor
-            if (parseInt(writeData[j]['Valor del Pago o de la recarga'], 10) === parseInt(readValue, 10)){
-
-              //Si todo coincide, hago un spli del campo Referencia y saco el id de la solicitud.
-              let requestId = writeData[j]['Referencia'].split(' ')[0];
-
-              const stateRow = await pool.query('SELECT * FROM RequestState');
-              
-              //Ahí actualizo a:
-              //1.  Finalizada si el campo dice Pago Exitoso.
-              //2. Devolución bancaria si dice Pago Rechazado y agrega observación.
-              //3. Pendientes por banco cuando estén en período de espera para desembolsar.
-
-              //RejectedPayment
-              let rejectedObservation = readData[i].Motivo !== undefined ? readData[i].Motivo.split("|")[0] : null;
-
-              //GetCurrentStates
-              let statesAndInfo = checkFinalBankState(readData[i].Estado, rejectedObservation, stateRow);
-
-              //console.log("State", statesAndInfo);
-
-              //Cuerpo de la solicitud.
-              let requestBody = {
-                RequestState_idRequestState: statesAndInfo.newState,
-                bankTransactionState: statesAndInfo.newTransactionState,
-                observation: statesAndInfo.newObservation,
-                registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
-                registeredBy: 0, 
-                bankTransactionCode: statesAndInfo.newTransactionCode 
-              };
-
-              console.log("RI", requestId);
-              console.log("RB", requestBody);
-              
-              const updateRequest = await pool.query('UPDATE Request set ? WHERE idRequest = ?', [requestBody, requestId]);
-
-              writeData[j].process = true;
-              readData[i].process = true;
-              //console.log("Se pudo concretar.");
-              //console.log("ReadData2", j, readData);
-              //console.log("WriteData2", j, writeData);
-            }
-
-          }
-
-        }
-         
-      }
+     
     }
 
     return {status: 200, message: "Los archivos han sido leídos correctamente."};

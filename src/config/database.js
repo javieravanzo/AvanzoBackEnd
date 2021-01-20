@@ -38,6 +38,74 @@ poolConnection.getConnection((err, connection) => {
     }
 });
 
+poolConnection.beginTransaction = function beginTransaction(options, callback) {
+    if (!callback && typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+  
+    options = options || {};
+    options.sql = 'START TRANSACTION';
+    options.values = null;
+  
+    return this.query(options, callback);
+  };
+  
+  poolConnection.commit = function commit(options, callback) {
+    if (!callback && typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+  
+    options = options || {};
+    options.sql = 'COMMIT';
+    options.values = null;
+  
+    return this.query(options, callback);
+  };
+  
+  poolConnection.rollback = function rollback(options, callback) {
+    if (!callback && typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+  
+    options = options || {};
+    options.sql = 'ROLLBACK';
+    options.values = null;
+  
+    return this.query(options, callback);
+  };
+
+  poolConnection.end = function end(options, callback) {
+    var cb   = callback;
+    var opts = options;
+  
+    if (!callback && typeof options === 'function') {
+      cb   = options;
+      opts = null;
+    }
+  
+    // create custom options reference
+    opts = Object.create(opts || null);
+  
+    if (opts.timeout === undefined) {
+      // default timeout of 30 seconds
+      opts.timeout = 30000;
+    }
+  
+    this._implyConnect();
+    this._protocol.quit(opts, wrapCallbackInDomain(this, cb));
+  };
+  
+  poolConnection.destroy = function() {
+    this.state = 'disconnected';
+    this._implyConnect();
+    this._socket.destroy();
+    this._protocol.destroy();
+  };
+  
+
 
 poolConnection.query = promisify(poolConnection.query);
 

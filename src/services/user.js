@@ -25,7 +25,43 @@ const updateState = async (userId,state) => {
 
 };
 
+const insertUser = async (con,newUser) => {
+
+  try {
+    const userQuery = await con.query('INSERT INTO User SET ?', [newUser]);
+
+    if (userQuery) {
+      return { status: 200, data: userQuery };
+    } else {
+      console.log(e);
+
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    console.log(e);
+
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
+const insertAuth = async (con,newAuth) => {
+
+  try {
+    const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
+
+    if (authQuery) {
+      return { status: 200, data: authQuery };
+    } else {
+      return { status: 500, message: "Error interno del servidor." };
+    }
+  } catch (e) {
+    return { status: 500, message: "Error interno del servidor." };
+  }
+
+};
+
 
 module.exports = {
-  updateState
+  updateState,insertUser,insertAuth
 }

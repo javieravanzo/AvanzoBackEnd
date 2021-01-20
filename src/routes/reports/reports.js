@@ -46,7 +46,6 @@ router.get('/Reports/PendingGeneralByRRHH', [verifyToken], generatePendingByRRHH
 router.get('/Reports/PendingParticularByRRHH', [verifyToken], generateParticularPendingRequestByRRHH);
 
 router.post('/Reports/ReceiveBankReport', uploads.fields([
-  { name: 'write', maxCount: 1 },
   { name: 'read', maxCount: 1 }
 ]), [verifyToken], receiveBankReport);
 

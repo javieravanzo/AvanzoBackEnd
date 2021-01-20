@@ -15,6 +15,7 @@ const { base_URL, email_api_key, front_URL } = require('../config/global');
 const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const mailer = require('../lib/mailer/requestMailer.js');
+const todayDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '');
 
 //Functions
 function getStateIdFromName(row, name) {
@@ -61,10 +62,10 @@ const compile = async function (templateName, data) {
 
   //Production
   const dirPath = path.join(process.cwd(), '../files/templates');
-  let filePath ="";
-  if(fs.existsSync(dirPath)){
+  let filePath = "";
+  if (fs.existsSync(dirPath)) {
     filePath = path.join(process.cwd(), '../files/templates', `${templateName}.hbs`);
-  }else{
+  } else {
     filePath = path.join(process.cwd(), '..\\files\\templates', `${templateName}.hbs`);
   }
 
@@ -432,12 +433,10 @@ const createRequest = async (body, file, clientId, files) => {
   try {
 
     const { quantity, split, moyen, accountType, accountNumber, interest, administration, iva, otherValues,
-      totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction, fromapp, request_overdraft,request_observation } = body;
-
-    console.log("Fromapp", fromapp);
+      totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction, fromapp, request_overdraft, request_observation } = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', clientId);
-    //////console.log("AC", approvedClient);
+    // console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1) {
 
@@ -446,10 +445,10 @@ const createRequest = async (body, file, clientId, files) => {
       //console.log("UR", userRow[0]);
 
       //////console.log("COND", parseInt(quantity, 10), parseInt(userRow[0].partialCapacity, 10), parseInt(quantity, 10) > parseInt(userRow[0].partialCapacity, 10));
-     // if (parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)) {
-   
+      // if (parseInt(userRow[0].partialCapacity, 10) >= parseInt(quantity, 10)) {
 
-      if (parseInt(quantity, 10) <= parseInt('300000', 10) ) {
+
+      if (parseInt(quantity, 10) <= parseInt('300000', 10)) {
 
         let updateNewClient = null;
 
@@ -492,14 +491,14 @@ const createRequest = async (body, file, clientId, files) => {
         newRequest.computedCapacity = computed_capacity;
         newRequest.creditNumber = math.ceil(math.random() * 10000);
         newRequest.approveHumanResources = parseInt(userRow[0].approveHumanResources, 10) === 1 ? true : false;
-        newRequest.createdDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-        newRequest.registeredDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });;
+        newRequest.createdDate = todayDate;
+        newRequest.registeredDate = todayDate;;
         newRequest.registeredBy = 1;
         newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
         newRequest.fromapp = fromapp === 'true' ? 1 : 0;
         newRequest.observation = "";
         newRequest.Request_overdraft = request_overdraft === 'true' ? 1 : 0;
-        newRequest.Request_observation = request_observation ;
+        newRequest.Request_observation = request_observation;
 
         //Obsevations - Request
         //const observation = {observationContent: ""};
@@ -1357,7 +1356,7 @@ const getAllReasonsOfRejection = async () => {
 
   try {
 
-  
+
     //Select rows
     const requestRow = await pool.query('SELECT rere_id, rere_type, rere_description, rere_create_At FROM rejection_reasons');
 
@@ -1394,8 +1393,8 @@ const generateContracts = async (customerid, split, quantity, company) => {
       splitQuantity: format(80000),
       emailCode: '123456',
       phoneCode: '834578',
-      emailCodeDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-      phoneCodeDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      emailCodeDate: todayDate,
+      phoneCodeDate: todayDate,
     };
 
     console.log("UserData", userData);
@@ -1591,5 +1590,5 @@ module.exports = {
   getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
   passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllDefinitelyRejected,
   getAllProcessWithoutChangeRequest, updateDocumentsRequest, updateRequestInformation,
-  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized,getAllReasonsOfRejection
+  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized, getAllReasonsOfRejection
 };
