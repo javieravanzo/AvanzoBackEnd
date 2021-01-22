@@ -384,7 +384,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () => {
 
   try {
-    const clientRow = await pool.query('SELECT U.idUser, U.name, U.email, U.createdDate, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.isDeleted = ?', [false]);
+    const clientRow = await pool.query('SELECT U.idUser, U.name, U.email, U.createdAt, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.isDeleted = ?', [false]);
     if (clientRow) {
       return { status: 200, data: clientRow };
     } else {
@@ -400,7 +400,7 @@ const getAllCustomerWithCompanies = async () => {
 const getCustomerToApprove = async () => {
 
   try {
-    const clientRow = await pool.query('SELECT N.idNewClient, N.phoneNumber, N.name, N.lastName, N.email, N.createdDate, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, CO.idCompany, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
+    const clientRow = await pool.query('SELECT N.idNewClient, N.phoneNumber, N.name, N.lastName, N.email, N.createdAt, N.identificationId, N.totalRemainder, CO.socialReason, CO.defaultAmount, CO.maximumSplit, CO.address, CO.idCompany, N.file1, N.file2, N.file3 FROM NewClient N JOIN Company CO ON (N.Company_idCompany = CO.idCompany) where (N.status = ?)', [0]);
 
     //const cycles = await pool.query('SELECT CS.idCompanySalaries, CS.companyRateName, CS.companyReportDates, CS.companyPaymentDates FROM CompanySalaries CS JOIN Company_has_CompanySalaries CHS ON (CHS.CompanySalaries_idCompanySalaries = CS.idCompanySalaries) where (CHS.Company_idCompany = ?)', clientRow[0].idCompany);
 
@@ -853,7 +853,7 @@ const makePayments = async (clientid, quantity) => {
 const getCustomerAccountDetail = async (clientid) => {
 
   try {
-    const clientRow = await pool.query('SELECT U.name, U.lastName, U.email, U.createdDate, C.identificationId, C.phoneNumber, A.maximumAmount, A.montlyFee, A.partialCapacity, A.totalCapital, A.totalInterest, A.totalFeeAdministration, A.totalOtherCollection, A.totalRemainder, A.computedCapacity, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.idClient = ?', [clientid]);
+    const clientRow = await pool.query('SELECT U.name, U.lastName, U.email, U.createdAt, C.identificationId, C.phoneNumber, A.maximumAmount, A.montlyFee, A.partialCapacity, A.totalCapital, A.totalInterest, A.totalFeeAdministration, A.totalOtherCollection, A.totalRemainder, A.computedCapacity, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.idClient = ?', [clientid]);
     return { status: 200, data: clientRow[0] };
   } catch (e) {
     console.log(e);

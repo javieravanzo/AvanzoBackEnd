@@ -120,10 +120,8 @@ const newPreregister = async (client, user, files, auth) => {
       const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status,U.email FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
       //console.log("UR", userRow);
       consultUser = userRow;
- console.log("=================================>");
-  console.log(userRow);
+
       if (JSON.stringify(userRow) === '[]') {
-        console.log("=================================>2");
 
         //Select the totalRemainder by Company
         const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [client.Company_idCompany]);
@@ -181,7 +179,6 @@ const newPreregister = async (client, user, files, auth) => {
           const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
           sendSMS(preClient.phoneNumber, smsCodesQuery[0].sms_co_body);
         }
-        console.log('--------------------------------');
 
         return { status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico." };
 
@@ -211,7 +208,7 @@ const newPreregister = async (client, user, files, auth) => {
       if (userPre[0].phoneNumber === client.phoneNumber) {
         messages.push("Este numero de telefono ya esta registrado");
       }
-      return { status: 500, message: messages };
+      return { status: 404, message: messages };
 
     }
   } catch (e) {
