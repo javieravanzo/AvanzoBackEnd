@@ -204,6 +204,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'request'
+    tableName: 'Request'
   });
 };

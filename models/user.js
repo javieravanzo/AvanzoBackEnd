@@ -101,6 +101,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'user'
+    tableName: 'User'
   });
 };

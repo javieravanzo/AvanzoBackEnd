@@ -50,6 +50,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'bank'
+    tableName: 'Bank'
   });
 };

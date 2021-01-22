@@ -1,5 +1,5 @@
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('Rejectionreasons', {
+  return sequelize.define('RejectionReasons', {
     rere_id: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
@@ -36,6 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'rejectionreasons'
+    tableName: 'RejectionReasons'
   });
 };
