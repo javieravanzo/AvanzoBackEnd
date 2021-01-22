@@ -384,7 +384,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
 const getAllCustomerWithCompanies = async () => {
 
   try {
-    const clientRow = await pool.query('SELECT U.idUser, U.name, U.email, U.createdAt, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.isDeleted = ?', [false]);
+    const clientRow = await pool.query('SELECT U.idUser, U.name, U.email,U.status as userState, U.createdAt, C.idClient, C.platformState, C.identificationId, U.lastName, C.profession, C.phoneNumber, C.fixedNumber, A.idAccount, A.totalRemainder, A.maximumAmount, A.montlyFee, CO.socialReason FROM Client C JOIN User U JOIN Account A JOIN Company CO ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany) where C.isDeleted = ?', [false]);
     if (clientRow) {
       return { status: 200, data: clientRow };
     } else {
