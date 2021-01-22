@@ -52,6 +52,7 @@
     "sequelize-cli": "^6.2.0",
     "sqlite3": "^5.0.0",
     "timeago.js": "^4.0.2",
+    "wkhtmltopdf": "^0.3.4",
     "xlsx": "^0.15.6"
   },
   "devDependencies": {

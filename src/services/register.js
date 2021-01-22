@@ -115,7 +115,7 @@ const newPreregister = async (client, user, files, auth) => {
   try {
 
 
-    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND (nc.email = ? OR nc.identificationId = ? OR nc.phoneNumber = ?) `, [user.email, client.identificationId, client.phoneNumber]);
+    const userPre = await pool.query(`SELECT * FROM avanzo.NewClient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND (nc.email = ? OR nc.identificationId = ? OR nc.phoneNumber = ?) `, [user.email, client.identificationId, client.phoneNumber]);
     if (JSON.stringify(userPre) === '[]') {
       const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status,U.email FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
       //console.log("UR", userRow);
@@ -176,7 +176,7 @@ const newPreregister = async (client, user, files, auth) => {
         sendEmail(template, userData, '', '', subject, text, '')
         //Send SMS 
         if (ENVIRONMENT === 'production') {
-          const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
+          const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.SmsCodes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
           sendSMS(preClient.phoneNumber, smsCodesQuery[0].sms_co_body);
         }
 
