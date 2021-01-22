@@ -23,3 +23,4 @@ yarn-error.log*
 #database
 /src/config/database.js
 /src/config/db_config.json
+src/config/db_config.json
