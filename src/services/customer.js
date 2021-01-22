@@ -1,6 +1,8 @@
 
 //Requires
 const pool = require('../config/database.js');
+const sequelize = require('../config/database_sequelize.js');
+
 const jwt = require('jsonwebtoken');
 const { my_secret_key, base_URL, front_URL, base_URL_test } = require('../config/global');
 const sgMail = require('@sendgrid/mail');

@@ -1,0 +1,4 @@
+seq-ei -H avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com -u appavanzo -p $vAnk6SpQBcNzY97E  -d avanzo -o ./models -m mysql -P 3306 -e js -s 2
+
+
+seq-ei -H 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com' -u appavanzo -p $vAnk6SpQBcNzY97E  -d avanzo -o ./models -m mysql -P 3306 -e js -s 2

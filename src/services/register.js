@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { my_secret_key, base_URL, front_URL, base_URL_test } = require('../config/global');
 
 const { sendEmail, sendSMS } = require('../utils/utils.js');
-const { ENVIRONMENT, SMS_CODES,PENDING_APPROVAL,PRE_CLIENT_STATES } = require('../utils/constants.js');
+const { ENVIRONMENT, SMS_CODES, PENDING_APPROVAL, PRE_CLIENT_STATES } = require('../utils/constants.js');
 //Services
 const registerCustomer = async (identificationId, client, user, auth) => {
 
@@ -115,90 +115,105 @@ const newPreregister = async (client, user, files, auth) => {
   try {
 
 
-    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND (nc.email = ? OR nc.identificationId = ? OR nc.phoneNumber = ?) `, [ user.email,client.identificationId,client.phoneNumber]);
-if (JSON.stringify(userPre) === '[]'){
-    const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
-    //console.log("UR", userRow);
-    consultUser = userRow;
+    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND (nc.email = ? OR nc.identificationId = ? OR nc.phoneNumber = ?) `, [user.email, client.identificationId, client.phoneNumber]);
+    if (JSON.stringify(userPre) === '[]') {
+      const userRow = await pool.query('SELECT C.idClient, C.identificationId, CO.socialReason, U.idUser, U.status,U.email FROM Client C JOIN User U JOIN Company CO ON (C.idClient = U.Client_idClient AND CO.idCompany = C.Company_idCompany ) where (C.identificationId = ? OR U.email = ?)', [client.identificationId, user.email]);
+      //console.log("UR", userRow);
+      consultUser = userRow;
+ console.log("=================================>");
+  console.log(userRow);
+      if (JSON.stringify(userRow) === '[]') {
+        console.log("=================================>2");
 
-    if (JSON.stringify(userRow) === '[]') {
+        //Select the totalRemainder by Company
+        const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [client.Company_idCompany]);
 
-      //Select the totalRemainder by Company
-      const companyQuery = await pool.query('SELECT C.maximumSplit, C.defaultAmount, C.approveHumanResources FROM Company C where C.idCompany = ?', [client.Company_idCompany]);
+        //Create password
+        const newPassword = await helpers.encryptPassword(auth.password);
 
-      //Create password
-      const newPassword = await helpers.encryptPassword(auth.password);
-
-      //Create client
-      const preClient = {
-        name: user.name,
-        lastName: user.lastName,
-        documentType: client.documentType,
-        identificationId: client.identificationId,
-        phoneNumber: client.phoneNumber,
-        email: user.email,
-        password: newPassword,
-        file1: files.documentId,
-        file2: null,
-        file3: files.paymentReport,
-        //status: 0 = Created, 1 = Approved, 2 = Rejected.
-        status: 0,
-        totalRemainder: companyQuery[0].defaultAmount,
-        // createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
-        //registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
-        registeredBy: 0,
-        Company_idCompany: client.Company_idCompany,
-        city: client.city,
-        birthDate: '2020-10-24',//client.birthDate,
-        CompanySalaries_idCompanySalaries: client.salary,
-        Role_idRole: 4,
-        gender: client.gender,
-        vehicle: client.vehicle,
-        vehicle_type: client.vehicle_type,
-        license_plate_vehicle: client.license_plate_vehicle,
-        clie_address: client.clie_address,
-        clie_from: client.clie_from
-      };
-      const preClientQuery = await pool.query('INSERT INTO NewClient SET ?', [preClient]);
+        //Create client
+        const preClient = {
+          name: user.name,
+          lastName: user.lastName,
+          documentType: client.documentType,
+          identificationId: client.identificationId,
+          phoneNumber: client.phoneNumber,
+          email: user.email,
+          password: newPassword,
+          file1: files.documentId,
+          file2: null,
+          file3: files.paymentReport,
+          //status: 0 = Created, 1 = Approved, 2 = Rejected.
+          status: 0,
+          totalRemainder: companyQuery[0].defaultAmount,
+          // createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          //registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          registeredBy: 0,
+          Company_idCompany: client.Company_idCompany,
+          city: client.city,
+          birthDate: '2020-10-24',//client.birthDate,
+          CompanySalaries_idCompanySalaries: client.salary,
+          Role_idRole: 4,
+          gender: client.gender,
+          vehicle: client.vehicle,
+          vehicle_type: client.vehicle_type,
+          license_plate_vehicle: client.license_plate_vehicle,
+          clie_address: client.clie_address,
+          clie_from: client.clie_from
+        };
+        const preClientQuery = await pool.query('INSERT INTO NewClient SET ?', [preClient]);
 
 
-      var subject = 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación';
-      var text = 'Avanzo';
-      var template = PENDING_APPROVAL;
-      let userData = {
-        email: preClient.email,
-        name: preClient.name,
-        url: front_URL,
-        base_URL_test: base_URL + "/confirmation.png",
-        footer: base_URL + "/footer.png",
-      };
+        var subject = 'Avanzo (Créditos al instante) - Cuenta pendiente de aprobación';
+        var text = 'Avanzo';
+        var template = PENDING_APPROVAL;
+        let userData = {
+          email: preClient.email,
+          name: preClient.name,
+          url: front_URL,
+          base_URL_test: base_URL + "/confirmation.png",
+          footer: base_URL + "/footer.png",
+        };
 
-      sendEmail(template, userData, '', '', subject, text, '')
-      //Send SMS 
-      if (ENVIRONMENT === 'production') {
-        const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
-        sendSMS(preClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+        sendEmail(template, userData, '', '', subject, text, '')
+        //Send SMS 
+        if (ENVIRONMENT === 'production') {
+          const smsCodesQuery = await pool.query('SELECT sms_co_id,sms_co_body FROM avanzo.sms_codes WHERE sms_co_id = ? ', [SMS_CODES.CUSTOMER_PENDING_APPROVAL]);
+          sendSMS(preClient.phoneNumber, smsCodesQuery[0].sms_co_body);
+        }
+        console.log('--------------------------------');
+
+        return { status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico." };
+
+      } 
+      messages = [];
+       console.log(userRow[0].email,user.email);
+       console.log(userRow[0].identificationId , client.identificationId);
+
+       if (userRow[0].email === user.email) {
+        messages.push("Este email ya esta registrado");
       }
-      console.log('--------------------------------');
+      if (userRow[0].identificationId === client.identificationId) {
+        messages.push("Este numero de documento ya esta registrado");
+      }
+      return { status: 500, message: messages };
 
-      return { status: 200, message: "Has sido registrado satisfactoriamente. Entrarás a un proceso de aprobación interno y serás informado a través de correo electrónico." };
-      
-    }
-    
-  }else{
-    messages =[];
-    if(userPre[0].email === user.email ){
-      messages.push("Este email ya esta registrado");
-    }
-    if(userPre[0].identificationId === client.identificationId){
-      messages.push("Este numero de documento ya esta registrado");
-    }
-    if(userPre[0].phoneNumber === user.phoneNumber ){
-      messages.push("Este numero de telefono ya esta registrado");
-    }
-    return { status: 500, message: messages};
 
-  }
+    } else {
+      console.log(userPre[0].phoneNumber, user.phoneNumber);
+      messages = [];
+      if (userPre[0].email === user.email) {
+        messages.push("Este email ya esta registrado");
+      }
+      if (userPre[0].identificationId === client.identificationId) {
+        messages.push("Este numero de documento ya esta registrado");
+      }
+      if (userPre[0].phoneNumber === client.phoneNumber) {
+        messages.push("Este numero de telefono ya esta registrado");
+      }
+      return { status: 500, message: messages };
+
+    }
   } catch (e) {
     console.log("E", e);
 

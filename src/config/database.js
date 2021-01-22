@@ -33,7 +33,7 @@ poolConnection.getConnection((err, connection) => {
 
     if (connection) {
         connection.release();
-        console.log('DB is connected');
+        console.log('Pool DB is connected');
         return;
     }
 });

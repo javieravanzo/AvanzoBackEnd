@@ -72,6 +72,7 @@ const preRegister = async (req, res, next) => {
 
   try {
     const result = await newPreregister(client, user, files, auth);
+     console.log(result);
     res.status(result.status).json({ message: result.message });
   } catch (e) {
     console.log("E", e);

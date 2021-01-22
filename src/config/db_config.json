@@ -1,0 +1,16 @@
+{
+  "username": "root",
+  "password": "root",
+  "host": "127.0.0.1",
+  "database": "avanzo",
+  "dir": "./models",
+  "port": 3306,
+  "compile": "js",
+  "logging": false,
+  "space": 2,
+  "reverse": false,
+  "dialectBd":"mysql",
+  "max":5,
+  "min":1
+}
+

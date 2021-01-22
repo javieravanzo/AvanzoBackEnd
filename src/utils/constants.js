@@ -1,5 +1,5 @@
-const ENVIRONMENT = "development";
-//const ENVIRONMENT = "production";
+//const ENVIRONMENT = "development";
+const ENVIRONMENT = "production";
 
 /* ----------------- Bancos ------------------- */
 const banks = {

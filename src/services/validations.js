@@ -14,7 +14,7 @@ const validateDocumentNumber = async (documentNumber) =>{
   try {
 
     const exist = await pool.query('SELECT C.identificationId FROM Client C  where (C.identificationId = ?)', documentNumber);
-    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.identificationId = ? `, [documentNumber]);
+    const userPre = await pool.query(`SELECT * FROM avanzo.NewClient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.identificationId = ? `, [documentNumber]);
 
     if(JSON.stringify(exist) !== '[]' || JSON.stringify(userPre) !== '[]' ){
       return {status: 200, data: true};
@@ -34,7 +34,7 @@ const validatePhoneNumber = async (phoneNumber) =>{
   try {
 
     const exist = await pool.query('SELECT C.phoneNumber FROM Client C  where (C.phoneNumber = ?)', phoneNumber);
-    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.phoneNumber = ?`, [phoneNumber]);
+    const userPre = await pool.query(`SELECT * FROM avanzo.NewClient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.phoneNumber = ?`, [phoneNumber]);
 
     if(JSON.stringify(exist) !== '[]' || JSON.stringify(userPre) !== '[]' ){
       return {status: 200, data: true};
@@ -53,7 +53,7 @@ const validateEmail = async (email) =>{
   try {
 
     const exist = await pool.query('SELECT U.email FROM User U  where (U.email = ?)', email);
-    const userPre = await pool.query(`SELECT * FROM avanzo.newclient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.email = ?`, [email]);
+    const userPre = await pool.query(`SELECT * FROM avanzo.NewClient nc WHERE nc.status <> ${PRE_CLIENT_STATES.REJECTED} AND  nc.email = ?`, [email]);
 
     if(JSON.stringify(exist) !== '[]' || JSON.stringify(userPre) !== '[]'  ){
       return {status: 200, data: true};

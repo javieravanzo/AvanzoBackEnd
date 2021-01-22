@@ -6,6 +6,12 @@ var path = require('path');
 var fs = require('fs');
 
 //Imports
+var DataTypes = require('sequelize/lib/data-types');
+const dbSequelize = require('../config/database_sequelize.js');
+sequelize = dbSequelize.sequelize,
+    Sequelize = dbSequelize.Sequelize;
+const RejectionReasons = require('../../models/rejectionreasons')(sequelize, DataTypes);;
+
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
         getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
         generateContracts, getAllRequestsWasOutlayed, getAllRequestWasRejected, getAllRejectedRequest,
@@ -623,9 +629,12 @@ const generateContract = async (req, res, next) => {
 const getAllRejectionReasons = async (req, res, next) => {
 
   try {
-    const result = await getAllReasonsOfRejection();
-    if(result.status === 200){
-      res.status(result.status).json(result.data);
+
+    // let company = await Company.findByPk(newClient.Company_idCompany);
+    let listRejectionReasons =await RejectionReasons.findAll();
+    // const result = await getAllReasonsOfRejection();
+    if(listRejectionReasons !== null){
+      res.status(200).json(listRejectionReasons);
     }else{
       res.status(result.status).json(result.message);
     }

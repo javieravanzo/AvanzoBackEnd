@@ -36,7 +36,7 @@ const login = async (email, password) => {
                         };
                         jsonMenu.push(data);
                     }
-                    const userAuth = { expiresOn: userQuery.expiresOn, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '') };
+                    const userAuth = { expiresOn: userQuery.expiresOn };
                     const userData = { idUser: userQuery.idUser, name: userQuery.name, email: userQuery.email, roleId: userQuery.Role_idRole };
                     const validPassword = await helpers.matchPassword(password, userQuery.password);
                     //console.log("VP",validPassword);
