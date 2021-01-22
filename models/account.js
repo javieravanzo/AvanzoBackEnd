@@ -134,6 +134,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'account'
+    tableName: 'Account'
   });
 };

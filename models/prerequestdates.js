@@ -71,6 +71,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'prerequestdates'
+    tableName: 'PreRequestDates'
   });
 };

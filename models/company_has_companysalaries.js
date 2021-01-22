@@ -36,6 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'company_has_companysalaries'
+    tableName: 'Company_has_CompanySalaries'
   });
 };

@@ -36,6 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'requeststate'
+    tableName: 'RequestState'
   });
 };

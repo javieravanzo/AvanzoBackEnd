@@ -92,6 +92,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'requestoutlay'
+    tableName: 'RequestOutLay'
   });
 };

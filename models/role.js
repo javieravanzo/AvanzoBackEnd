@@ -43,6 +43,6 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     }
   }, {
-    tableName: 'role'
+    tableName: 'Role'
   });
 };
