@@ -19,3 +19,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#database
+/src/config/database.js
+/src/config/db_config.json
