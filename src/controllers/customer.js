@@ -355,11 +355,12 @@ const approveCustomer = async (req, res, next) => {
         //Get the user id
         const adminId = getAdminId(req);
         const { clientid, approve, cycleid, rere_id } = req.headers;
-        const t = await sequelize.transaction();
         try {
             let newClient = await dbSequelize.newclient.findByPk(clientid);
 
             if (approve === "true") {
+                const t = await sequelize.transaction();
+
                 if (newClient !== null) {
                     const filesPath = {
                         documentId: newClient.file1,
@@ -511,6 +512,7 @@ const approveCustomer = async (req, res, next) => {
                 }
 
             } else {
+                 console.log(new Date());
                 //Se debe actualizar el estado de newclient a recazado estado 20
                 // const clientQuery = await pool.query('UPDATE NewClient SET status = ?,rere_id = ? where idNewClient = ?', [PRE_CLIENT_STATES.REJECTED, rere_id, clientid]);
                 let changeStateNewClient = await dbSequelize.newclient.update({ status: PRE_CLIENT_STATES.REJECTED, rere_id: rere_id }, {
@@ -558,7 +560,9 @@ const approveCustomer = async (req, res, next) => {
 
             }
         } catch (error) {
-            console.log(error);
+            console.log("E-562: ",error);
+            res.status(404).json({ message: "No es posible terminar la operación" });
+
             console.log("Se ejecuta rollback de la transaccion");
             await t.rollback();
         }
