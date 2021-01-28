@@ -10,6 +10,7 @@ var fs = require('fs');
 const { generateBankReports, readBankReport, generatePendingBankRequest,
   generatePendingByHumanResources, generateParticularPendingByRRHH } = require('../services/reports');
 const dbSequelize = require('../config/database_sequelize.js');
+const { REQUEST_STATE } = require('../utils/constants.js');
 
 //Functions
 function getAdminId(req) {
@@ -454,11 +455,11 @@ const receiveBankReport = async (req, res, next) => {
       const adminId = getAdminId(req);
       const generatebankfile = await dbSequelize.generatedbankfiles.findByPk(req.body.geba_id);
       // const generatebankfile = await dbSequelize.sequelize.query("SELECT * FROM GeneratedBankFiles WHERE geba_id =8");
-let arrayRequests= [];
+      let arrayRequests = [];
       if (generatebankfile !== null) {
 
 
-   generatebankfile.geba_json_requests.requests.forEach(function (element) {
+        generatebankfile.geba_json_requests.requests.forEach(function (element) {
           console.log(element);
           arrayRequests.push(element.requestId)
         });
@@ -477,19 +478,30 @@ let arrayRequests= [];
         var readData = Excel.utils.sheet_to_json(readSheet, { range: 14 });
 
 
-          for (let i in readData) {
-            // readData[i].process = readData[i].process === true ? readData[i].process :  false;
+        for (let i in readData) {
+          // readData[i].process = readData[i].process === true ? readData[i].process :  false;
 
-            const requ = await dbSequelize.request.findOne({
-              attributes: ['idRequest', 'RequestState_idRequestState', 'Account_idAccount'],
-              where: {
-                quantity: parseInt(readData[i].Valor.replace("$","").replace(".",""), 10),
-              },where:(sequelize.literal(`SUBSTRING(accountNumber, -4) = ${readData[i]["Numero Destino"].slice(-4)}`) )
-            });
+          const requ = await dbSequelize.request.findOne({
+            attributes: ['idRequest', 'RequestState_idRequestState', 'Account_idAccount'],
+            where: {
+              quantity: parseInt(readData[i].Valor.replace("$", "").replace(".", ""), 10),
+            }, where: (sequelize.literal(`SUBSTRING(Request.accountNumber, -4) = ${readData[i]["Numero Destino"].slice(-4)}`)),
+            include: [{
+              model: dbSequelize.account}]
+          });
 
-         
-         
-             console.log(arrayRequests.includes(requ.idRequest));
+          
+
+          console.log("_______________________________________________________________");
+          console.log(requ.Account_idAccount);
+          console.log("_______________________________________________________________");
+
+          if (arrayRequests.includes(requ.idRequest) && readData[i]["Estado"].trim().toLowerCase() === "Pago Exitoso".toLowerCase()) {
+
+            let changeStateNewClient = await requ.update({ RequestState_idRequestState: REQUEST_STATE.FINISHED });
+            console.log("Se actualiza el estado del request : " + requ.idRequest);
+            console.log("Nuevo estado : " + REQUEST_STATE.FINISHED);
+
           }
 
 
@@ -497,14 +509,14 @@ let arrayRequests= [];
           res.status(200).json({ message: "Créditos actualizados con exito" });
 
 
-        // const result = await readBankReport(readData);
+          // const result = await readBankReport(readData);
 
 
-        // generatebankfile.geba_json_requests.requests.forEach(function (element) {
-        //   console.log(element);
+          // generatebankfile.geba_json_requests.requests.forEach(function (element) {
+          //   console.log(element);
 
-        // });
-
+          // });
+        }
       } else {
         res.status(404).json({ message: "Error No se encontro este registro de archivo" });
         throw new Error("Error cambiando estado newClient");

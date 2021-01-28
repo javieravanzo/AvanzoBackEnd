@@ -96,6 +96,10 @@ db.user.hasMany(db.role);
 db.user.belongsTo(db.client,{foreignKey:'Client_idClient'});
 db.client.hasOne(db.user,{foreignKey:'Client_idClient'});
 
+
+// db.client.belongsTo(db.user,{foreignKey:'Client_idClient'});
+// db.user.hasOne(db.client,{foreignKey:'Client_idClient'});
+
 // db.user.belongsTo(db.client,{as:'client',foreignKey:'Client_idClient'});
 // db.client.hasMany(db.user);
 
@@ -109,6 +113,10 @@ db.user.hasMany(db.administrator);
 
 db.generatedbankfiles.belongsTo(db.bank,{foreignKey:'bank_id'});
 db.bank.hasOne(db.generatedbankfiles,{foreignKey:'bank_id'});
+
+
+db.request.belongsTo(db.account,{foreignKey:'Account_idAccount'});
+db.account.hasMany(db.request,{foreignKey:'Account_idAccount'});
 
 module.exports = db;
 

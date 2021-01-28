@@ -58,7 +58,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     Client_idClient: {
       type: DataTypes.INTEGER(11),
-      allowNull: false,
+      allowNull: true,
       autoIncrement: false,
       primaryKey: false,
       defaultValue: null
@@ -72,6 +72,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     updatedAt: {
       type: DataTypes.DATE,
+      allowNull: true,
+      autoIncrement: false,
+      primaryKey: false,
+      defaultValue: null
+    },
+    code_userDocumentNumber: {
+      type: DataTypes.STRING,
       allowNull: true,
       autoIncrement: false,
       primaryKey: false,

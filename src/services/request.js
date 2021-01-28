@@ -1535,6 +1535,102 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
 
 };
 
+const generateFirstCodesService = async (userDocumentNumber, phoneNumber, email) => {
+
+  try {
+
+    if (phoneNumber !== null && phoneNumber !== "" && email !== null && email !== "") {
+
+      console.log("PhoneNumber", phoneNumber, "Email", email);
+
+      //CheckQuery
+    
+
+
+          const emailCode = Math.floor(100000 + Math.random() * 900000);
+
+          //Encrypt Codes
+          const newEmailCode = await helpers.encryptPassword(emailCode.toString());
+
+          //console.log("EC", emailCode);
+
+          const phoneCode = Math.floor(100000 + Math.random() * 900000);
+
+          //Encrypt Codes
+          const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
+
+          let objectCode = {
+            numberEmailCode: emailCode.toString(),
+            numberPhoneCode: phoneCode.toString(),
+            emailCode: newEmailCode,
+            phoneCode: newPhoneCode,
+            sendTime: new Date(),
+            receiveTime: null,
+            code_userDocumentNumber:userDocumentNumber
+          };
+
+          console.log("Codes", objectCode);
+
+          const checkClient = await pool.query('SELECT idCodes FROM Codes where code_userDocumentNumber = ?', userDocumentNumber);
+
+          if (checkClient.length > 0) {
+
+            const updateCodes = await pool.query('UPDATE Codes SET ? where code_userDocumentNumber = ?', [objectCode, userDocumentNumber]);
+
+          } else {
+
+            const insertCodes = await pool.query('INSERT INTO Codes SET ?', [objectCode]);
+
+          }
+
+          //Mailer
+          sgMail.setApiKey(email_api_key);
+
+          let userData = {
+            email: email,
+            url: front_URL,
+            emailCode: emailCode,
+            base_URL_test: base_URL + "/confirmation.png",
+            footer: base_URL + "/footer.png",
+          };
+
+          let output = await compile('transactionCode', userData);
+
+          let info = {
+            from: 'operaciones@avanzo.co', // sender address
+            to: email, // list of receivers
+            subject: 'Avanzo (Créditos al instante) - Código de validación', // Subject line
+            text: 'Avanzo', // plain text body
+            html: output // html body
+          };
+
+          await sgMail.send(info);
+          const smsCodes = await dbSequelize.smscodes.findOne({
+            attributes: ['sms_co_id', 'sms_co_body'],
+            where: {
+                sms_co_id: SMS_CODES.CLIENT_REJECTED
+            }
+        });
+          sendSMS(phoneNumber, smsCodes.sms_co_body);
+
+          return { status: 200, message: "Los códigos han sido enviados" };
+
+       
+
+      
+
+    } else {
+
+      return { status: 400, message: "Los datos ingresados no son válidos." };
+
+    }
+
+  } catch (e) {
+    console.log("E", e);
+  }
+
+};
+
 const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) => {
 
   try {
@@ -1590,5 +1686,5 @@ module.exports = {
   getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
   passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllDefinitelyRejected,
   getAllProcessWithoutChangeRequest, updateDocumentsRequest, updateRequestInformation,
-  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized, getAllReasonsOfRejection
+  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized, getAllReasonsOfRejection,generateFirstCodesService
 };

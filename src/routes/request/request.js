@@ -51,7 +51,7 @@ const { getOutLayData, getOultayDatesList, createNewRequest, getAllRequest, getR
         getPendingBankRefundedRequest, changeToProcessWithoutChange, changeToOutlay,
         changeToProcessWithDocuments, getAllReviewWithoutChangeRequest, updateDocumentsRequests,
         updateRequestsInformation, getDefinitelyRejectedRequest, getAllRequestWithDocumentsChange,
-        getAllProcessInBank, getAllFinalizedRequest,getAllRejectionReasons
+        getAllProcessInBank, getAllFinalizedRequest,getAllRejectionReasons,generateFirstCodes,checkFirstCodes
        } = require('../../controllers/request');
   
 //Routes 
@@ -140,8 +140,10 @@ router.get('/Documents/GenerateContract', [
 [verifyToken], generateContract);
 
 router.get('/Request/GenerateCodes', [verifyToken], generateCodes);
-
 router.get('/Request/ValidateCodes', [verifyToken], checkCodes);
+
+router.post('/Request/GenerateFirstCodes', [verifyToken], generateFirstCodes);
+router.post('/Request/ValidateFirstCodes', [verifyToken], checkFirstCodes);
 
 //Export
 module.exports = router;
