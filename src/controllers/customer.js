@@ -355,164 +355,173 @@ const approveCustomer = async (req, res, next) => {
         //Get the user id
         const adminId = getAdminId(req);
         const { clientid, approve, cycleid, rere_id } = req.headers;
+        const t=await sequelize.transaction();
         try {
             let newClient = await dbSequelize.newclient.findByPk(clientid);
 
             if (approve === "true") {
-                const t = await sequelize.transaction();
+                try {
+                    
 
-                if (newClient !== null) {
-                    const filesPath = {
-                        documentId: newClient.file1,
-                        paymentReport: newClient.file3
-                    };
-                    //  let newClientDocuments = insertClientDocuments(pool, filesPath).then(newClientDocuments => {
-                    const clientDocuments = await dbSequelize.clientdocuments.create(filesPath, { transaction: t });
-                    if (clientDocuments !== null) {
-                        const clientNew = {
-                            identificationId: newClient.identificationId,
-                            documentType: newClient.documentType,
-                            birthDate: newClient.birthDate,
-                            city: newClient.city,
-                            phoneNumber: newClient.phoneNumber,
-                            Company_idCompany: newClient.Company_idCompany,
-                            registeredBy: 1,
-                            entryDate: todayDate.split(" ")[0],
-                            rejectState: false,
-                            isDeleted: false,
-                            platformState: true,
-                            ClientDocuments_idClientDocuments: clientDocuments.idClientDocuments,
-                            CompanySalaries_idCompanySalaries: cycleid,
+                    if (newClient !== null) {
+                        const filesPath = {
+                            documentId: newClient.file1,
+                            paymentReport: newClient.file3
                         };
-                        const client = await dbSequelize.client.create(clientNew, { transaction: t });
-                        // let client = insertClient(pool, clientNew).then(client => {
-                        if (client !== null) {
-                            const newUser = {
-                                name: newClient.name,
-                                lastName: newClient.lastName,
-                                email: newClient.email,
-                                status: true,
+                        //  let newClientDocuments = insertClientDocuments(pool, filesPath).then(newClientDocuments => {
+                        const clientDocuments = await dbSequelize.clientdocuments.create(filesPath, { transaction: t });
+                        if (clientDocuments !== null) {
+                            const clientNew = {
+                                identificationId: newClient.identificationId,
+                                documentType: newClient.documentType,
+                                birthDate: newClient.birthDate,
+                                city: newClient.city,
+                                phoneNumber: newClient.phoneNumber,
+                                Company_idCompany: newClient.Company_idCompany,
                                 registeredBy: 1,
-                                registeredDate: todayDate,
-                                createdDate: todayDate,
-                                Role_idRole: 4,
-                                Client_idClient: client.idClient,
-                                isConfirmed: true,
-                                Company_idCompany: newClient.Company_idCompany
+                                entryDate: todayDate.split(" ")[0],
+                                rejectState: false,
+                                isDeleted: false,
+                                platformState: true,
+                                ClientDocuments_idClientDocuments: clientDocuments.idClientDocuments,
+                                CompanySalaries_idCompanySalaries: cycleid,
                             };
-                            // let user = insertUser(pool, newUser).then(user => {
-                            const user = await dbSequelize.user.create(newUser, { transaction: t });
+                            const client = await dbSequelize.client.create(clientNew, { transaction: t });
+                            // let client = insertClient(pool, clientNew).then(client => {
+                            if (client !== null) {
+                                const newUser = {
+                                    name: newClient.name,
+                                    lastName: newClient.lastName,
+                                    email: newClient.email,
+                                    status: true,
+                                    registeredBy: 1,
+                                    registeredDate: todayDate,
+                                    createdAt: todayDate,
+                                    Role_idRole: 4,
+                                    Client_idClient: client.idClient,
+                                    isConfirmed: false,
+                                    Company_idCompany: newClient.Company_idCompany
+                                };
+                                // let user = insertUser(pool, newUser).then(user => {
+                                const user = await dbSequelize.user.create(newUser, { transaction: t });
 
-                            if (user !== null) {
-                                //get companybyid
-                                let company = await dbSequelize.company.findByPk(newClient.Company_idCompany);
-                                if (company !== null) {
-                                    const newAccount = {
-                                        maximumAmount: company.defaultAmount,
-                                        accumulatedQuantity: 0,
-                                        documentsUploaded: true,
-                                        montlyFee: company.maximumSplit,
-                                        totalInterest: 0, totalFeeAdministration: 0,
-                                        totalOtherCollection: 0, totalRemainder: 0,
-                                        approveHumanResources: company.approveHumanResources === 1 ? true : false,
-                                        registeredBy: 1,
-                                        registeredDate: todayDate,
-                                        Client_idClient: client.idClient,
-                                        lastAdministrationDate: todayDate
-                                    };
-                                    const account = await dbSequelize.account.create(newAccount, { transaction: t });
-                                    console.log("account : ", account);
-                                    if (account !== null) {
-                                        const new_date = new Date();
-                                        new_date.setHours(new_date.getHours() + expirationTime);
-                                        const newAuth = {
-                                            User_idUser: user.idUser,
+                                if (user !== null) {
+                                    //get companybyid
+                                    let company = await dbSequelize.company.findByPk(newClient.Company_idCompany);
+                                    if (company !== null) {
+                                        const newAccount = {
+                                            maximumAmount: company.defaultAmount,
+                                            accumulatedQuantity: 0,
+                                            documentsUploaded: true,
+                                            montlyFee: company.maximumSplit,
+                                            totalInterest: 0, totalFeeAdministration: 0,
+                                            totalOtherCollection: 0, totalRemainder: 0,
+                                            approveHumanResources: company.approveHumanResources === 1 ? true : false,
                                             registeredBy: 1,
                                             registeredDate: todayDate,
-                                            createdDate: todayDate,
-                                            password: newClient.password,
-                                            expiresOn: new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
+                                            Client_idClient: client.idClient,
+                                            lastAdministrationDate: todayDate
                                         };
-                                        console.log("7", new Date());
-                                        const auth = await dbSequelize.auth.create(newAuth, { transaction: t });
-                                        if (auth !== null) {
-
-                                            const jwtoken = jwt.sign({ client }, my_secret_key, { expiresIn: '30m' });
-                                            const url = base_URL + `/Account/Confirm/${jwtoken}`;
-                                            //Mailer
-                                            let userData = {
-                                                email: newClient.email,
-                                                name: newClient.name,
-                                                url: front_URL,
-                                                base_URL_test: base_URL + "/confirmation.png",
-                                                footer: base_URL + "/footer.png",
-                                                link: url,
+                                        const account = await dbSequelize.account.create(newAccount, { transaction: t });
+                                        if (account !== null) {
+                                            const new_date = new Date();
+                                            new_date.setHours(new_date.getHours() + expirationTime);
+                                            const newAuth = {
+                                                User_idUser: user.idUser,
+                                                registeredBy: 1,
+                                                registeredDate: todayDate,
+                                                createdAt: todayDate,
+                                                password: newClient.password,
+                                                expiresOn: new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
                                             };
-                                            var subject = 'Avanzo (Créditos al instante) - Confirmación de cuenta';
-                                            var text = 'Avanzo';
-                                            var template = ACCOUNT_CONFIRMATION;
-                                            sendEmail(template, userData, NAME_FILE_CONTRACT, ATTACHMENT_TYPES.PDF, subject, text, PATH_FILE_CONTRACT)
-                                            //Send SMS 
-                                            if (ENVIRONMENT === 'production') {
-                                                const smsCodes = await dbSequelize.smscodes.findOne({
-                                                    attributes: ['sms_co_id', 'sms_co_body'],
+                                            console.log("7", new Date());
+                                            const auth = await dbSequelize.auth.create(newAuth, { transaction: t });
+                                            if (auth !== null) {
+
+                                                const jwtoken = jwt.sign({ client }, my_secret_key, { expiresIn: '30m' });
+                                                const url = base_URL + `/Account/Confirm/${jwtoken}`;
+                                                //Mailer
+                                                let userData = {
+                                                    email: newClient.email,
+                                                    name: newClient.name,
+                                                    url: front_URL,
+                                                    base_URL_test: base_URL + "/confirmation.png",
+                                                    footer: base_URL + "/footer.png",
+                                                    link: url,
+                                                    documentNumber: newClient.identificationId
+                                                };
+                                                var subject = 'Avanzo (Créditos al instante) - Confirmación de cuenta';
+                                                var text = 'Avanzo';
+                                                var template = ACCOUNT_CONFIRMATION;
+                                                 sendEmail(template, userData, NAME_FILE_CONTRACT, ATTACHMENT_TYPES.PDF, subject, text, true)
+                                                //Send SMS 
+                                                if (ENVIRONMENT === 'production') {
+                                                    const smsCodes = await dbSequelize.smscodes.findOne({
+                                                        attributes: ['sms_co_id', 'sms_co_body'],
+                                                        where: {
+                                                            sms_co_id: SMS_CODES.APPROVED_CLIENT
+                                                        }
+                                                    });
+                                                    sendSMS(newClient.phoneNumber, smsCodes.sms_co_body);
+                                                }
+                                                let changeStateNewClient = await newClient.update({ status: 1 }, {
                                                     where: {
-                                                        sms_co_id: SMS_CODES.APPROVED_CLIENT
+                                                        idNewClient: clientid
                                                     }
                                                 });
-                                                sendSMS(newClient.phoneNumber, smsCodes.sms_co_body);
-                                            }
-                                            let changeStateNewClient = await newClient.update({ status: 1 }, {
-                                                where: {
-                                                    idNewClient: clientid
-                                                }
-                                            });
 
-                                            if (changeStateNewClient[0] !== 0) {
-                                                await t.commit();
-                                                res.status(200).json({ message: "El usuario ha sido aprobado exitosamente." });
+                                                if (changeStateNewClient[0] !== 0) {
+                                                    await t.commit();
+                                                    res.status(200).json({ message: "El usuario ha sido aprobado exitosamente." });
+                                                } else {
+                                                    res.status(404).json({ message: "Error cambiando estado newClient" });
+                                                    throw new Error("Error cambiando estado newClient");
+                                                }
                                             } else {
-                                                res.status(404).json({ message: "Error cambiando estado newClient" });
-                                                throw new Error("Error cambiando estado newClient");
+                                                res.status(404).json({ message: "Error registrando Auth" });
+                                                throw new Error("Error registrando Auth");
                                             }
+
                                         } else {
-                                            res.status(404).json({ message: "Error registrando Auth" });
-                                            throw new Error("Error registrando Auth");
+                                            res.status(404).json({ message: "Error registrando Account" });
+                                            throw new Error("Error registrando Account");
                                         }
 
+
                                     } else {
-                                        res.status(404).json({ message: "Error registrando Account" });
-                                        throw new Error("Error registrando Account");
+                                        res.status(404).json({ message: "Error obteniendo company" });
+                                        throw new Error("Error obteniendo company");
                                     }
 
-
                                 } else {
-                                    res.status(404).json({ message: "Error obteniendo company" });
-                                    throw new Error("Error obteniendo company");
+                                    res.status(404).json({ message: "Error registrando User" });
+                                    throw new Error("Error registrando User");
                                 }
 
                             } else {
-                                res.status(404).json({ message: "Error registrando User" });
-                                throw new Error("Error registrando User");
+                                res.status(404).json({ message: "Error registrando Client" });
+                                throw new Error("Error registrando Client");
                             }
 
                         } else {
-                            res.status(404).json({ message: "Error registrando Client" });
-                            throw new Error("Error registrando Client");
+                            res.status(404).json({ message: "Error registrando ClientDocuments" });
+                            throw new Error("Error registrando ClientDocuments");
                         }
 
                     } else {
-                        res.status(404).json({ message: "Error registrando ClientDocuments" });
-                        throw new Error("Error registrando ClientDocuments");
+                        res.status(404).json({ message: "No se encontró NewClient" });
+                        throw new Error("No se encontró NewClient");
                     }
 
-                } else {
-                    res.status(404).json({ message: "No se encontró NewClient" });
-                    throw new Error("No se encontró NewClient");
+                } catch (error) {
+                    console.log(error);
+                    await t.rollback();
+                    console.log("Se ejecuta rollback de la transaccion");
+
                 }
 
             } else {
-                 console.log(new Date());
+                console.log(new Date());
                 //Se debe actualizar el estado de newclient a recazado estado 20
                 // const clientQuery = await pool.query('UPDATE NewClient SET status = ?,rere_id = ? where idNewClient = ?', [PRE_CLIENT_STATES.REJECTED, rere_id, clientid]);
                 let changeStateNewClient = await dbSequelize.newclient.update({ status: PRE_CLIENT_STATES.REJECTED, rere_id: rere_id }, {
@@ -523,7 +532,6 @@ const approveCustomer = async (req, res, next) => {
 
                 if (changeStateNewClient[0] !== 0) {
                     console.log("Cliente rechazado");
-
                     //Mailer
                     let userData = {
                         email: newClient.email,
@@ -531,15 +539,15 @@ const approveCustomer = async (req, res, next) => {
                         url: front_URL,
                         base_URL_test: base_URL + "/confirmation.png",
                         footer: base_URL + "/footer.png",
+                        documentNumber: newClient.identificationId
                     };
-
                     var subject = 'Avanzo (Créditos al instante) - Rechazo de cuenta';
                     var text = 'Avanzo';
                     var template = ACCOUNT_REJECTED;
-                    sendEmail(template, userData, '', '', subject, text, '');
+                    await sendEmail(template, userData, '', '', subject, text, false);
                     //Send SMS 
                     if (ENVIRONMENT === 'production') {
-                  
+
 
                         const smsCodes = await dbSequelize.smscodes.findOne({
                             attributes: ['sms_co_id', 'sms_co_body'],
@@ -548,23 +556,16 @@ const approveCustomer = async (req, res, next) => {
                             }
                         });
                         sendSMS(newClient.phoneNumber, smsCodes.sms_co_body);
-
                     }
                     res.status(200).json({ message: "El usuario ha sido rechazado exitosamente." });
-
-                }else{
+                } else {
                     res.status(404).json({ message: "Error cambiando estado newClient" });
                     throw new Error("Error cambiando estado newClient");
                 }
-
-
             }
         } catch (error) {
-            console.log("E-562: ",error);
+            console.log("E-562: ", error);
             res.status(404).json({ message: "No es posible terminar la operación" });
-
-            console.log("Se ejecuta rollback de la transaccion");
-            await t.rollback();
         }
         next();
     } catch (e) {

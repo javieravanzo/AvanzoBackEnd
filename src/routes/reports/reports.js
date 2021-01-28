@@ -7,7 +7,7 @@ const { header, body } = require('express-validator');
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
 const { generateBankReport, receiveBankReport, generatePendingRequestReport, 
-        generatePendingByRRHH, generateParticularPendingRequestByRRHH } = require('../../controllers/reports');
+        generatePendingByRRHH, generateParticularPendingRequestByRRHH,downloadFile } = require('../../controllers/reports');
 
 //Initialize
 const router = express.Router();
@@ -44,6 +44,11 @@ router.get('/Reports/PendingToFinalizeByBank', [verifyToken], generatePendingReq
 router.get('/Reports/PendingGeneralByRRHH', [verifyToken], generatePendingByRRHH);
 
 router.get('/Reports/PendingParticularByRRHH', [verifyToken], generateParticularPendingRequestByRRHH);
+
+// router.get('/Reports/DownloadFile/:fileName', [verifyToken], downloadFile);
+
+router.get('/Reports/DownloadFile/:fileName', downloadFile);
+
 
 router.post('/Reports/ReceiveBankReport', uploads.fields([
   { name: 'read', maxCount: 1 }

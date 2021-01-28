@@ -76,6 +76,8 @@ db.sms = require('../../models/sms.js')(sequelize, Sequelize);
 db.smscodes = require('../../models/smscodes.js')(sequelize, Sequelize);
 db.transaction = require('../../models/transaction.js')(sequelize, Sequelize);
 db.user = require('../../models/user.js')(sequelize, Sequelize);
+db.generatedbankfiles = require('../../models/generatedbankfiles.js')(sequelize, Sequelize);
+
 
 
 //Relations
@@ -105,6 +107,8 @@ db.company.hasOne(db.user);
 db.administrator.belongsTo(db.user);
 db.user.hasMany(db.administrator);
 
+db.generatedbankfiles.belongsTo(db.bank,{foreignKey:'bank_id'});
+db.bank.hasOne(db.generatedbankfiles,{foreignKey:'bank_id'});
 
 module.exports = db;
 

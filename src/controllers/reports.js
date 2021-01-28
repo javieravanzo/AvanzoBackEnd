@@ -3,11 +3,13 @@
 const jwt = require('jsonwebtoken');
 const Excel = require('xlsx');
 const { banks } = require('../utils/constants.js');
+const { utils } = require('../utils/utils.js');
 
 var fs = require('fs');
 //Imports
 const { generateBankReports, readBankReport, generatePendingBankRequest,
   generatePendingByHumanResources, generateParticularPendingByRRHH } = require('../services/reports');
+const dbSequelize = require('../config/database_sequelize.js');
 
 //Functions
 function getAdminId(req) {
@@ -145,7 +147,7 @@ const generateBankReport = async (req, res, next) => {
     workbook.Props = {
       Title: "Reporte del banco",
       Author: "Avanzo",
-      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -157,6 +159,7 @@ const generateBankReport = async (req, res, next) => {
     if (result.status === 200) {
 
       let date_ob = new Date();
+      let bank = await dbSequelize.bank.findByPk(req.params.bank_id);
 
       // current date
       // adjust 0 before single digit date
@@ -171,6 +174,11 @@ const generateBankReport = async (req, res, next) => {
       const processData = processQueryData(result.data, req.params.bank_id);
 
       var final_woorkbook = null;
+      let arrayRequest = [];
+      result.data.forEach(element => {
+        console.log(element);
+        arrayRequest.push({ requestId: element.Referencia, requestState: 4 });
+      });
       switch (parseInt(req.params.bank_id, 10)) {
         case banks.BANCO_DAVIVIENDA:
           final_woorkbook = Excel.utils.json_to_sheet(result.data);
@@ -211,7 +219,7 @@ const generateBankReport = async (req, res, next) => {
             //console.log(element);
             txt += `"${sec < 9 ? "0" + (sec += 1) : sec += 1}"|"${element.DOCUMENTO}"|"${element.TIPODOCUMENTO}"|"${element.VALOR}"|"${element.FECHA}"|"${element.NOMBRES}"|"${element.APELLIDO1}"|"${element.APELLIDO2}"|"${element.TELEFONO}"|"${element.COMENTARIOS}"|"${element.CODIGOPS}"|"${element.PIN}"\n`;
           });
-          fs.writeFile("../files/writes/Desembolsos_" + day + "-" + month + "-" + year + ".txt", txt, function (erro) {
+          fs.writeFile("files/writes/Desembolsos_" + day + "-" + month + "-" + year + ".txt", txt, function (erro) {
             if (erro) {
               throw erro;
             }
@@ -230,15 +238,21 @@ const generateBankReport = async (req, res, next) => {
       var url = "";
       if (parseInt(req.params.bank_id, 10) !== banks.EFECTY) {
         workbook.Sheets["Hoja 1"] = final_woorkbook;
-        let workbookAbout = Excel.writeFile(workbook, "../files/writes/Desembolsos_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
-        url = "/Desembolsos_" + day + "-" + month + "-" + year + ".xlsx";
+        let workbookAbout = Excel.writeFile(workbook, "files/writes/Desembolsos_" + bank.bankName + "_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
+        url = "/Desembolsos_" + bank.bankName + "_" + day + "-" + month + "-" + year + ".xlsx";
       } else {
-        url = "/Desembolsos_" + day + "-" + month + "-" + year + ".txt";
+        url = "/Desembolsos_" + bank.bankName + "_" + day + "-" + month + "-" + year + ".txt";
       }
 
+      const objGeneratedBankFiles = {
+        bank_id: bank.idBank,
+        geba_path: url,
+        geba_json_requests: { requests: arrayRequest },
 
+      };
+      const generatedbankfiles = await dbSequelize.generatedbankfiles.create(objGeneratedBankFiles);
 
-
+      console.log(generatedbankfiles);
       ////console.log("Length", result.data.length);
       if (result) {
         res.status(200).json({ data: url });
@@ -272,7 +286,7 @@ const generatePendingRequestReport = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes finalizar por banco",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -295,7 +309,7 @@ const generatePendingRequestReport = async (req, res, next) => {
     let month = date.getMonth();
     let year = date.getFullYear();
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesTerminarDesembolsoPorBanco_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
+    let workbookAbout = Excel.writeFile(workbook, "files/writes/PendientesTerminarDesembolsoPorBanco_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
     let url = "/PendientesTerminarDesembolsoPorBanco_" + day + "-" + month + "-" + year + ".xlsx";
 
@@ -328,7 +342,7 @@ const generatePendingByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -355,7 +369,7 @@ const generatePendingByRRHH = async (req, res, next) => {
 
     //console.log("Days", day, month, year);
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHH_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
+    let workbookAbout = Excel.writeFile(workbook, "files/writes/PendientesPorRRHH_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
     let url = "/PendientesPorRRHH_" + day + "-" + month + "-" + year + ".xlsx";
 
@@ -388,7 +402,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
     workbook.Props = {
       Title: "Pendientes aprobar por recursos humanos en IGS",
       Author: "Cristian Orjuela",
-      CreatedDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+      createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
     };
 
     workbook.SheetNames.push("Hoja 1");
@@ -411,7 +425,7 @@ const generateParticularPendingRequestByRRHH = async (req, res, next) => {
     let month = date.getMonth();
     let year = date.getFullYear();
 
-    let workbookAbout = Excel.writeFile(workbook, "../files/writes/PendientesPorRRHEnIGS_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
+    let workbookAbout = Excel.writeFile(workbook, "files/writes/PendientesPorRRHEnIGS_" + day + "-" + month + "-" + year + ".xlsx", { bookType: 'xlsx', type: 'binary' });
 
     let url = "/PendientesPorRRHEnIGS_" + day + "-" + month + "-" + year + ".xlsx";
 
@@ -435,29 +449,93 @@ const receiveBankReport = async (req, res, next) => {
     ////console.log("Read", req);
     ////console.log("Write", req.write);
     ////console.log("Read", req.files[0].path);
-
     //Get the user id
-    const adminId = getAdminId(req);
-
-    // Create a workbook, like a file.
-    var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
-    
-
-    // Define the sheet of work.
-    var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
-    
-
-    // Map the xlsx format to json.
-    // range:14  indicates the place of the header
-    var readData = Excel.utils.sheet_to_json(readSheet,{range:14});
-
     try {
-      const result = await readBankReport(readData);
-      res.status(result.status).json({ message: result.message });
-    } catch (e) {
-      res.status(500).json({ message: "No es posible realizar el registro en este momento." });
-    };
+      const adminId = getAdminId(req);
+      const generatebankfile = await dbSequelize.generatedbankfiles.findByPk(req.body.geba_id);
+      // const generatebankfile = await dbSequelize.sequelize.query("SELECT * FROM GeneratedBankFiles WHERE geba_id =8");
+let arrayRequests= [];
+      if (generatebankfile !== null) {
 
+
+   generatebankfile.geba_json_requests.requests.forEach(function (element) {
+          console.log(element);
+          arrayRequests.push(element.requestId)
+        });
+
+
+        // Create a workbook, like a file.
+        var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
+
+        // Define the sheet of work.
+        var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
+
+
+
+        // Map the xlsx format to json.
+        // range:14  indicates the place of the header
+        var readData = Excel.utils.sheet_to_json(readSheet, { range: 14 });
+
+
+          for (let i in readData) {
+            // readData[i].process = readData[i].process === true ? readData[i].process :  false;
+
+            const requ = await dbSequelize.request.findOne({
+              attributes: ['idRequest', 'RequestState_idRequestState', 'Account_idAccount'],
+              where: {
+                quantity: parseInt(readData[i].Valor.replace("$","").replace(".",""), 10),
+              },where:(sequelize.literal(`SUBSTRING(accountNumber, -4) = ${readData[i]["Numero Destino"].slice(-4)}`) )
+            });
+
+         
+         
+             console.log(arrayRequests.includes(requ.idRequest));
+          }
+
+
+
+          res.status(200).json({ message: "Créditos actualizados con exito" });
+
+
+        // const result = await readBankReport(readData);
+
+
+        // generatebankfile.geba_json_requests.requests.forEach(function (element) {
+        //   console.log(element);
+
+        // });
+
+      } else {
+        res.status(404).json({ message: "Error No se encontro este registro de archivo" });
+        throw new Error("Error cambiando estado newClient");
+      }
+
+    } catch (error) {
+      console.log("E - ", error);
+      res.status(404).json({ message: "Error No se encontro este registro de archivo" });
+      throw new Error("Error interno");
+
+    }
+
+
+
+
+
+  } catch (e) {
+    //console.log("Error", e);
+    res.status(500).json({ message: "Error interno del servidor" });
+  };
+
+};
+
+
+const downloadFile = async (req, res, next) => {
+
+  try {
+
+    //utils.downloadFile(req.params.fileName);
+    res.download('files/writes/' + req.params.fileName);
+    res.status(200)
   } catch (e) {
     //console.log("Error", e);
     res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
@@ -467,5 +545,5 @@ const receiveBankReport = async (req, res, next) => {
 
 module.exports = {
   generateBankReport, receiveBankReport, generatePendingRequestReport, generatePendingByRRHH,
-  generateParticularPendingRequestByRRHH
+  generateParticularPendingRequestByRRHH, downloadFile
 };

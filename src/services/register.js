@@ -33,7 +33,7 @@ const registerCustomer = async (identificationId, client, user, auth) => {
       //Insert into auth
       const newAuth = {
         User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+        createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
       };
       newAuth.password = await helpers.encryptPassword(auth.password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);
@@ -144,12 +144,12 @@ const newPreregister = async (client, user, files, auth) => {
           //status: 0 = Created, 1 = Approved, 2 = Rejected.
           status: 0,
           totalRemainder: companyQuery[0].defaultAmount,
-          // createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
+          // createdAt: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           //registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}),
           registeredBy: 0,
           Company_idCompany: client.Company_idCompany,
           city: client.city,
-          birthDate: '2020-10-24',//client.birthDate,
+          birthDate: client.birthDate,
           CompanySalaries_idCompanySalaries: client.salary,
           Role_idRole: 4,
           gender: client.gender,
@@ -242,7 +242,7 @@ const registerAdmins = async (admin, user, auth) => {
       //Auth
       const newAuth = {
         User_idUser: userRow[0].idUser, registeredBy: 1, registeredDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }),
-        createdDate: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
+        createdAt: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
       };
       newAuth.password = await helpers.encryptPassword(auth.password);
       const result3 = await pool.query('INSERT INTO Auth SET ?', [newAuth]);

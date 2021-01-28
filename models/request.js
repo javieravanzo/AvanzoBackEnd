@@ -203,7 +203,13 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: false,
       defaultValue: null
     }
-  }, {
+  },
+  // { getterMethods: {
+  //   numberAccount() {
+  //     return accountNumber.aplit(-4)
+  //   }
+  // }}  , 
+  {
     tableName: 'Request'
   });
 };

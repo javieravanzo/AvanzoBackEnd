@@ -16,7 +16,6 @@ const createCompanies = async (req, userId) => {
     const company = {
       nit, address, socialReason, economyActivity, maximumSplit, defaultAmount,
       approveHumanResources, paymentSupport, workingSupport, databaseExchange, fixedFee};
-    company.registeredDate = new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"});
     company.registeredBy = userId;
     const consultEmail = await pool.query('SELECT C.idCompany, U.email FROM Company C JOIN User U ON (U.Company_idCompany = C.idCompany) where C.nit = ? OR U.email = ?', [nit, email]);
     ////console.log("CE", consultEmail.length > 0);
@@ -83,11 +82,11 @@ const createCompanies = async (req, userId) => {
       }
 
       //User
-      const user = {email, name: socialReason, isConfirmed: true, status: true, createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), Role_idRole: 3, Company_idCompany: companyRow.insertId};
+      const user = {email, name: socialReason, isConfirmed: true, status: true, createdAt: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), Role_idRole: 3, Company_idCompany: companyRow.insertId};
       const userRow = await pool.query('INSERT INTO User SET ?', [user]);
 
       //Auth
-      const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
+      const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdAt: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
       newAuth.password = await helpers.encryptPassword(password);
       const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]); 
 
@@ -156,7 +155,7 @@ const updateCompanies = async (req, userId) => {
     const userRow = await pool.query('UPDATE User SET ? where idUser = ?', [user, idUser]);
 
     //Auth
-    /*const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
+    /*const newAuth = { User_idUser: userRow.insertId, registeredBy: userId, registeredDate: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"}), createdAt: new Date().toLocaleString("es-CO", {timeZone: "America/Bogota"})};
     newAuth.password = await helpers.encryptPassword(password);
     const authQuery = await pool.query('INSERT INTO Auth SET ?', [newAuth]);*/
 

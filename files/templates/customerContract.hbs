@@ -1,0 +1,591 @@
+<style>
+  .parrafo {
+    margin-bottom: 15px;
+    LINE-HEIGHT: 20px;
+  }
+
+  .titulo {
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .lista-decimal {
+    list-style: decimal;
+  }
+
+  .lista-griega {
+    list-style: lower-roman;
+  }
+
+  .justifi {
+    text-align: justify;
+  }
+
+  .subtitle {
+    font-weight: bold;
+  }
+
+  .underline {
+    text-decoration-line: underline;
+  }
+
+  p {
+    font-weight: normal;
+  }
+
+  .titulo-nivel2 {
+    font-weight: bold;
+  }
+
+  .section {
+    font-size: 15px;
+    font-family: Arial;
+  }
+
+  #HTMLtoPDF {
+    max-width: 90%;
+    min-width: 555px;
+    widows: 555px;
+    margin: auto;
+  }
+
+  ul {
+    counter-reset: item;
+    margin: 0 0 1.5em;
+    padding: 0;
+  }
+
+  ul.lista-decimal>li {
+    counter-increment: item;
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 0 2rem;
+    text-indent: -1.2rem;
+  }
+
+  ul.lista-decimal>li::before {
+    content: counter(item) '.';
+    display: inline-block;
+    font-weight: bold;
+    padding-right: .5rem;
+    text-align: right;
+  }
+
+  ul.lista-griega>li::before {
+    font-weight: bold;
+  }
+
+  .margin-0 {
+    margin: 0;
+  }
+
+  .arial {
+    font-family: sans-serif;
+    font-size: 20px;
+  }
+
+  hr {
+    border: none;
+    height: 2px;
+    color: #333;
+    background-color: #333;
+  }
+</style>
+<html>
+
+<head>
+  <title>Contrato herramienta tecnologica</title>
+  <meta charset="UTF-8">
+</head>
+
+<body>
+  <div>
+    <div id='pageHeader'><img src='https://avanzo.co/wp-content/uploads/2017/05/Logo-1.png' style="width:150px;" /></br></br></div>
+    <div id="HTMLtoPDF">
+
+      <center class="arial">
+        <p class="titulo arial">CONTRATO DE CUPO DE CRÉDITO ROTATIVO
+          <font style="text-transform: uppercase;">CON DESCUENTO POR LIBRANZA</font>
+        </p> <br>
+      </center>
+
+      <div class="section parrafo justifi">
+        <p>Son parte del presente contrato: </p>
+        <p>
+          <span class="subtitle">El Acreedor: </span>
+          Victoria Inversiones S.A.S, sociedad colombiana, debidamente constituida y registrada en la Cámara de Comercio
+          de
+          Bogotá, identificada con NIT 901116431-9, representada legalmente por Max Jefferson Beltrán López, con
+          domicilio en la ciudad de
+          Bogotá D.C., identificado con la cédula de ciudadanía número 1.023.914.453, a través de su marca registrada
+          AVANZO.
+        </p>
+
+        <p><span class="subtitle">El Cliente: </span>La persona natural suscriptora del presente
+          contrato:{{name}}</p>
+
+        <p>El presente Contrato tiene como objetivo regular las condiciones generales bajo las cuales opera el producto
+          de cupo de crédito de
+          libranza celebrado entre EL ACREEDOR, como ENTIDAD OPERADORA y EL CLIENTE como titular y DEUDOR de la misma,
+          quien,
+          en virtud de la correspondiente solicitud de crédito y la autorización de descuento, se obliga al cumplimiento
+          de las condiciones aquí
+          pactadas, sin perjuicio de la aplicación de las normas que rigen la materia.</p>
+
+        <center class="arial" style="margin-top: 105px;">
+          <p class="titulo arial"> CLÁUSULAS</p>
+        </center>
+        <p><span class="subtitle">1. Definiciones. </span> Las siguientes definiciones se observarán para los efectos
+          del presente Contrato:</p>
+
+        <p><u>Cliente:</u> Es la persona natural suscriptora del presente contrato persona natural asalariada,
+          pensionada o contratada por prestación
+          de servicios que solicita el cupo rotativo de crédito, realizando el pago de los desembolsos que se realicen a
+          su favor a través de su
+          salario, sus prestaciones sociales de carácter económico o su pensión, siempre que medie autorización para el
+          efecto al Empleador
+          o Entidad Pagadora.</p>
+
+        <p><u>Cupo de crédito rotativo:</u> Cupo de crédito que, una vez aprobado será rotativo, esto es que se
+          mantendrá disponible para ser
+          desembolsado y transferido a favor de EL CLIENTE hasta completar el cupo total disponible, el cual se irá
+          liberando a medida en que
+          se realizan los pagos de los desembolsos solicitados.</p>
+
+        <p><u>Desembolso sobre el cupo de crédito rotativo:</u> Es el desembolso que hace EL ACREEDOR sobre el valor
+          solicitado por EL CLIENTE
+          del cupo de crédito rotativo previamente aprobado.</p>
+
+        <p><u>Empleador o entidad pagadora:</u> Es la persona natural o jurídica, de naturaleza pública o privada, que
+          tiene a su cargo la obligación
+          del pago del salario o remuneración, cualquiera que sea la denominación se le dé, en razón de la ejecución de
+          un trabajo o porque
+          tiene a su cargo el pago de pensiones en calidad de administrador de fondos de cesantías y pensiones..</p>
+
+        <p><u> Entidad Operadora:</u> Es la persona jurídica que realiza operaciones de crédito, que son recaudadas a
+          través del mecanismo de
+          libranza.</p>
+
+        <p><u>Libranza:</u> es la autorización que da el asalariado o pensionado a su empleador o entidad pagadora; para
+          que realice un descuento
+          de su salario o pensión, con el objeto de que sea girado a favor de las entidades operadoras..</p>
+
+        <p><span class="subtitle">2. Descripción del Cupo de Crédito Rotativo.</span> Podrá ser otorgado por un monto
+          máximo a financiar de $ 300.000 por un plazo de 0
+          MESES a partir de su aprobación, el cual podrá ser renovado automáticamente de forma unilateral por parte de
+          EL ACREEDOR por
+          periodos iguales y continuos al inicialmente pactado.</p>
+
+        <p>El Cupo de Crédito Rotativo es asignado a EL CLIENTE de acuerdo con las políticas de riesgo de EL ACREEDOR y
+          puede ser
+          usado por EL CLIENTE en una o varias transacciones hasta la fecha de vencimiento del plazo inicial o de
+          cualquiera de las
+          prórrogas automáticas que EL ACREEDOR otorgue.</p>
+
+        <p>El monto del cupo de crédito podrá ser modificado o suspendido en cualquier momento por EL ACREEDOR de
+          acuerdo a la
+          subsistencia o no, de las circunstancias que hayan sido determinantes para el otorgamiento inicial del mismo.
+        </p>
+
+        <p><span class="subtitle">3. Condiciones del producto.</span> La aprobación y utilización del cupo de crédito
+          rotativo por Libranza se hará de forma electrónica, a
+          través de la página web https://www.avanzo.co/be-better/ de EL ACREEDOR. donde EL CLIENTE solicitará un cupo
+          de crédito
+          rotativo, ingresando a la página web, y diligenciando los datos que le sean requeridos, para, a continuación
+          leer los términos y
+          condiciones y las políticas de privacidad y tratamiento de datos para dar su aprobación mediante un proceso de
+          doble verificación vía
+          correo electrónico y mensaje SMS.
+        </p>
+
+        <p>Una vez enviada la solicitud, EL ACREEDOR hará un estudio para determinar si otorgará o no el cupo de crédito
+          y cuál será su
+          monto y plazo de acuerdo con la información aportada por EL CLIENTE y la ENTIDAD PAGADORA, lo cual será
+          informado a EL
+          CLIENTE a través de SMS.
+        </p>
+
+        <p>Una vez informado de la aprobación del Cupo de crédito Rotativo y las condiciones del mismo consignadas en el
+          presente Documento,
+          EL CLIENTE dará un acepto final a las mismas, quedando, de esta forma formalizado el acuerdo por el cual EL
+          CLIENTE se hace
+          beneficiario del Cupo de crédito Rotativo de AVANZO.
+        </p>
+
+        <p>Una vez aprobado el cupo de crédito Rotativo, y de acuerdo con las solictudes que EL CLIENTE vaya realizando
+          sobre el mismo. EL
+          ACREEDOR realizará el desembolso del valor solicitado a través de transferencia electrónica a la cuenta
+          bancaria que EL CLIENTE
+          haya registrado en el proceso de solicitud, previa información al cliente sobre las condiciones de ese
+          desembolso particular;
+        </p>
+
+        <p>Una vez cumplido el plazo para el pago de cada uno de los desembolsos, este se efectuará a través del
+          descuento directo por
+          Libranza previamente autorizado por EL CLIENTE a su EMPLEADOR o ENTIDAD PAGADORA. Por tratarse de un Cupo de
+          Crédito
+          Rotativo, EL CLIENTE podrá solicitar tantos desembolsos de diferentes montos, como su cupo de crédito lo
+          permita y una vez
+          agotado, este volverá a estar disponible a medidaque vayan siendo pagados los montos desembolsados.
+        </p>
+
+        <p><span class="subtitle">4. Condiciones de los desembolsos.</span> La solicitud de los desembolsos deberá
+          realizarse por parte del CLIENTE en un plazo no
+          inferior a siete (7) días hábiles contados desde el día en que realiza la solicitud hasta el momento del pago
+          de su nómina o pensión,
+          sea esta quincenal o mensual.
+        </p>
+
+        <p>Cada Desembolso que EL CLIENTE solicite sobre su Cupo de Crédito Rotativo aprobado deberá a) tener un plazo
+          máximo de
+          sesenta (60) días; b) Estar acorde en su plazo con las fechas en que la entidad pagadora realice los pagos de
+          nómina o pensión, ya
+          sea estas quincenales o mensuales.
+        </p>
+
+        <p>Cada desembolso estará supeditado a la previa aprobación de la entidad pagadora, la cual certificará a EL
+          ACREEDOR la existencia
+          de recursos para su pago a travís de descuento de libranza de acuerdo con los montos exigidos por la ley como
+          descuentos
+          máximos posibles. Una aprobado por parte de la entidad pagadora EL ACREEDOR propenderá por realizar el
+          desembolso a más
+          tardar dentro de los tres (3) días hábiles siguientes a su aprobación, por medio de transferencia electrónica
+          a la cuenta bancaria que
+          EL CLIENTE haya suministrado a EL ACREEDOR para este efecto. Para aquellos clientes que utilicen los servicios
+          DAVIPLATA o
+          NEQUI, se propenderá por realizar el desembolso dentro de las veinticuatro (24) horas siguientes a su
+          aprobación por parte de la
+          entidad pagadora. En todo caso en que, por cualquier circunstancia, los desembolsos no puedan ser realizados
+          dentro de los plazos
+          aquí establecidos, los cobros por intereses y demás cargos sólo serán exigidos a partir de la entrega de los
+          recursos solicitados.
+        </p>
+
+        <p>EL ACREEDOR pondrá a disposición del CLIENTE los estados de cuenta del crédito de libranza a travís de los
+          canales determinados
+          para tales efectos.
+        </p>
+
+        <p><span class="subtitle">5. Condiciones de pago.</span> Los pagos de los desembolsos que se realicen a partir
+          de la utilización del cupo de crédito rotativo de
+          crédito aprobado se realizarán en el plazo determinado por el CLIENTE.
+        </p>
+
+        <p>En caso de que EL CLIENTE solicite un desembolso en un plazo inferior a los siete (7) días hábiles previos al
+          corte de pago de la
+          entidad pagadora más próximo, los pagos de los desembolsos iniciarán desde el corte de pago de la quincena o
+          mensualidad
+          siguiente.
+        </p>
+
+        <p>La Entidad Pagadora que tenga a su cargo el pago del salario o de la mesada pensional de EL CLIENTE realizará
+          los descuentos
+          por concepto del pago de las cuotas del crédito de libranza otorgado por EL ACREEDOR al CLIENTE, según el
+          formato de
+          autorización de descuento por libranza suscrito por EL CLIENTE. Para tal efecto, se entenderá que en el evento
+          en que la Entidad
+          Pagadora no realice los pagos a favor del ACREEDOR, o EL CLIENTE solicite vacaciones, licencias, o se retire
+          de la empresa o en
+          general ocurra cualquier evento no atribuible al ACREEDOR que ocasione que este no reciba los recursos
+          correspondientes al pago
+          de la cuota mensual exigible, EL CLIENTE estará obligado a realizar el pago oportuno directamente a EL
+          ACREEDOR, por los
+          medios que este disponga para tal fin. La omisión del pago causará a cargo de EL CLIENTE intereses de mora
+          sobre el saldo
+          vencido a la tasa máxima legal vigente certificada por la Superintendencia Financiera de Colombia, para la
+          fecha de mora.
+        </p>
+
+        <p>EL CLIENTE podrá efectuar abonos parciales y/o totales sobre el saldo de la deuda en cualquier momento, sin
+          ningún tipo de
+          sanción o penalización, en ese sentido los abonos extraordinarios parciales realizados por EL CLIENTE, se
+          aplicarán al capital de la
+          obligación, siempre y cuando la obligación se encuentre al día. En caso de mora los pagos efectuados se
+          destinarán en primer lugar
+          al pago del IVA causado, los intereses moratorios y remuneratorios, los costos pendientes de ser cancelados y
+          finalmente al capital.
+        </p>
+
+        <p>En caso de que la Entidad Pagadora efectúe descuentos mayores a los pactados, o realice descuentos con
+          posterioridad a la
+          cancelación de la obligación se realizará el siguiente procedimiento: a. En caso de que EL CLIENTE tenga
+          saldos pendientes de
+          pago por otras obligaciones celebradas con EL ACREEDOR, se abonaran dichos montos al saldo de dichas
+          obligaciones. b. En caso
+          contrario, EL ACREEDOR devolverá el dinero al CLIENTE mediante transferencia electrónica a su cuenta bancaria,
+          sin que haya
+          lugar al reconocimiento de algún tipo de remuneración, interés o indemnización por este hecho.
+        </p>
+
+        <p><span class="subtitle">6. Condiciones en caso de desvinculación de EL CLIENTE de la ENTIDAD PAGADORA.</span>
+          Cuando EL CLIENTE se desvincule de
+          la Entidad pagadora o cese la relación laboral con EL EMPLEADOR por cualquier motivo, dicha Entidad o
+          Empleador descontará del
+          valor final de la liquidación los valores adeudados en el saldo total que tenga EL CLIENTE frente al ACREEDOR.
+        </p>
+
+        <p>Se entenderá que dicho descuento podrá realizarse sobre vacaciones, salarios, indemnizaciones, primas y en
+          general cualquier tipo
+          de prestación laboral que adeude la ENTIDAD PAGADORA a favor de EL CLIENTE, tomando para ello, si fuere
+          necesario, hasta el
+          100% del valor total de la liquidación. En caso de que el pago de dicha liquidación no sea suficiente para
+          cubrir el saldo de la
+          obligación, el crédito de libranza pasará a ser un crédito ordinario de consumo, en el cual EL CLIENTE
+          continuará obligado al pago
+          de los saldos exigibles mediante los mecanismos ordinarios de recaudo dispuestos por EL ACREEDOR, así mismo EL
+          ACREEDOR
+          podrá facultativamente aplicar a la obligación la tasa más alta establecida para este tipo de crédito. EL
+          CLIENTE podrá darle
+          continuidad a la libranza notificándole al ACREEDOR el cambio de Entidad Pagadora o empleador manteniendo de
+          esa forma la tasa
+          de libranza originalmente otorgada. No obstante, EL CLIENTE deberá pagar autónomamente las cuotas que se
+          causen durante la
+          implementación del mecanismo de descuento.
+        </p>
+
+        <p><span class="subtitle">7. Otras condiciones. </span>
+          Cobros. A cada Cupo de Crédito Rotativo de libranza por descuento directo que sea aprobado y
+          desembolsado, se le aplicarán los siguientes cobros, diferentes del capital:
+        </p>
+
+        <p><span class="subtitle"> a) </span>
+          Tasas de interés: Cargo que EL CLIENTE deberá pagar a EL ACREEDOR por el tiempo de financiación de los
+          desembolsos que
+          realice sobre su cupo de crédito rotativo aprobado y/o por mora en el pago de las cuotas financiadas. Estas
+          tasas no podrán superar
+          en ningún momento las máximas autorizadas por la Superintendencia Financiera.
+        </p>
+
+        <p><span class="subtitle"> b) </span>
+          Administración: Cargo administrativo que se genera por efecto de la creación y manutención de un cupo de
+          crédito a favor de EL
+          CLIENTE que estará disponible para su utilización, el cual será cargado al cliente de manera mensual y que se
+          generará únicamente
+          en el caso de que EL CLIENTE tenga activos uno o más desembolsos sobre su Cupo de Crédito Rotativo.
+        </p>
+
+        <p><span class="subtitle"> c) </span>
+          Impuesto al Valor Agregado: Los servicios financieros se encuentran gravados por el Impuesto al valor
+          agregado, el cual debe ser
+          asumido por EL CLIENTE.
+        </p>
+
+        <p>Parágrafo. Tecnología: AVANZO, a través de su página web, busca, además de brindar un servicio innovador y
+          ágil para EL CLIENTE,
+          otorgarle funcionalidades, capacitaciones y otros servicios adicionales al otorgamiento del cupo de crédito
+          rotativo y los desembolsos
+          sobre el mismo. No obstante lo anterior, se ha definido por la entidad este beneficio no generará ningún costo
+          para EL CLIENTE.
+        </p>
+
+        <p><span class="subtitle">8. Condiciones en caso de Incumplimiento.</span>
+          En caso de mora de cualquiera de las obligaciones a cargo del CLIENTE o del
+          incumplimiento de cualquiera de ellas, se causarán a la obligación los intereses moratorios a la tasa máxima
+          legal permitida. Estarán
+          a cargo del CLIENTE los impuestos que se ocasionen con motivo del otorgamiento del producto financiero, los
+          costos y demás
+          gastos que la cobranza implique.
+        </p>
+
+        <p>En caso de no realizar el pago dentro del plazo establecido, el cual se entenderá
+          expirado a la media noche del último día otorgado
+          para la cancelación de la deuda, la obligación se declarará vencida y el ACREEDOR queda autorizado para,
+          además de cobrar los
+          intereses de mora correspondientes sobre los saldos insolutos, acelerar el vencimiento y exigir
+          anticipadamente el valor de todas las
+          obligaciones en las que EL CLIENTE sea deudor sin necesidad de requerimiento judicial o extrajudicial.
+        </p>
+
+        <p><span class="subtitle">9. Autorizaciones.</span> El CLIENTE autoriza a EL ACREEDOR a las siguientes
+          actividades:
+        </p>
+
+        <p><span class="subtitle"> a) </span>
+          Consulta y Reporte en Centrales de Riesgo: EL CLIENTE autoriza irrevocablemente y en todo tiempo a EL ACREEDOR
+          o a quien
+          represente sus derechos u ostente en el futuro la calidad de acreedor, para consultar ante cualquier operador
+          de base de datos o
+          central de riesgo, toda la información sobre su comportamiento creditito y comercial, hábitos de pago y
+          cumplimiento de sus
+          obligaciones. Así mismo, para que informe y reporte a dichas entidades el comportamiento de pago, cumplimiento
+          o incumplimiento
+          de sus obligaciones crediticias, o de sus deberes legales de contenido patrimonial, respecto a todas las
+          operaciones que bajo
+          cualquier modalidad haya celebrado o llegue a celebrar en el futuro con EL ACREEDOR, de tal forma que aquellas
+          entidades
+          presenten una información veraz, pertinente, completa actualizada y exacta de su desempeño como deudor.
+        </p>
+
+        <p><span class="subtitle"> b) </span>
+          Tratamiento de Datos Personales: EL CLIENTE autoriza irrevocablemente que los datos de carácter personal de su
+          titularidad que
+          se obtengan en virtud de la relación comercial que mantenga o que haya mantenido con EL ACREEDOR, sean
+          tratados por EL
+          ACREEDOR, quien será responsable de su administración junto con los encargados que éste designe, e
+          implementando las
+          medidas de seguridad necesarias para la conservación y protección de los mismos. Así mismo, EL CLIENTE declara
+          que se le ha
+          informado que sus datos personales han sido y serán recopilados para fines operativos, comerciales y de
+          mercadeo, de prevención
+          de riesgo y estadísticos, por EL ACREEDOR y/o por cualquiera de sus aliados comerciales, y en general para
+          permitir el
+          cumplimiento de las obligaciones que EL ACREEDOR haya adquirido en virtud de la presente relación contractual
+          o que le sean
+          exigibles por disposiciones legales o reglamentarias. De igual forma EL CLIENTE autoriza que, para las
+          finalidades descritas, EL
+          ACREEDOR pueda suministrar su información a los siguientes tipos de personas: (i) Terceros que en calidad de
+          proveedores
+          nacionales o extranjeros, en el país o en el exterior, presten servicios tecnológicos, logísticos, operativos,
+          de seguridad o de apoyo, y
+          en general que en ejercicio de su servicio deban tener acceso a la información por EL CLIENTE suministrada,
+          (ii) Las personas
+          naturales o jurídicas accionistas del ACREEDOR y a las sociedades controlantes, controladas, vinculadas,
+          afiliadas o pertenecientes
+          al mismo grupo empresarial, (iii) Las autoridades nacionales o extranjeras que en ejercicio de sus
+          competencias lo soliciten.
+          Adicionalmente EL CLIENTE autoriza todo tipo de tratamiento que sea necesario para cumplir las finalidades
+          anteriormente
+          mencionadas y declara que ha sido informado de la posibilidad que tiene como titular de la información de
+          conocer en cualquier
+          momento los datos de su titularidad con los que cuenta EL ACREEDOR, con el fin de actualizarlos, corregirlos o
+          rectificarlos, así
+          como de la posibilidad que tiene de solicitar su eliminación o revocación, en los casos previstos en la ley.
+          Adicionalmente EL
+          CLIENTE declara que ha sido informado de las políticas y procedimientos que tiene EL ACREEDOR para el manejo
+          de su
+          información y conoce que las mismas pueden ser consultadas permanentemente en la página web
+          https://www.avanzo.co/politicas-
+          tratamiento-datos-personales/.
+        </p>
+
+        <p><span class="subtitle"> c) </span>
+          En el evento en que, por cualquier causa, EL ACREEDOR realice un desembolso duplicado y/o por una suma mayor a
+          la
+          solicitada y aprobada, EL CLIENTE autoriza a que el excedente sea debitado automáticamente de la cuenta de
+          ahorros/corriente
+          reportada por EL CLIENTE al momento de la solicitud del cupo de crédito rotativo u otro medio de información o
+          al momento de la(s)
+          solicitud(es) de un desembolso.
+
+          De no contar con la información bancaria, EL CLIENTE autoriza a EL ACREEDOR a solicitar a la entidad pagadora
+          el descuento del
+          excedente del/los siguiente(s) pago(s) de su pensión, salario, bonificaciones, honorarios comisiones, mesada
+          mensual u otras
+          remuneraciones existentes a su favor hasta cubrir el valor total de lo adeudado.
+        </p>
+
+        <p><span class="subtitle">10. Mérito ejecutivo.</span>
+          El presente contrato junto con el soporte de la aceptación del CLIENTE de las condiciones del desembolso y el
+          estado de cuenta que presente EL ACREEDOR al momento de la judicialización presta merito ejecutivo por
+          contener obligaciones
+          expresas, claras y exigibles a favor de EL ACREEDOR. En consecuencia, EL ACREEDOR podrá exigir el cumplimiento
+          de la
+          obligación por la vía judicial frente a EL CLIENTE sin necesidad de presentar documentos o cumplir requisitos
+          adicionales a los aquí
+          mencionados.
+        </p>
+
+        <p><span class="subtitle">11. Vigencia.</span>
+          La duración del presente contrato será la vigencia del Cupo Rotativo de Crédito, no obstante EL ACREEDOR queda
+          facultado para dar por terminado el plazo pactado y/o exigir el pago inmediato judicial o extrajudicialmente
+          del valor de la(s)
+          obligación(es) pendiente(s) de EL CLIENTE, sus intereses, cobros por administración, tecnología, seguros,
+          gastos de cobranza,
+          honorarios, gastos de recaudo, o cualquier otro gasto en contraprestación de servicios adicionales que le
+          hubieran prestado y demás
+          obligaciones accesorias, en los siguientes casos, sin necesidad de requerimiento privado o judicial, o
+          constitución en mora, sin
+          consideración al vencimiento y plazos pactados, a los cuales EL CLIENTE renuncia de manera expresa en razón a
+          su claro
+          conocimiento de los términos convenidos de su(s) obligación(es) para con EL ACREEDOR o quien haga sus veces:
+        </p>
+
+        <p><span class="subtitle"> a) </span>
+          Si se presentare el incumplimiento de cualquier obligación que directa o indirectamente tenga EL CLIENTE, o
+          mora de una o más
+          de las cuotas convenidas para el pago de su(s) obligación(es), o de cualquiera otra obligación que directa o
+          indirectamente exista a
+          cargo del deudor, sus avalistas, codeudores, fiadores o garantes para con EL ACREEDOR o quien haga sus veces;
+        </p>
+
+        <p><span class="subtitle"> b) </span>
+          Si EL CLIENTE fuere demandado ante cualquier autoridad y por cualquier persona, o si se encontrare en notorio
+          estado de
+          insolvencia o liquidación a juicio de EL ACREEDOR;
+        </p>
+
+        <p><span class="subtitle"> c) </span>
+          Si se cometieren inexactitudes o adulteraciones en los balances, informes, declaraciones o documentos que EL
+          CLIENTE hubiera
+          presentado al ACREEDOR o no le entregare la documentación adicional que en cualquier tiempo les solicitara EL
+          ACREEDOR la
+          cual está obligado a entregar.
+        </p>
+
+        <p><span class="subtitle"> d) </span>Por la muerte del CLIENTE. </p>
+
+        <p><span class="subtitle"> e) </span>Por la no actualización por parte del CLIENTE, por lo menos anualmente, de
+          la
+          información suministrada para el análisis del
+          crédito, cuando exista alguna variación, o cuando el ACREEDOR así lo requiera. </p>
+
+        <p><span class="subtitle"> f) </span>Si se evidencia falsedad en los documentos suministrados para el análisis
+          de
+          riesgo crediticio efectuado con ocasión a la
+          operación de crédito de libranza que aquí se instrumenta. </p>
+
+        <p><span class="subtitle">12. Declaraciones.</span> EL CLIENTE, mediante la suscripción del presente documento,
+          declara bajo la gravedad del juramento que no
+          ha solicitado ni tramitado ningún producto de financiación con alguna otra entidad durante la solicitud,
+          estudio, análisis, celebración y
+          desembolso de la operación de libranza que se instrumenta mediante el presente contrato que implique un
+          descuento sobre su
+          salario, remuneración o mesada pensional. </p>
+
+        <p>Así mismo, manifiesta que entiende que cualquier falta de veracidad, total o parcial, en la declaración aquí
+          contenida, o en los
+          documentos suministrados para su análisis de riesgo crediticio, generará un incumplimiento contractual, que
+          facultará a EL
+          ACREEDOR para proceder de conformidad con lo indicado en los numerales Octavo y Décimo (del presente contrato,
+          así como para
+          interponer la denuncia respectiva por la vulneración del tipo penal de falsedad en documento privado (Artículo
+          289, Ley 599 de
+          2000). </p>
+
+        <p>Al aceptar los términos y condiciones del presente documento EL CLIENTE declara que está de acuerdo, de
+          manera expresa e
+          inequívoca, con los términos y condiciones del crédito y de las demás estipulaciones previstas en este
+          acuerdo.</p>
+
+        <div>
+          <div style="padding: 10px; float: left; width: 45%; text-align: justify;">
+            <div class="section justifi" style="margin-bottom: 28px;">
+              <p style="margin-bottom: 76px;"><span class="subtitle">FIRMA REPRESENTANTE LEGAL AVANZO</span></p>
+              {{!-- <span style="border-bottom: solid 1px black;padding: 0px 128px 0;"></span> --}}
+              <p style="margin: 0;">Max Jefferson Beltrán López</p>
+              <p style="margin: 0;">C.C.: 1.023.914.453</p>
+              </br></br>
+
+            </div>
+          </div>
+
+          <div style="padding: 10px; float: right; width: 45%; text-align: justify;">
+            <div class="section justifi" style="margin-bottom: 28px;">
+              <p style="margin-bottom: 76px;"><span class="subtitle">FIRMA ELECTRONICA CLIENTE</span></p>
+              {{!-- <span style="border-bottom: solid 1px black;padding: 0px 128px 0;"></span> --}}
+              <p style="margin: 0;">{{name}}</p>
+              <p style="margin: 0;">C.C:{{documentNumber}}</p>
+             
+              <p style="margin: 0;">Código Correo: {{emailCode}}</p>
+              <p style="margin: 0;">Código celular: {{phoneCode}}</p>
+              <p style="margin: 0;">Hora y fecha de la firma : {{signatureDate}}</p>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -50,7 +50,7 @@ const getInitialsData = async (userId) => {
   try {
     const userRow = await pool.query('SELECT ACCOUNT.idAccount, ACCOUNT.maximumAmount, ACCOUNT.partialCapacity FROM Client CLIENT JOIN User USER JOIN Account ACCOUNT ON (CLIENT.idClient = USER.Client_idClient AND ACCOUNT.Client_idClient = CLIENT.idClient ) where USER.idUser = ?', [userId]);
     //console.log("UR", userRow);
-    const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ? ORDER BY createdDate DESC LIMIT 3', [userRow[0].idAccount]);
+    const transactions = await pool.query('SELECT * FROM Transaction where Account_idAccount = ? ORDER BY createdAt DESC LIMIT 3', [userRow[0].idAccount]);
     //console.log("UT", transactions);
     const request = await pool.query('SELECT REQUEST.idRequest FROM Request REQUEST JOIN RequestState REQUESTSTATE ON (REQUESTSTATE.idRequestState = REQUEST.RequestState_idRequestState AND REQUESTSTATE.idRequestState < ?) where REQUEST.Account_idAccount = ?', [5, userRow[0].idAccount]);
     //console.log("URE", request);
@@ -68,6 +68,7 @@ const getInitialsData = async (userId) => {
       return { status: 500, message: "Error interno del servidor." };
     }
   } catch (e) {
+     console.log("E - 71: ",e);
     return { status: 500, message: "Error interno del servidor." };
   }
 };
@@ -182,7 +183,7 @@ const createCustomer = async (body, user, company, adminId) => {
     newUser.lastName = lastName;
     newUser.registeredBy = adminId;
     newUser.registeredDate = todayDate;
-    newUser.createdDate = todayDate;
+    newUser.createdAt = todayDate;
     newUser.Role_idRole = 4;
     newUser.status = false;
     newUser.Client_idClient = clientQuery.insertId;
@@ -339,7 +340,7 @@ const createMultipleCustomers = async (customersData, adminId) => {
           email: customersData[i].CorreoElectronico,
           registeredBy: adminId,
           registeredDate: todayDate,
-          createdDate: todayDate,
+          createdAt: todayDate,
           Role_idRole: 4,
           status: false,
           Client_idClient: clientQuery.insertId
@@ -458,7 +459,7 @@ const getDatesListToCustomer = async (companyid) => {
 const getTransactionsByUsersId = async (userId) => {
 
   try {
-    const transactionRow = await pool.query('SELECT T.idTransaction, T.quantity, T.transactionType, T.createdDate FROM User U JOIN Client C JOIN Account A JOIN Transaction T ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND T.Account_idAccount = A.idAccount) where U.idUser = ?', [userId]);
+    const transactionRow = await pool.query('SELECT T.idTransaction, T.quantity, T.transactionType, T.createdAt FROM User U JOIN Client C JOIN Account A JOIN Transaction T ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND T.Account_idAccount = A.idAccount) where U.idUser = ?', [userId]);
 
     if (transactionRow) {
       return { status: 200, data: transactionRow };
@@ -626,7 +627,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
         //   rejectState: false,
         //   isDeleted: false,
         //   platformState: true,
-        //   //createdDate: todayDate,
+        //   //createdAt: todayDate,
         //   ClientDocuments_idClientDocuments: fileQuery.insertId,
         //   CompanySalaries_idCompanySalaries: cycleId,
 
@@ -647,7 +648,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
         //   status: true,
         //   registeredBy: 1,
         //   registeredDate: todayDate,
-        //   createdDate: todayDate,
+        //   createdAt: todayDate,
         //   Role_idRole: 4,
         //   Client_idClient: clientQuery.insertId,
         //   isConfirmed: true,
@@ -685,7 +686,7 @@ const approveCustomers = async (clientid, approve, adminId, cycleId, rere_id) =>
           User_idUser: userQuery.insertId,
           registeredBy: 1,
           registeredDate: todayDate,
-          createdDate: todayDate,
+          createdAt: todayDate,
           password: newClient[0].password,
           expiresOn: new_date.toISOString().replace(/T/, ' ').replace(/\..+/, ''),
         };
@@ -831,7 +832,7 @@ const makePayments = async (clientid, quantity) => {
     const updateAccount = await pool.query('UPDATE Account SET ? where Client_idClient = ?', [newAccount, clientid]);
 
     //Transaction
-    const paymentTransaction = { quantity: quantity, transactionType: "Pago", createdDate: todayDate, registeredDate: new Date, Account_idAccount: userRow[0].idAccount }
+    const paymentTransaction = { quantity: quantity, transactionType: "Pago", createdAt: todayDate, registeredDate: new Date, Account_idAccount: userRow[0].idAccount }
 
     //Transaction Query
     const transactionQuery = await pool.query('INSERT INTO Transaction SET ?', [paymentTransaction]);

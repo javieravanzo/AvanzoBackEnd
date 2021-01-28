@@ -160,7 +160,7 @@ const generatePendingByHumanResources = async (companyIdToNotInclude) => {
   try {
     const clientRow =  await pool.query('SELECT CO.socialReason as "EMPRESA", U.name as "NOMBRE", C.identificationId as "CEDULA", R.quantity as "MONTO", R.totalValue as "TOTAL A PAGAR", R.split as "CUOTAS", U.lastname as "ESTADO (RESPUESTA DE LA EMPRESA)" FROM Company CO JOIN Client C JOIN User U JOIN Account A JOIN Request R ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount) where R.RequestState_idRequestState = ? and CO.idCompany <> ? and R.sendRRHHEmail <> ?', [statePendingRRHH, companyIdToNotInclude, true]);
     
-    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdDate < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany <> ?)', [false, companyIdToInclude]);
+    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdAt < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany <> ?)', [false, companyIdToInclude]);
     
     return {status: 200, data: clientRow, message: "OK"};
   
@@ -182,7 +182,7 @@ const generateParticularPendingByRRHH = async (companyIdToInclude) => {
   try {
     const clientRow =  await pool.query('SELECT C.identificationId as "CEDULA", U.name as "NOMBRE", C.entryDate as "FECHA INGRESO", C.salary as "SALARIO", R.quantity as "MONTO", R.totalValue as "TOTAL A PAGAR", R.split as "CUOTAS", U.lastname as "ESTADO (RESPUESTA DE LA EMPRESA)" FROM Company CO JOIN Client C JOIN User U JOIN Account A JOIN Request R ON (C.idClient = U.Client_idClient AND A.Client_idClient = C.idClient AND C.Company_idCompany = CO.idCompany AND R.Account_idAccount = A.idAccount) where R.RequestState_idRequestState = ? and CO.idCompany = ? and R.sendRRHHEmail <> ?', [statePendingRRHH, companyIdToInclude, true]);
     
-    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdDate < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany = ?)', [false, companyIdToInclude]);
+    const updateRequest = await pool.query('UPDATE Request R JOIN Account A JOIN Client C SET R.sendRRHHEmail = true where (R.createdAt < NOW() and R.sendRRHHEmail = ? and C.Company_idCompany = ?)', [false, companyIdToInclude]);
 
     return {status: 200, data: clientRow, message: "OK"};
   
@@ -198,7 +198,12 @@ const readBankReport = async (readData) => {
   try{
    
     console.log("============================================");
-console.log(readData);
+console.log(readData[0]["BANCO"]);
+console.log(readData[0]["Tipo Destino"]);
+console.log(readData[0]["Numero Destino"].slice(-4));
+console.log(readData[0]["Titular"]);
+console.log(readData[0]["Valor"]);
+console.log(readData[0]["Estado"]);
 console.log("============================================");
 
     for (let i in readData){

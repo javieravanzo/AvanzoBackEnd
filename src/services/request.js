@@ -491,7 +491,7 @@ const createRequest = async (body, file, clientId, files) => {
         newRequest.computedCapacity = computed_capacity;
         newRequest.creditNumber = math.ceil(math.random() * 10000);
         newRequest.approveHumanResources = parseInt(userRow[0].approveHumanResources, 10) === 1 ? true : false;
-        // newRequest.createdDate = todayDate;
+        // newRequest.createdAt = todayDate;
         // newRequest.registeredDate = todayDate;;
         newRequest.registeredBy = 1;
         newRequest.RequestState_idRequestState = requestState[0].name = "Solicitada" ? requestState[0].idRequestState : -1;
@@ -881,7 +881,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const quantityTransaction = {
         quantity: requestQuery[0].quantity,
         transactionType: "Préstamo",
-        createdDate: new Date(),
+        createdAt: new Date(),
         registeredBy: userId.idUser,
         // //registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount
@@ -892,7 +892,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const administrationTransaction = {
         quantity: requestQuery[0].administrationValue,
         transactionType: "Cuota de administración",
-        createdDate: new Date(),
+        createdAt: new Date(),
         registeredBy: userId.idUser,
         // //registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount
@@ -903,7 +903,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const interestTransaction = {
         quantity: requestQuery[0].interestValue,
         transactionType: "Interés",
-        createdDate: new Date(),
+        createdAt: new Date(),
         registeredBy: userId.idUser,
         //registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount
@@ -914,7 +914,7 @@ const approveOrRejectRequest = async (requestid, approve, userId, transactionCod
       const ivaTransaction = {
         quantity: requestQuery[0].ivaValue,
         transactionType: "IVA",
-        createdDate: new Date(),
+        createdAt: new Date(),
         registeredBy: userId.idUser,
         //registeredDate: new Date,
         Account_idAccount: requestQuery[0].Account_idAccount
