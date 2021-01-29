@@ -142,8 +142,8 @@ router.get('/Documents/GenerateContract', [
 router.get('/Request/GenerateCodes', [verifyToken], generateCodes);
 router.get('/Request/ValidateCodes', [verifyToken], checkCodes);
 
-router.post('/Request/GenerateFirstCodes', [verifyToken], generateFirstCodes);
-router.post('/Request/ValidateFirstCodes', [verifyToken], checkFirstCodes);
+router.post('/Request/GenerateFirstCodes', generateFirstCodes);
+router.post('/Request/ValidateFirstCodes', checkFirstCodes);
 
 //Export
 module.exports = router;
