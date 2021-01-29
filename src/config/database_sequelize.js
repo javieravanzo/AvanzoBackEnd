@@ -77,6 +77,7 @@ db.smscodes = require('../../models/smscodes.js')(sequelize, Sequelize);
 db.transaction = require('../../models/transaction.js')(sequelize, Sequelize);
 db.user = require('../../models/user.js')(sequelize, Sequelize);
 db.generatedbankfiles = require('../../models/generatedbankfiles.js')(sequelize, Sequelize);
+db.loginhistory = require('../../models/loginhistory.js')(sequelize, Sequelize);
 
 
 
@@ -91,6 +92,8 @@ db.user.hasMany(db.audit);
 db.role.belongsTo(db.user);
 db.user.hasMany(db.role);
 
+db.loginhistory.belongsTo(db.user);
+db.user.hasMany(db.loginhistory);
 
 
 db.user.belongsTo(db.client,{foreignKey:'Client_idClient'});

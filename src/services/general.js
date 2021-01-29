@@ -50,7 +50,7 @@ const login = async (email, password) => {
                         const result2 = await pool.query('UPDATE Auth set ? WHERE User_idUser = ?', [userAuth, userRow[0].idUser]);
                         return {
                             status: 200, message: "Ha ingresado satisfactoriamente.",
-                            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData, menu: jsonMenu },
+                            data: { access_token: jwtoken, expires_on: userAuth.expiresOn, user_info: userData, menu: jsonMenu, },
 
                         };
                     } else {
