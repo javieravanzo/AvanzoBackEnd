@@ -35,8 +35,9 @@ const makeLogin = async (req, res, next) => {
     return;
   }
 
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const { email, password } = req.body;
-  const { ip, browser, so } = req.headers;
+  const {  browser, so } = req.headers;
 
 
   if (email !== "" && password !== "") {
