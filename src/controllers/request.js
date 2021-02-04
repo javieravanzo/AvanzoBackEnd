@@ -12,7 +12,7 @@ sequelize = dbSequelize.sequelize,
   Sequelize = dbSequelize.Sequelize;
 const RejectionReasons = require('../../models/rejectionreasons')(sequelize, DataTypes);;
 
-const { SMS_CODES,TRANSACTION_CODE } = require('../utils/constants.js');
+const { SMS_CODES, TRANSACTION_CODE } = require('../utils/constants.js');
 
 const { getOutLaysData, getOultayDatesLists, createRequest, getAllRequests, getAllRequestsToApprove,
   getAllRequestsByCompany, approveOrRejectRequest, getRequestStatesList, getRequestsToOutLay,
@@ -43,10 +43,10 @@ helpers.encryptPassword = async (password) => {
 };
 
 helpers.matchPassword = async (password, savedPassword) => {
-  try{
-      return await bcrypt.compare(password, savedPassword);
-  }catch(e){
-      throw(e);
+  try {
+    return await bcrypt.compare(password, savedPassword);
+  } catch (e) {
+    throw (e);
   }
 };
 
@@ -795,14 +795,14 @@ const generateFirstCodes = async (req, res, next) => {
 
 const checkFirstCodes = async (req, res, next) => {
 
- 
 
-  const {  phonecode, emailcode,userDocumentNumber } = req.body;
+
+  const { phonecode, emailcode, userDocumentNumber } = req.body;
 
   let ipAddress = req.connection.remoteAddress;
 
-let message="";
-let status =200;
+  let message = "";
+  let status = 200;
   try {
     // const result = await checkNewCodes(clientId, userid, phonecode, emailcode, ipAddress);
 
@@ -810,12 +810,12 @@ let status =200;
 
     if (phonecode !== null && phonecode !== "" && emailcode !== null && emailcode !== "") {
       let lastCode = await dbSequelize.codes.findOne({
-        attributes: ['idCodes','emailCode','phoneCode'],
+        attributes: ['idCodes', 'emailCode', 'phoneCode'],
         where: {
           code_userDocumentNumber: userDocumentNumber
         }
       });
-      if(lastCode){
+      if (lastCode) {
         let validEmailCode = await helpers.matchPassword(emailcode.toString(), lastCode.emailCode);
         let validPhoneCode = await helpers.matchPassword(phonecode.toString(), lastCode.phoneCode);
         let updateCodes = {
@@ -823,23 +823,26 @@ let status =200;
           receiveIP: ipAddress
         };
         if (validEmailCode && validPhoneCode) {
-          message= "Los códigos son auténticos" ;
-          lastCode.update({ receiveTime:updateCodes.receiveTime,receiveIP:updateCodes.receiveIP });
-          status =200;
+          message = "Los códigos son auténticos";
+          lastCode.update({ receiveTime: updateCodes.receiveTime, receiveIP: updateCodes.receiveIP });
+          status = 200;
         } else {
-          message= "Los códigos ingresados no coinciden con el registro." ;
-          status=400;
-        }        
+          message = "Los códigos ingresados no coinciden con el registro.";
+          status = 400;
+        }
+      } else {
+        message = "Este documento no tiene registrado codigos.";
+        status = 400;
       }
     } else {
-      message="Los códigos ingresados no son números válidos.";
-      status=400;
+      message = "Los códigos ingresados no son números válidos.";
+      status = 400;
     }
-      res.status(status).json({message:message});
-   
+    res.status(status).json({ message: message });
+
     next();
   } catch (e) {
-     console.log(e);
+    console.log(e);
     res.status(500).json({ message: "No es posible obtener la información en este momento." });
   };
 
@@ -877,5 +880,5 @@ module.exports = {
   generateCodes, checkCodes, getPendingBankRefundedRequest, changeToProcessWithDocuments,
   changeToProcessWithoutChange, changeToOutlay, getAllReviewWithoutChangeRequest,
   updateRequestsInformation, updateDocumentsRequests, getDefinitelyRejectedRequest,
-  getAllRequestWithDocumentsChange, getAllProcessInBank, getAllFinalizedRequest, getAllRejectionReasons, generateFirstCodes,checkFirstCodes
+  getAllRequestWithDocumentsChange, getAllProcessInBank, getAllFinalizedRequest, getAllRejectionReasons, generateFirstCodes, checkFirstCodes
 };
