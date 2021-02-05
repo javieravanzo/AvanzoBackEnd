@@ -13,7 +13,7 @@ const registerSMS = async (to,body) =>{
       sms_body: body,
     };
 
-    const SMSQuery = await pool.query('INSERT INTO sms SET ?', [sms]);
+    const SMSQuery = await pool.query('INSERT INTO Sms SET ?', [sms]);
 
     if(SMSQuery !== '[]' ){
       return {status: 200, data: SMSQuery};
@@ -42,7 +42,7 @@ const registerEmail = async (email_subject,email_text,email_template_name,email_
       email_user_data:JSON.stringify(email_user_data)
     };
 
-    const emailQuery = await pool.query('INSERT INTO emails SET ?', [mail]);
+    const emailQuery = await pool.query('INSERT INTO Emails SET ?', [mail]);
 
     if(emailQuery !== '[]' ){
       return {status: 200, data: emailQuery};
@@ -80,7 +80,7 @@ const changeStateMail = async (email_id,state) =>{
 const changeStateSMS = async (sms_id,state) =>{
   
   try {
-    const emailQuery = await pool.query('UPDATE sms SET ? where sms_id = ?', [{sms_forwarded: state}, sms_id]);
+    const emailQuery = await pool.query('UPDATESmsSET ? where sms_id = ?', [{sms_forwarded: state}, sms_id]);
     if(emailQuery !== '[]' ){
       return {status: 200, data: true};
     }else{
