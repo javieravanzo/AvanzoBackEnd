@@ -16,7 +16,12 @@ const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const mailer = require('../lib/mailer/requestMailer.js');
 const todayDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '');
+const { ENVIRONMENT, SMS_CODES} = require('../utils/constants.js');
+const dbSequelize = require('../config/database_sequelize.js');
+const { sendSMS } = require('../utils/utils.js');
 
+sequelize = dbSequelize.sequelize,
+    Sequelize = dbSequelize.Sequelize;
 //Functions
 function getStateIdFromName(row, name) {
 
@@ -1508,6 +1513,17 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
           };
 
           await sgMail.send(info);
+          if (ENVIRONMENT === 'production') {
+            const smsCodes = await dbSequelize.smscodes.findOne({
+                attributes: ['sms_co_id', 'sms_co_body'],
+                where: {
+                    sms_co_id: SMS_CODES.PHONE_VERIFICATION
+                }
+            });
+            smsCodes.sms_co_body = smsCodes.sms_co_body.replace("[CODE]", phoneCode.toString())
+
+            sendSMS(phoneNumber, smsCodes.sms_co_body);
+        }
 
           return { status: 200, message: "Los códigos han sido enviados" };
 
@@ -1608,7 +1624,7 @@ const generateFirstCodesService = async (userDocumentNumber, phoneNumber, email)
           const smsCodes = await dbSequelize.smscodes.findOne({
             attributes: ['sms_co_id', 'sms_co_body'],
             where: {
-                sms_co_id: SMS_CODES.CLIENT_REJECTED
+                sms_co_id: SMS_CODES.PHONE_VERIFICATION
             }
         });
           sendSMS(phoneNumber, smsCodes.sms_co_body);
@@ -1655,7 +1671,7 @@ const checkNewCodes = async (clientId, userid, phonecode, emailcode, ipAddress) 
 
         const updateDates = await pool.query('UPDATE Codes SET ? WHERE Client_idClient = ?', [updateCodes, clientId]);
 
-        if (validEmailCode) {
+        if (validEmailCode && validPhoneCode) {
           return { status: 200, message: "Los códigos son auténticos" };
         } else {
           return { status: 400, message: "Los códigos ingresados no coinciden con el registro." };
