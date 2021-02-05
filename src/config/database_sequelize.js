@@ -6,6 +6,8 @@ const { Sequelize } = require('sequelize');
 
 //Import file config
 const config = require('../config/db_config.json');
+// const config = require('../config/db_config_local.json');
+
 
 //Import Controllers
 // const LoggerApiController = require('../controllers/loggerApiController.controller');
