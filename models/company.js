@@ -108,4 +108,5 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'Company'
   });
+  
 };

@@ -73,4 +73,5 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'PreRequestDates'
   });
+  
 };
