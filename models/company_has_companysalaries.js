@@ -38,4 +38,5 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'Company_has_CompanySalaries'
   });
+  
 };
