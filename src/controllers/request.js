@@ -726,6 +726,8 @@ const generateFirstCodes = async (req, res, next) => {
       //Encrypt Codes
       const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
+       console.log(">>>>>>>>>>>>>>");
+        console.log(userDocumentNumber);
       let objectCode = {
         numberEmailCode: emailCode.toString(),
         numberPhoneCode: phoneCode.toString(),
