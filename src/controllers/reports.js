@@ -655,7 +655,33 @@ const uploadSabana = async (req, res, next) => {
 
 };
 
+const GetDataByDocumentNumber = async (req, res, next) => {
+
+  //Get the user id
+
+  try {
+     console.log("----------------------------------------");
+    const { documentNumber } = req.params;
+ console.log(documentNumber);
+    const sabanaOne = await dbSequelize.sabana.findAll({
+      attributes: ['saba_credito','saba_full_name'],
+      where: {
+        saba_numero_cedula: documentNumber
+      }
+  });      if (sabanaOne) {
+          res.status(200).json(sabanaOne);
+      } else {
+          res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
+      }
+
+  } catch (e) {
+     console.log(e);
+      res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
+  };
+
+};
+
 module.exports = {
   generateBankReport, receiveBankReport, generatePendingRequestReport, generatePendingByRRHH,
-  generateParticularPendingRequestByRRHH, downloadFile, uploadSabana
+  generateParticularPendingRequestByRRHH, downloadFile, uploadSabana,GetDataByDocumentNumber
 };
