@@ -399,7 +399,7 @@ const approveCustomer = async (req, res, next) => {
                                     createdAt: todayDate,
                                     Role_idRole: 4,
                                     Client_idClient: client.idClient,
-                                    isConfirmed: false,
+                                    isConfirmed: true,
                                     Company_idCompany: newClient.Company_idCompany
                                 };
                                 // let user = insertUser(pool, newUser).then(user => {

@@ -6,7 +6,7 @@ const { Sequelize } = require('sequelize');
 
 //Import file config
 const config = require('../config/db_config.json');
-// const config = require('../config/db_config_local.json');
+//  const config = require('../config/db_config_local.json');
 
 
 //Import Controllers
@@ -80,6 +80,7 @@ db.transaction = require('../../models/transaction.js')(sequelize, Sequelize);
 db.user = require('../../models/user.js')(sequelize, Sequelize);
 db.generatedbankfiles = require('../../models/generatedbankfiles.js')(sequelize, Sequelize);
 db.loginhistory = require('../../models/loginhistory.js')(sequelize, Sequelize);
+db.sabana = require('../../models/sabana.js')(sequelize, Sequelize);
 
 
 

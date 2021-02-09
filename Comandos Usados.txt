@@ -5,3 +5,6 @@ seq-ei -H 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com' -u appavanzo -p $v
 
 -- correr comando en servidor y poder matar la sesion local
 nohup "comando" &
+
+sacar modelo de una tabla en particular 
+-- sequelize-auto-models -h localhost -d avanzo -u root -x root -p 3306  --dialect mysql -c src/config/database_sequelize -o ./models -t Sabana -C
