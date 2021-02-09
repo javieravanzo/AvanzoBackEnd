@@ -565,79 +565,81 @@ const uploadSabana = async (req, res, next) => {
 
     try {
 
-      const isdelete =await dbSequelize.sabana.destroy({
+      const isdelete = await dbSequelize.sabana.destroy({
         where: {},
         truncate: true
       });
- 
-  
-        var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
-        var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
-        var readData = Excel.utils.sheet_to_json(readSheet, { range: 0 });
-        for (let i in readData) {
-      
-          const sabanaObj = {
-            saba_credito: readData[i]["Credito"],
-            saba_id_cuota: readData[i]["id_cuota"],
-            saba_empresa: readData[i]["Empresa"],
-            saba_fecha_solicitud: readData[i]["fecha_soliciud"],
-            saba_anio_solicitud: readData[i]["Año_Solicitud"],
-            saba_fecha_desembolso: readData[i]["fecha_desembolso"],
-            saba_anio_desembolso: readData[i]["Año_Desembolso"],
-            saba_mes_desembolso: readData[i]["mes"],
-            saba_fecha_pago_sistema: readData[i]["fecha_pago_sistema"],
-            saba_fecha_pagocuota: readData[i]["fecha_pagocuota"],
-            saba_mes_recaudar: readData[i][" Mes Recaudar "],
-            saba_anio: readData[i]["Año"],
-            saba_fecha_pago_usuario: readData[i]["fecha_pago_usuario"],
-            saba_mes_pago: readData[i]["Mes pago"],
-            saba_anio_pago: readData[i]["Año_Pago"],
-            saba_dias_cartera: readData[i]["Días Cartera"],
-            saba_rango_cartera: readData[i]["Rango cartera"],
-            saba_full_name: readData[i]["nombre_apellidos"],
-            saba_numero_cedula: readData[i]["Numero_cedula"],
-            saba_monto: readData[i]["monto"],
-            saba_iva: readData[i]["iva"],
-            saba_seguro: readData[i]["|seguro"],
-            saba_interes: readData[i]["interes"],
-            saba_tecnologia: readData[i]["tecnologia"],
-            saba_administracion: readData[i]["administracion"],
-            saba_pago_total: readData[i]["pago_total"],
-            saba_pago_actual: readData[i]["pago_actual"],
-            saba_estado_credito: readData[i]["estado_credito"],
-            saba_sub_estado: readData[i]["Sub_Estado"],
-            saba_valor_cuota: readData[i][" valor cuota "],
-            saba_desembolso: readData[i][" Desembolso "],
-            saba_n_cuotas: readData[i]["Nª Cuotas"],
-            saba_dif: readData[i][" DIF "],
-            saba_capital: readData[i][" Capital "],
-            saba_intereses: readData[i][" Intereses "],
-            saba_administracion_2: readData[i][" Administracion "],
-            saba_iva_2: readData[i][" IVA "],
-            saba_pago_real: readData[i][" Pago Real "],
-            saba_capital_2: readData[i][" Capital _1"],
-            saba_intereses_2: readData[i][" Intereses _1"],
-            saba_administracion_3: readData[i][" Administracion _1"],
-            saba_iva3: readData[i][" IVA _1"],
-            saba_diferencia: readData[i][" Diferencia "],
-            saba_cartera: readData[i][" CARTERA "],
-            saba_responsable: readData[i]["Responsable"],
-            saba_motivo: readData[i]["Motivo"]
-          };
-       
-          const sabana = await dbSequelize.sabana.create(sabanaObj, { transaction: t });
-          if (sabana !== null) {
-          }else{
-            throw new Error("Error registrando el registro " + i);
-  
-          }
-  
-        }
-        await t.commit();
 
-      
+
+      var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
+      var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
+      var readData = Excel.utils.sheet_to_json(readSheet, { range: 0 });
+      for (let i in readData) {
+        console.log("----------------------------------------");
+        console.log(readData[i]["tecnologia"]);
+        console.log("---------------------------------------");
+        const sabanaObj = {
+          saba_credito: readData[i]["Credito"],
+          saba_id_cuota: readData[i]["id_cuota"],
+          saba_empresa: readData[i]["Empresa"],
+          saba_fecha_solicitud: readData[i]["fecha_soliciud"],
+          saba_anio_solicitud: readData[i]["Año_Solicitud"],
+          saba_fecha_desembolso: readData[i]["fecha_desembolso"],
+          saba_anio_desembolso: readData[i]["Año_Desembolso"],
+          saba_mes_desembolso: readData[i]["mes"],
+          saba_fecha_pago_sistema: readData[i]["fecha_pago_sistema"],
+          saba_fecha_pagocuota: readData[i]["fecha_pagocuota"],
+          saba_mes_recaudar: readData[i][" Mes Recaudar "],
+          saba_anio: readData[i]["Año"],
+          saba_fecha_pago: readData[i]["fecha_pagocuota"],
+          saba_fecha_pago_usuario: readData[i]["fecha_pago_usuario"],
+          saba_mes_pago: readData[i]["Mes pago"],
+          saba_anio_pago: readData[i]["Año_Pago"],
+          saba_dias_cartera: readData[i]["Días Cartera"],
+          saba_rango_cartera: readData[i]["Rango cartera"],
+          saba_full_name: readData[i]["nombre_apellidos"],
+          saba_numero_cedula: readData[i]["Numero_cedula"],
+          saba_monto: readData[i]["monto"],
+          saba_iva: readData[i]["iva"],
+          saba_seguro: readData[i]["|seguro"],
+          saba_interes: readData[i]["interes"],
+          saba_tecnologia: readData[i]["tecnologia"],
+          saba_administracion: readData[i]["administracion"],
+          saba_pago_total: readData[i]["pago_total"],
+          saba_pago_actual: readData[i]["pago_actual"],
+          saba_estado_credito: readData[i]["estado_credito"],
+          saba_sub_estado: readData[i]["Sub_Estado"],
+          saba_valor_cuota: readData[i][" valor cuota "],
+          saba_desembolso: readData[i][" Desembolso "],
+          saba_n_cuotas: readData[i]["Nª Cuotas"],
+          saba_dif: readData[i][" DIF "],
+          saba_capital: readData[i][" Capital "],
+          saba_intereses: readData[i][" Intereses "],
+          saba_administracion_2: readData[i][" Administracion "],
+          saba_iva_2: readData[i][" IVA "],
+          saba_pago_real: readData[i][" Pago Real "],
+          saba_capital_2: readData[i][" Capital _1"],
+          saba_intereses_2: readData[i][" Intereses _1"],
+          saba_administracion_3: readData[i][" Administracion _1"],
+          saba_iva3: readData[i][" IVA _1"],
+          saba_diferencia: readData[i][" Diferencia "],
+          saba_cartera: readData[i][" CARTERA "],
+          saba_responsable: readData[i]["Responsable"],
+          saba_motivo: readData[i]["Motivo"]
+        };
+
+        const sabana = await dbSequelize.sabana.create(sabanaObj, { transaction: t });
+        if (sabana !== null) {
+        } else {
+          throw new Error("Error registrando el registro " + i);
+
+        }
+      }
+      await t.commit();
+
+
       res.status(200).json({ message: "Sabana subida con exito" });
-  
+
 
     } catch (error) {
       await t.rollback();
@@ -660,28 +662,48 @@ const GetDataByDocumentNumber = async (req, res, next) => {
   //Get the user id
 
   try {
-     console.log("----------------------------------------");
     const { documentNumber } = req.params;
- console.log(documentNumber);
     const sabanaOne = await dbSequelize.sabana.findAll({
-      attributes: ['saba_credito','saba_full_name'],
+
+      attributes: ['saba_credito', 'saba_id_cuota', 'saba_empresa', 'saba_estado_credito', 'saba_fecha_solicitud',
+        'saba_fecha_pago', 'saba_fecha_pago_usuario', 'saba_valor_cuota', 'saba_dif'],
       where: {
         saba_numero_cedula: documentNumber
       }
-  });      if (sabanaOne) {
-          res.status(200).json(sabanaOne);
-      } else {
-          res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
-      }
+    });
+    const crediArray = [];
+    const crediArrayAll = [];
+
+
+    if (sabanaOne) {
+
+
+      sabanaOne.forEach(function (registro) {
+
+        const crediObj = {};
+
+        crediObj.credito=registro.saba_credito
+        crediObj.cuotas=[]
+        crediObj.cuotas.push(registro)
+        crediArray.push(crediObj)
+ 
+      });
+
+      // console.log(crediArray);
+
+      res.status(200).json(crediArray);
+    } else {
+      res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
+    }
 
   } catch (e) {
-     console.log(e);
-      res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
+    console.log(e);
+    res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
   };
 
 };
 
 module.exports = {
   generateBankReport, receiveBankReport, generatePendingRequestReport, generatePendingByRRHH,
-  generateParticularPendingRequestByRRHH, downloadFile, uploadSabana,GetDataByDocumentNumber
+  generateParticularPendingRequestByRRHH, downloadFile, uploadSabana, GetDataByDocumentNumber
 };

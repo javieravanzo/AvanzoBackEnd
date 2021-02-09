@@ -53,6 +53,11 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true,
 			field: 'saba_fecha_pago_sistema'
 		},
+		saba_fecha_pago: {
+			type: DataTypes.DATE,
+			allowNull: true,
+			field: 'saba_fecha_pago'
+		},
 		saba_fecha_pagocuota: {
 			type: DataTypes.DATE,
 			allowNull: true,
