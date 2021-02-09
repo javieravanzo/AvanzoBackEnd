@@ -7,7 +7,7 @@ const { header, body } = require('express-validator');
 //Controllers
 const { verifyToken } = require('../../controllers/validator');
 const { generateBankReport, receiveBankReport, generatePendingRequestReport, 
-        generatePendingByRRHH, generateParticularPendingRequestByRRHH,downloadFile } = require('../../controllers/reports');
+        generatePendingByRRHH, generateParticularPendingRequestByRRHH,downloadFile,uploadSabana } = require('../../controllers/reports');
 
 //Initialize
 const router = express.Router();
@@ -54,5 +54,9 @@ router.post('/Reports/ReceiveBankReport', uploads.fields([
   { name: 'read', maxCount: 1 }
 ]), [verifyToken], receiveBankReport);
 
+
+router.post('/Reports/Sabana', uploads.fields([
+  { name: 'read', maxCount: 1 }
+]), uploadSabana);
 //Export
 module.exports = router;
