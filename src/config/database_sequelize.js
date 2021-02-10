@@ -5,8 +5,8 @@ const { Sequelize } = require('sequelize');
 //Libraries
 
 //Import file config
-const config = require('../config/db_config.json');
-//  const config = require('../config/db_config_local.json');
+// const config = require('../config/db_config_server.json');
+ const config = require('../config/db_config.json');
 
 
 //Import Controllers
@@ -31,9 +31,9 @@ const config = require('../config/db_config.json');
         logging: console.log,
         logging: function (str) {
         // do your own logging
-         console.log("####################################################################11");
-         console.log(str);
-         console.log("####################################################################22");
+        //  console.log("####################################################################11");
+        //  console.log(str);
+        //  console.log("####################################################################22");
 
     }
     }

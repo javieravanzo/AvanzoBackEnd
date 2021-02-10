@@ -688,10 +688,25 @@ const updateState = async (req, res, next) => {
     };
 
 };
+const downloadFile = async (req, res, next) => {
+
+    try {
+  
+      //utils.downloadFile(req.params.fileName);
+    //    console.log(req.params.fileName.split("#")[1]);
+
+      res.download('./files/documents/'+req.params.cc +"/" + req.params.fileName);
+      res.status(200)
+    } catch (e) {
+      //console.log("Error", e);
+      res.status(500).json({ message: "El archivo no puede ser generado en este momento." });
+    };
+  
+  };
 
 module.exports = {
     getInitialData, getRequestData, getAllCustomer, createNewCustomer, createMultipleCustomer,
     getAllCustomerWithCompany, getTransactionsByUserId, getCustomers, getAllCustomerToApprove,
     getCountCustomerToApprove, approveCustomer, changeCustomerStatus, updateCustomer, makePayment,
-    getDateListToCustomer, deleteUsers, getAccountDetail, updateState
+    getDateListToCustomer, deleteUsers, getAccountDetail, updateState,downloadFile
 };

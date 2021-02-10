@@ -1,6 +1,7 @@
 //Requires
 const mysql = require('mysql');
 const { promisify } = require('util');
+const config = require('../config/db_config.json');
 
 //DBConnection
  const poolConnection = mysql.createPool({

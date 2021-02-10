@@ -9,10 +9,10 @@ const router = express.Router();
 
 //Modify the folder/file storage
 const storage = multer.diskStorage({
-  destination: function(req, file, callback){
-    
+  destination: function (req, file, callback) {
+
     //Production
-    var dest = '../files/documents/'+req.body.identificationId+'-'+req.body.company+'/';
+    var dest = '../files/documents/' + req.body.identificationId + '-' + req.body.company + '/';
     mkdirp.sync(dest);
     callback(null, dest);
 
@@ -22,8 +22,8 @@ const storage = multer.diskStorage({
     //callback(null, dest);
 
   },
-  filename: function(req, file, callback){
-    callback(null, file.fieldname + ".pdf");
+  filename: function (req, file, callback) {
+    callback(null, file.fieldname + "."+file.originalname.split(".")[1]);
   }
 });
 
@@ -56,10 +56,9 @@ router.post('/Account/Register', [
 router.post('/Account/NewRegister', uploads.fields([
   { name: 'documentId', maxCount: 1 },
   { name: 'photo', maxCount: 1 },
-  { name: 'paymentReport', maxCount: 1},
-  body('birthDate', 'Fecha de nacimiento es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty(),
-
-]), preRegister);
+  { name: 'paymentReport', maxCount: 1 }]),
+  body('birthDate', 'Fecha de nacimiento es invalida la fecha debe ser YYYY-MM-DD').exists().isDate().not().isEmpty()
+  , preRegister);
 
 //Routes
 router.post('/Account/RegisterAdministrator', [
