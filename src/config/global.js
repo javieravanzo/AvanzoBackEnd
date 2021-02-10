@@ -4,7 +4,7 @@ const base_URL = "http://backend.avanzocreditos.com:4000";
 
 const base_URL_test = "http://localhost:4000";
 
-const front_URL = "http://avanzoapp.amadordeveloper.com/";
+const front_URL = "http://avanzoapp.amadordeveloper.com";
 
 const front_URL_test = "http://localhost:3000";
 

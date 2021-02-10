@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const Excel = require('xlsx');
 const { banks } = require('../utils/constants.js');
 const { utils } = require('../utils/utils.js');
+var moment = require('moment');
 
 var fs = require('fs');
 //Imports
@@ -570,62 +571,138 @@ const uploadSabana = async (req, res, next) => {
         truncate: true
       });
 
+      // var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
+      var readWorkbook = Excel.readFile("C:/Users/dario/Downloads/Sabana Recaudo.csv", { cellDates: true });
 
-      var readWorkbook = Excel.readFile(req.files.read[0].path, { cellDates: true });
       var readSheet = readWorkbook.Sheets[readWorkbook.SheetNames[0]];
       var readData = Excel.utils.sheet_to_json(readSheet, { range: 0 });
       for (let i in readData) {
-        console.log("----------------------------------------");
-        console.log(readData[i]["tecnologia"]);
-        console.log("---------------------------------------");
+
+        var date_fecha_soliciud = moment(readData[i]["fecha_soliciud"], 'DD/MM/YYYY');
+        readData[i]["fecha_soliciud"] = date_fecha_soliciud.format('YYYY-MM-DD');
+
+        var date_fecha_desembolso = moment(readData[i]["fecha_desembolso"], 'DD/MM/YYYY');
+        readData[i]["fecha_desembolso"] = date_fecha_desembolso.format('YYYY-MM-DD');
+
+        var date_fecha_pago_sistema = moment(readData[i]["fecha_pago_sistema"], 'DD/MM/YYYY');
+        readData[i]["fecha_pago_sistema"] = date_fecha_pago_sistema.format('YYYY-MM-DD');
+
+        var date_fecha_pagocuota = moment(readData[i]["fecha_pagocuota"], 'DD/MM/YYYY');
+        readData[i]["fecha_pagocuota"] = date_fecha_pagocuota.format('YYYY-MM-DD');
+
+        if (readData[i]["fecha_pago_usuario"] !== "") {
+          var date_fecha_pago_usuario = moment(readData[i]["fecha_pago_usuario"], 'DD/MM/YYYY');
+          readData[i]["fecha_pago_usuario"] = date_fecha_pago_usuario.format('YYYY-MM-DD');
+        } else {
+          readData[i]["fecha_pago_usuario"] = null
+
+        }
+
+        if (readData[i]["fecha_pago_sistema"] !== "") {
+          var date_fecha_pago_sistema = moment(readData[i]["fecha_pago_sistema"], 'DD/MM/YYYY');
+          readData[i]["fecha_pago_sistema"] = date_fecha_pago_sistema.format('YYYY-MM-DD');
+        } else {
+          readData[i]["fecha_pago_sistema"] = null
+
+        }
+        if (readData[i]["monto"] == undefined) {
+          readData[i]["monto"] = "";
+        }
+        if (readData[i]["pago_actual"] == undefined) {
+          readData[i]["pago_actual"] = "";
+        }
+        if (readData[i]["Motivo"] == undefined) {
+          readData[i]["Motivo"] = "";
+        }
+        if (readData[i]["id_cuota"] == undefined) {
+          readData[i]["id_cuota"] = "";
+        }
+        if (readData[i]["pago_total"] == undefined) {
+          readData[i]["pago_total"] = "";
+        }
+        if (readData[i][" Pago Real "] == undefined) {
+          readData[i][" Pago Real "] = "";
+        }
+
+        if (readData[i][" valor cuota "] == undefined) {
+          readData[i][" valor cuota "] = "";
+        }
+
+        if (readData[i]["Credito"] == undefined) {
+          readData[i]["Credito"] = "";
+        }
+        if (readData[i][" DIF "] == undefined) {
+          readData[i][" DIF "] = "";
+        }
+        if (readData[i][" Capital "] == undefined) {
+          readData[i][" Capital "] = "";
+        }
+
+
+        if (readData[i][" Capital _1"] == undefined) {
+          readData[i][" Capital _1"] = "";
+        }
+        if (readData[i][" Diferencia "] == undefined) {
+          readData[i][" Diferencia "] = "";
+        }
+        if (readData[i][" CARTERA "] == undefined) {
+          readData[i][" CARTERA "] = "";
+        }
+        if (readData[i]["Responsable"] == undefined) {
+          readData[i]["Responsable"] = "";
+        }
+        if (readData[i]["Motivo"] == undefined) {
+          readData[i]["Motivo"] = "";
+        }
+
         const sabanaObj = {
-          saba_credito: readData[i]["Credito"],
-          saba_id_cuota: readData[i]["id_cuota"],
+          saba_credito: readData[i]["Credito"].toString() == "" ? null : readData[i]["Credito"].toString(),
+          saba_id_cuota: readData[i]["id_cuota"].toString() == "" ? null : readData[i]["id_cuota"].toString(),
           saba_empresa: readData[i]["Empresa"],
-          saba_fecha_solicitud: readData[i]["fecha_soliciud"],
+          saba_fecha_solicitud: readData[i]["fecha_soliciud"] == "" ? null : readData[i]["fecha_soliciud"],
           saba_anio_solicitud: readData[i]["Año_Solicitud"],
-          saba_fecha_desembolso: readData[i]["fecha_desembolso"],
+          saba_fecha_desembolso: readData[i]["fecha_desembolso"] == "" ? null : readData[i]["fecha_desembolso"],
           saba_anio_desembolso: readData[i]["Año_Desembolso"],
           saba_mes_desembolso: readData[i]["mes"],
-          saba_fecha_pago_sistema: readData[i]["fecha_pago_sistema"],
-          saba_fecha_pagocuota: readData[i]["fecha_pagocuota"],
+          saba_fecha_pago_sistema: readData[i]["fecha_pago_sistema"] == "" ? null : readData[i]["fecha_pago_sistema"],
+          saba_fecha_pagocuota: readData[i]["fecha_pagocuota"] == "" ? null : readData[i]["fecha_pagocuota"],
           saba_mes_recaudar: readData[i][" Mes Recaudar "],
           saba_anio: readData[i]["Año"],
           saba_fecha_pago: readData[i]["fecha_pagocuota"],
-          saba_fecha_pago_usuario: readData[i]["fecha_pago_usuario"],
+          saba_fecha_pago_usuario: readData[i]["fecha_pago_usuario"].toString() == "" ? null : readData[i]["fecha_pago_usuario"].toString(),
           saba_mes_pago: readData[i]["Mes pago"],
           saba_anio_pago: readData[i]["Año_Pago"],
           saba_dias_cartera: readData[i]["Días Cartera"],
           saba_rango_cartera: readData[i]["Rango cartera"],
           saba_full_name: readData[i]["nombre_apellidos"],
           saba_numero_cedula: readData[i]["Numero_cedula"],
-          saba_monto: readData[i]["monto"],
+          saba_monto: readData[i]["monto"].toString() == "" ? null : readData[i]["monto"].toString(),
           saba_iva: readData[i]["iva"],
           saba_seguro: readData[i]["|seguro"],
           saba_interes: readData[i]["interes"],
           saba_tecnologia: readData[i]["tecnologia"],
           saba_administracion: readData[i]["administracion"],
-          saba_pago_total: readData[i]["pago_total"],
-          saba_pago_actual: readData[i]["pago_actual"],
+          saba_pago_total: readData[i]["pago_total"].toString() == "" ? null : readData[i]["pago_total"].toString(),
+          saba_pago_actual: readData[i]["pago_actual"].toString() == "" ? null : readData[i]["monto"].toString(),
           saba_estado_credito: readData[i]["estado_credito"],
           saba_sub_estado: readData[i]["Sub_Estado"],
-          saba_valor_cuota: readData[i][" valor cuota "],
-          saba_desembolso: readData[i][" Desembolso "],
+          saba_valor_cuota: readData[i][" valor cuota "].toString() == "" ? null : readData[i][" valor cuota "].toString(),
+          saba_desembolso: readData[i][" Desembolso "].toString() == "" ? null : readData[i][" Desembolso "].toString(),
           saba_n_cuotas: readData[i]["Nª Cuotas"],
-          saba_dif: readData[i][" DIF "],
-          saba_capital: readData[i][" Capital "],
+          saba_dif: readData[i][" DIF "].toString() == "" ? null : readData[i][" DIF "].toString(),
+          saba_capital: readData[i][" Capital "].toString() == "" ? null : readData[i][" Capital "].toString(),
           saba_intereses: readData[i][" Intereses "],
           saba_administracion_2: readData[i][" Administracion "],
           saba_iva_2: readData[i][" IVA "],
-          saba_pago_real: readData[i][" Pago Real "],
-          saba_capital_2: readData[i][" Capital _1"],
+          saba_pago_real: readData[i][" Pago Real "].toString() == "" ? null : readData[i][" Pago Real "].toString(),
+          saba_capital_2: readData[i][" Capital _1"].toString() == "" ? null : readData[i][" Capital _1"].toString(),
           saba_intereses_2: readData[i][" Intereses _1"],
           saba_administracion_3: readData[i][" Administracion _1"],
           saba_iva3: readData[i][" IVA _1"],
-          saba_diferencia: readData[i][" Diferencia "],
-          saba_cartera: readData[i][" CARTERA "],
-          saba_responsable: readData[i]["Responsable"],
-          saba_motivo: readData[i]["Motivo"]
+          saba_diferencia: readData[i][" Diferencia "].toString() == "" ? null : readData[i][" Diferencia "].toString(),
+          saba_cartera: readData[i][" CARTERA "].toString() == "" ? null : readData[i][" CARTERA "].toString(),
+          saba_responsable: readData[i]["Responsable"].toString() == "" ? null : readData[i]["Responsable"].toString(),
+          saba_motivo: readData[i]["Motivo"].toString() == "" ? null : readData[i]["Motivo"].toString()
         };
 
         const sabana = await dbSequelize.sabana.create(sabanaObj, { transaction: t });
@@ -635,6 +712,7 @@ const uploadSabana = async (req, res, next) => {
 
         }
       }
+
       await t.commit();
 
 
@@ -665,31 +743,35 @@ const GetDataByDocumentNumber = async (req, res, next) => {
     const { documentNumber } = req.params;
     const sabanaOne = await dbSequelize.sabana.findAll({
 
-      attributes: ['saba_credito', 'saba_id_cuota', 'saba_empresa', 'saba_estado_credito', 'saba_fecha_solicitud',
+      attributes: ['saba_id', 'saba_credito', 'saba_id_cuota', 'saba_empresa', 'saba_estado_credito', 'saba_fecha_solicitud',
         'saba_fecha_pago', 'saba_fecha_pago_usuario', 'saba_valor_cuota', 'saba_dif'],
       where: {
         saba_numero_cedula: documentNumber
       }
     });
     const crediArray = [];
-    const crediArrayAll = [];
+    const crediAdded = [];
 
 
     if (sabanaOne) {
 
 
-      sabanaOne.forEach(function (registro) {
-
+      sabanaOne.forEach(function (registro, index) {
         const crediObj = {};
 
-        crediObj.credito=registro.saba_credito
-        crediObj.cuotas=[]
-        crediObj.cuotas.push(registro)
-        crediArray.push(crediObj)
- 
+        if (!crediAdded.includes(registro.saba_credito)) {
+          crediObj.credito = registro.saba_credito
+          crediObj.cuotas = []
+          sabanaOne.forEach(function (registro2) {
+            if (registro.saba_credito === registro2.saba_credito) {
+              crediObj.cuotas.push(registro2)
+            }
+          });
+          crediArray.push(crediObj)
+        }
+        crediAdded.push(registro.saba_credito)
       });
 
-      // console.log(crediArray);
 
       res.status(200).json(crediArray);
     } else {
@@ -702,6 +784,7 @@ const GetDataByDocumentNumber = async (req, res, next) => {
   };
 
 };
+
 
 module.exports = {
   generateBankReport, receiveBankReport, generatePendingRequestReport, generatePendingByRRHH,

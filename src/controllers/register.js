@@ -46,7 +46,6 @@ const preRegister = async (req, res, next) => {
   const { name, lastName, identificationId, documentType, city, birthDate, salary, email, company, phoneNumber, password, gender,
     vehicle, vehicle_type, license_plate_vehicle, clie_address, clie_from } = req.body;
 
-  //console.log("Body", documentType);
 
   //Validate input
   const errors = validationResult(req);
@@ -62,12 +61,10 @@ const preRegister = async (req, res, next) => {
     vehicle, vehicle_type, license_plate_vehicle, clie_address, clie_from
   };
   const user = { name, email, lastName };
-  //console.log("RF", req.files);
   const files = {
     documentId: path.normalize(req.files.documentId[0].path).replace("../files/documents/", ""),
     paymentReport: path.normalize(req.files.paymentReport[0].path).replace("../files/documents/", "")
   };
-  //console.log("files", files);
   const auth = { password };
 
   try {

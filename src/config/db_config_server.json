@@ -1,7 +1,7 @@
 {
-  "username": "root",
-  "password": "root",
-  "host": "127.0.0.1",
+  "username": "appavanzo",
+  "password": "$vAnk6SpQBcNzY97E",
+  "host": "avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com",
   "database": "avanzo",
   "dir": "./models",
   "port": 3306,
