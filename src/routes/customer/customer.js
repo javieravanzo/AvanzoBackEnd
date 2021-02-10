@@ -10,7 +10,7 @@ const { getInitialData, getRequestData, getAllCustomer, createNewCustomer, getCu
         createMultipleCustomer, getAllCustomerWithCompany, getTransactionsByUserId, 
         getAllCustomerToApprove, getCountCustomerToApprove, getDateListToCustomer, approveCustomer,
         updateCustomer, changeCustomerStatus, makePayment, deleteUsers,
-        getAccountDetail,updateState} = require('../../controllers/customer');
+        getAccountDetail,updateState,downloadFile} = require('../../controllers/customer');
  
 //Initialize
 const router = express.Router();
@@ -131,6 +131,9 @@ router.put('/Customer/UpdateState', [
   body('idClient', 'Id usuario no puede ser vacio').exists().isInt().not().isEmpty(),
 ]
 , [verifyToken], updateState);
+router.get('/Customer/DownloadFile/:cc/:fileName', downloadFile);
+
+
 
 //Export
 module.exports = router;

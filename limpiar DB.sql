@@ -30,8 +30,16 @@ UPDATE avanzo.newclient SET status=0 WHERE newclient.idNewClient =1;
 
 
 
+----------------
+-- eliminar login history
+DELETE FROM `avanzo`.`LoginHistory`;
+DELETE FROM `avanzo`.`Auth` WHERE  User_idUser NOT IN (2);
+DELETE FROM `avanzo`.`User` WHERE  idUser NOT IN (2);
+DELETE FROM `avanzo`.`Codes`;
+DELETE FROM `avanzo`.`Client`;
+TRUNCATE TABLE `avanzo`.`NewClient`;
 
-
+DELETE FROM `avanzo`.`ClientDocuments`;
 
 
 
