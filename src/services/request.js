@@ -708,13 +708,17 @@ const getAllRequests = async (clientId) => {
 
   try {
 
+<<<<<<< HEAD
     const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.createdAt, R.split, R.quantity, R.totalValue, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.approveHumanResources, R.observation, R.computedCapacity, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where (RS.idRequestState < ? or RS.idRequestState = ? or RS.idRequestState = ? ) ORDER BY R.createdAt DESC', [clientId, 5, 9, 10]);
+=======
+    const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.totalValue, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.approveHumanResources, R.observation, R.computedCapacity, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where (RS.idRequestState < ? or RS.idRequestState = ? ) ORDER BY  createdAt DESC', [clientId, 5, 9]);
+>>>>>>> be23d0757d2dec26bad6de22ca9a0428ef1c04cf
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
 
     return { status: 200, data: { request: requestRow, company: company[0] } };
 
   } catch (e) {
-    //console.log(e);
+    console.log(e);
     return { status: 500, message: "Error interno del servidor." };
   }
 };
@@ -723,7 +727,7 @@ const getAllRequestsWasOutlayed = async (clientId) => {
 
   try {
     //////console.log("ClientId", clientId);
-    const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.totalValue, R.computedCapacity, R.observation, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where ( RS.idRequestState = ?) ORDER BY IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt DESC', [clientId, 5]);
+    const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, R.totalValue, R.computedCapacity, R.observation, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where ( RS.idRequestState = ?) ORDER BY  createdAt DESC', [clientId, 5]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return { status: 200, data: { request: requestRow, company: company[0] } };
   } catch (e) {
@@ -736,7 +740,7 @@ const getAllRequestWasRejected = async (clientId) => {
 
   try {
     //////console.log("ClientId", clientId);
-    const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.totalValue, R.computedCapacity, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where ( RS.idRequestState = ? or RS.idRequestState = ? or RS.idRequestState = ? or RS.idRequestState = ?) ORDER BY IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt DESC', [clientId, 6, 7, 8, 11]);
+    const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, RS.name AS stateName, C.identificationId, U.name, U.lastName, C.profession, RS.idRequestState, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.totalValue, R.computedCapacity, R.account, R.accountType, R.accountNumber, R.filePath, R.observation, C.Company_idCompany, A.totalRemainder FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON  (U.Client_idClient = C.idClient AND A.Client_idClient = C.idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState AND C.idClient = ?) where ( RS.idRequestState = ? or RS.idRequestState = ? or RS.idRequestState = ? or RS.idRequestState = ?) ORDER BY  createdAt DESC', [clientId, 6, 7, 8, 11]);
     const company = await pool.query('SELECT CO.idCompany, US.name FROM Client C JOIN Company CO JOIN User US ON (C.Company_idCompany = CO.idCompany AND CO.idCompany = US.Company_idCompany) where C.idClient = ?', [clientId]);
     return { status: 200, data: { request: requestRow, company: company[0] } };
   } catch (e) {
