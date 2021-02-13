@@ -664,7 +664,7 @@ const getAccountDetail = async (req, res, next) => {
           const sabanaOne = await dbSequelize.sabana.findAll({
       
             attributes: ['saba_id', 'saba_credito', 'saba_id_cuota', 'saba_empresa', 'saba_estado_credito', 'saba_fecha_solicitud',
-              'saba_fecha_pago', 'saba_fecha_pago_usuario', 'saba_valor_cuota', 'saba_dif'],
+              'saba_fecha_pago', 'saba_fecha_pago_usuario', 'saba_valor_cuota', 'saba_dif',],
             where: {
               saba_numero_cedula: result.data.identificationId
             }
@@ -681,6 +681,8 @@ const getAccountDetail = async (req, res, next) => {
       
               if (!crediAdded.includes(registro.saba_credito)) {
                 crediObj.credito = registro.saba_credito
+                crediObj.empresa = registro.saba_empresa
+
                 crediObj.cuotas = []
                 sabanaOne.forEach(function (registro2) {
                   if (registro.saba_credito === registro2.saba_credito) {
