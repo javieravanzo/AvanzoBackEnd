@@ -16,12 +16,12 @@ const pool = require('../config/database.js');
 const helpers = require('../lib/helpers');
 const mailer = require('../lib/mailer/requestMailer.js');
 const todayDate = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }).replace(/\P.+/, '').replace(/\A.+/, '');
-const { ENVIRONMENT, SMS_CODES} = require('../utils/constants.js');
+const { ENVIRONMENT, SMS_CODES } = require('../utils/constants.js');
 const dbSequelize = require('../config/database_sequelize.js');
 const { sendSMS } = require('../utils/utils.js');
 
 sequelize = dbSequelize.sequelize,
-    Sequelize = dbSequelize.Sequelize;
+  Sequelize = dbSequelize.Sequelize;
 //Functions
 function getStateIdFromName(row, name) {
 
@@ -1142,7 +1142,7 @@ const getAllRequestsToApprove = async (userId) => {
       requeststate.push(getStateIdFromName(stateRow, "Aprobada Recursos Humanos"));
       requeststate.push(getStateIdFromName(stateRow, "Procesada documentos con cambio"));
 
-      const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.totalValue, R.computedCapacity, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? ) ORDER BY R.idRequest;', [requeststate[0], requeststate[1], requeststate[2],requeststate[3]]);
+      const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, C.identificationId, U.lastName, C.phoneNumber, C.profession, RS.idRequestState, RS.name AS requestStateName, IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.administrationValue, R.interestValue, R.otherValues, R.account, R.accountType, R.accountNumber, R.filePath, R.totalValue, R.computedCapacity, CD.paymentSupport, CD.workingSupport, C.Company_idCompany, CO.socialReason, U.name, A.totalRemainder FROM Client C JOIN ClientDocuments CD JOIN User U JOIN Company CO JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.ClientDocuments_idClientDocuments = CD.idClientDocuments AND C.idClient = A.Client_idClient AND CO.idCompany = C.Company_idCompany AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? OR R.RequestState_idRequestState = ? ) ORDER BY R.idRequest;', [requeststate[0], requeststate[1], requeststate[2], requeststate[3]]);
       return { status: 200, data: requestRow };
     } else if (userId.role === 3) {
       //Change the approval/reject state for company
@@ -1183,7 +1183,7 @@ const getRequestsToOutLay = async (userId) => {
       const stateRow = await pool.query('SELECT * FROM RequestState');
       requeststate = getStateIdFromName(stateRow, "En desembolso");
       const requestRow = await pool.query('SELECT R.idRequest,R.Request_overdraft,R.Request_observation, C.identificationId, U.lastName, C.profession, RS.idRequestState, RS.name,IF(R.createdAt IS NULL, "--", R.createdAt) AS createdAt, R.split, R.quantity, R.account, R.accountType, R.accountNumber, R.filePath, C.Company_idCompany FROM Client C JOIN User U JOIN Account A JOIN Request R JOIN RequestState RS ON (U.Client_idClient = C.idClient AND C.idClient = A.Client_idClient AND A.idAccount = R.Account_idAccount AND R.RequestState_idRequestState = RS.idRequestState) where (R.RequestState_idRequestState = ?);', [requeststate]);
-      
+
       return { status: 200, data: requestRow };
     } else if (userId.role === 3) {
       //Change the approval/reject state
@@ -1449,7 +1449,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
       console.log("PhoneNumber", phoneNumber, "Email", email);
 
       //CheckQuery
-      const userRow = await pool.query('SELECT C.idClient, U.idUser, U.email FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);
+      const userRow = await pool.query('SELECT C.idClient, U.idUser,U.name, U.email FROM Client C JOIN User U ON (C.idClient = U.Client_idClient) where C.phoneNumber = ? and U.email = ?', [phoneNumber, email]);
 
       console.log("UserRow", userRow);
 
@@ -1498,6 +1498,7 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
 
           let userData = {
             email: userRow[0].email,
+            name: userRow[0].name,
             url: front_URL,
             emailCode: emailCode,
             base_URL_test: base_URL + "/confirmation.png",
@@ -1517,15 +1518,15 @@ const generateRequestCodes = async (clientId, phoneNumber, email) => {
           await sgMail.send(info);
           if (ENVIRONMENT === 'production') {
             const smsCodes = await dbSequelize.smscodes.findOne({
-                attributes: ['sms_co_id', 'sms_co_body'],
-                where: {
-                    sms_co_id: SMS_CODES.PHONE_VERIFICATION
-                }
+              attributes: ['sms_co_id', 'sms_co_body'],
+              where: {
+                sms_co_id: SMS_CODES.PHONE_VERIFICATION
+              }
             });
             smsCodes.sms_co_body = smsCodes.sms_co_body.replace("[CODE]", phoneCode.toString())
 
             sendSMS(phoneNumber, smsCodes.sms_co_body);
-        }
+          }
 
           return { status: 200, message: "Los códigos han sido enviados" };
 
@@ -1562,80 +1563,80 @@ const generateFirstCodesService = async (userDocumentNumber, phoneNumber, email)
       console.log("PhoneNumber", phoneNumber, "Email", email);
 
       //CheckQuery
-    
 
 
-          const emailCode = Math.floor(100000 + Math.random() * 900000);
 
-          //Encrypt Codes
-          const newEmailCode = await helpers.encryptPassword(emailCode.toString());
+      const emailCode = Math.floor(100000 + Math.random() * 900000);
 
-          //console.log("EC", emailCode);
+      //Encrypt Codes
+      const newEmailCode = await helpers.encryptPassword(emailCode.toString());
 
-          const phoneCode = Math.floor(100000 + Math.random() * 900000);
+      //console.log("EC", emailCode);
 
-          //Encrypt Codes
-          const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
+      const phoneCode = Math.floor(100000 + Math.random() * 900000);
 
-          let objectCode = {
-            numberEmailCode: emailCode.toString(),
-            numberPhoneCode: phoneCode.toString(),
-            emailCode: newEmailCode,
-            phoneCode: newPhoneCode,
-            sendTime: new Date(),
-            receiveTime: null,
-            code_userDocumentNumber:userDocumentNumber
-          };
+      //Encrypt Codes
+      const newPhoneCode = await helpers.encryptPassword(phoneCode.toString());
 
-          console.log("Codes", objectCode);
+      let objectCode = {
+        numberEmailCode: emailCode.toString(),
+        numberPhoneCode: phoneCode.toString(),
+        emailCode: newEmailCode,
+        phoneCode: newPhoneCode,
+        sendTime: new Date(),
+        receiveTime: null,
+        code_userDocumentNumber: userDocumentNumber
+      };
 
-          const checkClient = await pool.query('SELECT idCodes FROM Codes where code_userDocumentNumber = ?', userDocumentNumber);
+      console.log("Codes", objectCode);
 
-          if (checkClient.length > 0) {
+      const checkClient = await pool.query('SELECT idCodes FROM Codes where code_userDocumentNumber = ?', userDocumentNumber);
 
-            const updateCodes = await pool.query('UPDATE Codes SET ? where code_userDocumentNumber = ?', [objectCode, userDocumentNumber]);
+      if (checkClient.length > 0) {
 
-          } else {
+        const updateCodes = await pool.query('UPDATE Codes SET ? where code_userDocumentNumber = ?', [objectCode, userDocumentNumber]);
 
-            const insertCodes = await pool.query('INSERT INTO Codes SET ?', [objectCode]);
+      } else {
 
-          }
+        const insertCodes = await pool.query('INSERT INTO Codes SET ?', [objectCode]);
 
-          //Mailer
-          sgMail.setApiKey(email_api_key);
+      }
 
-          let userData = {
-            email: email,
-            url: front_URL,
-            emailCode: emailCode,
-            base_URL_test: base_URL + "/confirmation.png",
-            footer: base_URL + "/footer.png",
-          };
+      //Mailer
+      sgMail.setApiKey(email_api_key);
 
-          let output = await compile('transactionCode', userData);
+      let userData = {
+        email: email,
+        url: front_URL,
+        emailCode: emailCode,
+        base_URL_test: base_URL + "/confirmation.png",
+        footer: base_URL + "/footer.png",
+      };
 
-          let info = {
-            from: 'operaciones@avanzo.co', // sender address
-            to: email, // list of receivers
-            subject: 'Avanzo (Créditos al instante) - Código de validación', // Subject line
-            text: 'Avanzo', // plain text body
-            html: output // html body
-          };
+      let output = await compile('transactionCode', userData);
 
-          await sgMail.send(info);
-          const smsCodes = await dbSequelize.smscodes.findOne({
-            attributes: ['sms_co_id', 'sms_co_body'],
-            where: {
-                sms_co_id: SMS_CODES.PHONE_VERIFICATION
-            }
-        });
-          sendSMS(phoneNumber, smsCodes.sms_co_body);
+      let info = {
+        from: 'operaciones@avanzo.co', // sender address
+        to: email, // list of receivers
+        subject: 'Avanzo (Créditos al instante) - Código de validación', // Subject line
+        text: 'Avanzo', // plain text body
+        html: output // html body
+      };
 
-          return { status: 200, message: "Los códigos han sido enviados" };
+      await sgMail.send(info);
+      const smsCodes = await dbSequelize.smscodes.findOne({
+        attributes: ['sms_co_id', 'sms_co_body'],
+        where: {
+          sms_co_id: SMS_CODES.PHONE_VERIFICATION
+        }
+      });
+      sendSMS(phoneNumber, smsCodes.sms_co_body);
 
-       
+      return { status: 200, message: "Los códigos han sido enviados" };
 
-      
+
+
+
 
     } else {
 
@@ -1704,5 +1705,5 @@ module.exports = {
   getAllPendingRHRequest, generateRequestCodes, checkNewCodes, getAllBankRefundedRequest,
   passToProcessWithoutChange, passToProcessWithDocuments, passToOutlay, getAllDefinitelyRejected,
   getAllProcessWithoutChangeRequest, updateDocumentsRequest, updateRequestInformation,
-  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized, getAllReasonsOfRejection,generateFirstCodesService
+  getAllProcessDocumentsChange, getAllProcessBank, getAllRequestFinalized, getAllReasonsOfRejection, generateFirstCodesService
 };
