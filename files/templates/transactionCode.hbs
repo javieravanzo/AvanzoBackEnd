@@ -1,83 +1,72 @@
-<html>
-  <head>
-    <meta chraset="UTF-8">
-    <style type="text/css">
-      .body-email{
-        width: 50% !important;
-        margin: auto !important;
-      }
-      .image-class{
-        width: 100% !important;
-      }
-      .body-content{
-        width: 85% !important;
-        margin: auto !important;
-        text-align: center !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
-        color: #00609C !important;
-      }
-      .email-content{
-        font-size: 17px !important;
-      }
-      .email-divider{
-        width: 80% !important;
-        margin: auto !important;
-        color: #CCEBF8 !important;
-        border-color: #CCEBF8 !important;
-        background-color: #CCEBF8 !important;
-      }
-      .link-page{
-        color: white !important!
-      }
-      .email-ignore{
-        font-size: 14px !important;
-      }
-      .web-button{
-        background-color: #00609C !important;
-        color: white !important;
-        font-size: 15px !important;
-        border-radius: 15px !important;
-        padding: 10px !important;
-        font-family: Arial, Helvetica, sans-serif !important;
-      }
-    </style>  
-  </head>
-  <body>
-    <div class="body-email">
-      <div>
-        <img src={{base_URL_test}} alt="signature" class="image-class">
-      </div>
-      <br/>
-      <div class="body-content">
-        <div class="body-title">
-          <span class="email-content">
-            <b>Tu crédito ya casi está listo.</b> Tu código de validación es {{emailCode}}.
-          </span>
-        </div>
-        <br/>  
-        <div class="email-divider">
-          <hr/>
-        </div> 
-        <br/>
+<table style="width:700px; max-width: 100%;display:block;margin:auto">
+    <tr>
+        <td>
+            <img src="https://avanzo.co/wp-content/uploads/2021/02/header-1.png" style="width:80%; display:block; margin:auto">
+        </td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
+            Hola {{name}}, gracias por inscribirte en nuestro sitio web avanzo.co<br>
+            Ingresa el siguiente código para completar el registro:
+        </td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:40px; font-weight:bold; text-align:center; padding-top:40px; padding-bottom:40px">
+            {{emailCode}}
+        </td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
+Una vez completes el proceso, te enviaremos un correo indicándote el estado de tu registro.
+        </td>
+    </tr>
+    <tr>
+        <td style="height:1px; background: #00609c;"></td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
 
-        <div class="email-ignore">
-          <u>*Si no hiciste esta solicitud, por favor omite este mensaje.</u>
-        </div>
-        <br/>
-        <div class="footer-confirmation">
-          <button class="web-button" background-color= "#00609C" color= "white" font-size= "15px"
-                  border-radius= "15px" padding= "10px" font-family="Arial, Helvetica, sans-serif" 
-                  ><a class="link-page" href={{url}}>Ir a la página web</a></button>
-        </div>
-      </div>
-      <br/>
-      <br/>
-      <div >
-        <img src={{footer}} alt="footer" class="image-class" >
-      </div>
+            Mientras tanto, queremos contarte algunos de los productos que puedes adquirir con nuestros créditos.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="https://avanzo.co/wp-content/uploads/2021/02/productos.jpg" style="width:100%">.
+        </td>
+    </tr>
+    <tr>
+        <td style="height:1px; background: #00609c;"></td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
+            Para tus dudas y/o sugerencias puedes contactarte a nuestras líneas de atención y te ayudaremos, nos preocupamos por ti y los tuyos.
+        </td>
+    </tr>
+    <tr>
+        <td style="color:#757575; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
+            Whatsapp Avanzo: <a href="https://wa.me/573014703524" style="color:#757575; text-decoration:none;">301 470 3524</a><br>
+            Línea teléfonica Avanzo: <a href="tel:+570314824824" style="color:#757575; text-decoration:none;">031 482 4824</a>
+ 
+        </td>
+    </tr>
+    <tr>
+        <td style="color:white;background: #00609c; font-family: verdana; font-size:20px; text-align:center; padding-top:40px; padding-bottom:40px">
+                        <a href="https://www.facebook.com/avanzo.co/" style="width:50px;height:50px; display:inline-block"><img src="https://avanzo.co/wp-content/uploads/2021/02/facebook.png" style="width:100%" />
+                        </a>
+                        <a href="https://www.linkedin.com/company/avanzocreditos" style="width:50px;height:50px; display:inline-block"><img src="https://avanzo.co/wp-content/uploads/2021/02/linkedin.png" style="width:100%" />
+                        </a>
+                        <a href="http://www.avanzo.co/" style="width:50px;height:50px; display:inline-block"><img src="https://avanzo.co/wp-content/uploads/2021/02/enlace.png" style="width:100%" />
+                        </a>
+                        <a href="https://www.youtube.com/channel/UClMK1tvftAr0NJNgJOzsq9A" style="width:50px;height:50px; display:inline-block"><img src="https://avanzo.co/wp-content/uploads/2021/02/youtube.png" style="width:100%" />
+                        </a>
+                        <br> <br>
+                        <hr>
+                        <br>
+                        Copyright © <br><br>
 
-    </div>
+Nuestro correo <br>
+<a href="mailto:operaciones@avanzo.co" style="color:white; text-decoration:none">operaciones@avanzo.co</a>
 
-  </body>
-
-</html>
+        </td>
+    </tr>
+</table>

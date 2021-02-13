@@ -700,7 +700,7 @@ const generateCodes = async (req, res, next) => {
 };
 const generateFirstCodes = async (req, res, next) => {
 
-  const { userDocumentNumber, phoneNumber, email } = req.body;
+  const { userDocumentNumber, phoneNumber, email,name } = req.body;
 
   //console.log(clientid, phonenumber, email);
 
@@ -760,6 +760,7 @@ const generateFirstCodes = async (req, res, next) => {
       let userData = {
         email: email,
         url: front_URL,
+        name,
         emailCode: emailCode,
         base_URL_test: base_URL + "/confirmation.png",
         footer: base_URL + "/footer.png",
