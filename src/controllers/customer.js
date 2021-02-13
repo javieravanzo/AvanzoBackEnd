@@ -653,6 +653,55 @@ const getAccountDetail = async (req, res, next) => {
         const clientid = getClientId(req);
 
         const result = await getCustomerAccountDetail(clientid);
+         console.log("---------------------");
+         console.log(result.data.identificationId);
+          console.log("--------------------");
+
+
+
+
+
+          const sabanaOne = await dbSequelize.sabana.findAll({
+      
+            attributes: ['saba_id', 'saba_credito', 'saba_id_cuota', 'saba_empresa', 'saba_estado_credito', 'saba_fecha_solicitud',
+              'saba_fecha_pago', 'saba_fecha_pago_usuario', 'saba_valor_cuota', 'saba_dif',],
+            where: {
+              saba_numero_cedula: result.data.identificationId
+            }
+          });
+          const crediArray = [];
+          const crediAdded = [];
+      
+      
+          if (sabanaOne) {
+      
+      
+            sabanaOne.forEach(function (registro, index) {
+              const crediObj = {};
+      
+              if (!crediAdded.includes(registro.saba_credito)) {
+                crediObj.credito = registro.saba_credito
+                crediObj.empresa = registro.saba_empresa
+
+                crediObj.cuotas = []
+                sabanaOne.forEach(function (registro2) {
+                  if (registro.saba_credito === registro2.saba_credito) {
+                    crediObj.cuotas.push(registro2)
+                  }
+                });
+                crediArray.push(crediObj)
+              }
+              crediAdded.push(registro.saba_credito)
+            });
+      
+            result.data.creditos=crediArray;
+            // res.status(200).json(crediArray);
+          } else {
+            res.status(500).json({ message: "No es posible realizar la consulta de usuarios en este momento." });
+          }
+
+
+
         if (result.status === 200) {
             res.status(result.status).json(result.data);
         } else {

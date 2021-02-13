@@ -441,7 +441,6 @@ const createRequest = async (body, file, clientId, files) => {
       totalValue, isBank, fileString, loanData, salary_base, biweekly_salary, general_deduction, fromapp, request_overdraft, request_observation } = body;
 
     const approvedClient = await pool.query('SELECT C.platformState, C.ClientDocuments_idClientDocuments, C.Company_idCompany, U.name AS companyName, CO.nit FROM Client C JOIN User U JOIN Company CO ON (C.Company_idCompany = CO.idCompany and C.Company_idCompany = U.Company_idCompany) where idClient = ?', [clientId]);
-    console.log("AC", approvedClient);
 
     if (parseInt(approvedClient[0].platformState, 10) === 1) {
 

@@ -32,7 +32,7 @@ const { Sequelize } = require('sequelize');
         logging: function (str) {
         // do your own logging
         //  console.log("####################################################################11");
-        //  console.log(str);
+          console.log(str);
         //  console.log("####################################################################22");
 
     }
