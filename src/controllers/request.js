@@ -804,8 +804,8 @@ const checkFirstCodes = async (req, res, next) => {
 
   let ipAddress = req.connection.remoteAddress;
 
-  let message = "";
-  let status = 200;
+let message="";
+let status =300;
   try {
     // const result = await checkNewCodes(clientId, userid, phonecode, emailcode, ipAddress);
 

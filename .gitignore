@@ -25,3 +25,4 @@ src/config/db_config.json
 src/config/db_config_server.json
 src/config/db_config_local.json
 src/config/database.js
+src/config/database_sequelize.js

@@ -4,19 +4,19 @@ const { promisify } = require('util');
 const config = require('../config/db_config.json');
 
 //DBConnection
-// const poolConnection = mysql.createPool({
-//      host: 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com',
-//      user: 'appavanzo',
-//      password: '$vAnk6SpQBcNzY97E',
-//      database: 'avanzo',
-//  });
+ const poolConnection = mysql.createPool({
+     host: 'avanzodb.ckyaf6mq6hy9.us-east-2.rds.amazonaws.com',
+     user: 'appavanzo',
+     password: '$vAnk6SpQBcNzY97E',
+     database: 'avanzo',
+ });
 
-const poolConnection = mysql.createPool({
-    host: config.host,
-    user: config.username,
-    password: config.password,
-    database: config.database,
-});
+/* const poolConnection = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'avanzo',
+}); */
 
 //HandleConnection
 poolConnection.getConnection((err, connection) => {

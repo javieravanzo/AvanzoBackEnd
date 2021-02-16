@@ -80,7 +80,7 @@ const changeStateMail = async (email_id,state) =>{
 const changeStateSMS = async (sms_id,state) =>{
   
   try {
-    const emailQuery = await pool.query('UPDATE sms SET ? where sms_id = ?', [{sms_forwarded: state}, sms_id]);
+    const emailQuery = await pool.query('UPDATESmsSET ? where sms_id = ?', [{sms_forwarded: state}, sms_id]);
     if(emailQuery !== '[]' ){
       return {status: 200, data: true};
     }else{
