@@ -4,7 +4,8 @@ const multer = require('multer');
 const mkdirp = require('mkdirp');
 var path = require('path');
 const { body, header,  } = require('express-validator');
-
+const { uuid } = require('uuidv4');
+const UUID = uuid().split('-')[0];
 //Initialize
 const router = express.Router();
 
@@ -25,7 +26,7 @@ const storage = multer.diskStorage({
   filename: function(req, file, callback){
     //console.log("File", file);
     let name = file.fieldname;
-    callback(null, name + path.extname(file.originalname));
+    callback(null, name+'-'+UUID + path.extname(file.originalname));
   }
 });
 

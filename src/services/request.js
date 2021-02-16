@@ -456,10 +456,7 @@ const createRequest = async (body, file, clientId, files) => {
 
         let updateNewClient = null;
 
-        //Update paymentSupport and workingSupport
-        if (files !== null) {
-          updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport, files.workingSupport, approvedClient[0].ClientDocuments_idClientDocuments]);
-        }
+
 
         //Update client info
         let newClient = {};
@@ -519,7 +516,10 @@ const createRequest = async (body, file, clientId, files) => {
         //Request
         const request = await pool.query('INSERT INTO Request SET ?', [newRequest]);
         //////console.log("REQ ID", request.insertId);
-
+        //Update paymentSupport and workingSupport
+        if (files !== null) {
+          updateNewClient = await pool.query('UPDATE ClientDocuments SET paymentSupport = ?, workingSupport = ? where idClientDocuments = ?', [files.paymentSupport.replace(files.paymentSupport.split("-")[2].split('.')[0], 'R[' + request.insertId + ']'), files.paymentSupport.replace(files.workingSupport.split("-")[2].split('.')[0], 'R[' + request.insertId + ']'), approvedClient[0].ClientDocuments_idClientDocuments]);
+        }
         //ConsultCodes
         const codes = await pool.query('SELECT numberEmailCode, numberPhoneCode, receiveTime FROM Codes where Client_idClient = ?', [clientId]);
 
@@ -580,6 +580,17 @@ const createRequest = async (body, file, clientId, files) => {
 
         //Production
         const result = await pdf.create(content, config).toFile('../files/documents/' + userRow[0].identificationId + '-' + approvedClient[0].Company_idCompany + '/autorizacion-descuento-' + request.insertId + '.pdf', (err) => {
+          console.log("-----------------------");
+          console.log(files.paymentSupport);
+          console.log(files.workingSupport);
+          console.log("-----------------------");
+
+          fs.rename(files.paymentSupport, files.paymentSupport.replace(files.paymentSupport.split("-")[2].split('.')[0], 'R[' + request.insertId + ']'), function (err) {
+            if (err) return { status: 400, message: { message: err } };
+            fs.rename(files.workingSupport, files.workingSupport.replace(files.workingSupport.split("-")[2].split('.')[0], 'R[' + request.insertId + ']'), function (err) {
+              if (err) return { status: 400, message: { message: err } };
+            });
+          });
 
           //Development
           //const result = await pdf.create(content, config).toFile('./files/documents/'+userRow[0].identificationId+'-'+approvedClient[0].Company_idCompany+'/autorizacion-descuento-'+request.insertId+'.pdf', (err) => {
