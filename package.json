@@ -32,7 +32,7 @@
     "express-validator": "^6.6.1",
     "fs-extra": "^8.1.0",
     "handlebars": "^4.7.6",
-    "html-pdf": "^2.2.0",
+    "html-pdf": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "math": "0.0.3",
     "mkdirp": "^0.5.1",
